@@ -1,26 +1,61 @@
+/* src/app/globals.css */
 @import "tailwindcss";
 
+/* 1. Definisikan Variables */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --light-primary: #e6f3ff;
+  --light-primary-hover: #d9edff;
+  --brand-primary: #0084ff;
+  --brand-primary-hover: #0077e6;
+  --brand-primary-active: #006acc;
+  --dark-primary: #0063bf;
+  --text-primary: #002e59;
+  --white: #ffffff;
+  --font-poppins: var(--font-poppins);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* 2. Definisikan Keyframes Animasi */
+@keyframes float {
+  50% { transform: translateY(-12px); }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
 }
 
+/* KUNCI: Keyframe untuk rotasi orbit */
+@keyframes orbit {
+  to { transform: rotate(360deg); }
+}
+
+/* KUNCI: Keyframe untuk melawan rotasi agar ikon tetap tegak */
+@keyframes counter-orbit {
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes pulse {
+  50% { transform: scale(1.05); }
+}
+
+/* 3. Daftarkan Animasi ke Tailwind via @theme */
+@theme {
+  /* ... (Daftarkan semua warna dan font Anda di sini) ... */
+  --color-light-primary: var(--light-primary);
+  /* ...dst */
+  --font-family-poppins: var(--font-poppins);
+  
+  /* Daftarkan animasi */
+  --animation-float-slow: float 4s ease-in-out infinite;
+  --animation-spin-slow: spin-slow 10s linear infinite;
+  --animation-pulse: pulse 3s ease-in-out infinite;
+  --animation-orbit: orbit 30s linear infinite; /* Durasi 30 detik */
+  --animation-counter-orbit: counter-orbit 30s linear infinite; /* Durasi HARUS SAMA */
+}
+
+/* 4. Style Dasar */
+html { scroll-behavior: smooth; }
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--light-primary);
+  color: var(--text-primary);
+  font-family: var(--font-poppins);
 }
