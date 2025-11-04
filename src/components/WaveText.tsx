@@ -1,3 +1,4 @@
+// src/components/WaveText.tsx
 "use client";
 import { motion } from 'framer-motion';
 
@@ -18,7 +19,7 @@ const WaveText = ({ text }: { text: string }) => {
       y: 0,
       opacity: 1,
       transition: {
-        type: "spring",
+        type: "spring" as const, // <-- DIPERBAIKI: Tambahkan 'as const' di sini
         damping: 12,
         stiffness: 100,
         repeat: Infinity,
