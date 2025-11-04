@@ -1,4 +1,3 @@
-// src/components/FloatingBackgroundIcons.tsx
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Shirt, Sparkles, Zap } from 'lucide-react';
@@ -16,7 +15,7 @@ const FloatingBackgroundIcons = () => {
   const [items, setItems] = useState<FloatingItem[]>([]);
 
   useEffect(() => {
-    // Hasilkan ikon hanya di sisi klien setelah komponen dimuat
+    // Hasilkan ikon HANYA di dalam useEffect (sisi klien)
     const newItems = Array.from({ length: 15 }, (_, i) => {
       const Icon = icons[i % 3];
       const size = Math.random() * (24 - 12) + 12;
@@ -32,14 +31,14 @@ const FloatingBackgroundIcons = () => {
       };
     });
     setItems(newItems);
-  }, []); // <-- Array dependensi kosong ini PENTING
+  }, []); // Array dependensi kosong memastikan ini hanya berjalan sekali di klien
 
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden z-0 pointer-events-none">
       {items.map(item => (
         <div 
           key={item.id} 
-          className="absolute text-[--color-brand-primary] opacity-10"
+          className="absolute text-(--color-brand-primary) opacity-10"
           style={item.style}
         >
           <item.Icon style={{ width: item.size, height: item.size }} />

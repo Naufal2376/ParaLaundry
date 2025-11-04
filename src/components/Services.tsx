@@ -47,10 +47,10 @@ const Services = () => {
   return (
     <section id="layanan" className="py-20 px-4 bg-white relative z-10">
       <div className="container mx-auto">
-        <h2 className="text-4xl font-bold text-center text-[--color-text-primary] mb-4" data-aos="fade-down">
+        <h2 className="text-4xl font-bold text-center text-(--color-text-primary) mb-4" data-aos="fade-down">
           Layanan Kami
         </h2>
-        <p className="text-center text-[--color-dark-primary] mb-12 max-w-2xl mx-auto" data-aos="fade-down" data-aos-delay="100">
+        <p className="text-center text-(--color-dark-primary) mb-12 max-w-2xl mx-auto" data-aos="fade-down" data-aos-delay="100">
           Pilih layanan yang sesuai dengan kebutuhan Anda
         </p>
         
@@ -72,18 +72,18 @@ const Services = () => {
               <div className="relative z-20">
                 
                 {/* Ikon HANYA membesar (scale) */}
-                <div className="text-[--color-brand-primary] mb-4 group-hover:scale-125 transition-all duration-500">
+                <div className="text-(--color-brand-primary) mb-4 group-hover:scale-125 transition-all duration-500">
                   {service.icon}
                 </div>
                 
                 {/* Teks TIDAK berubah warna */}
-                <h3 className="text-2xl font-bold text-[--color-text-primary] mb-3 transition-colors duration-300">
+                <h3 className="text-2xl font-bold text-(--color-text-primary) mb-3 transition-colors duration-300">
                   {service.title}
                 </h3>
-                <p className="text-[--color-dark-primary] mb-4 transition-colors duration-300">
+                <p className="text-(--color-dark-primary) mb-4 transition-colors duration-300">
                   {service.desc}
                 </p>
-                <p className="text-[--color-brand-primary] font-semibold text-lg transition-colors duration-300">
+                <p className="text-(--color-brand-primary) font-semibold text-lg transition-colors duration-300">
                   {service.price}
                 </p>
               </div>

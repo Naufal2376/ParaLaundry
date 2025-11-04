@@ -17,7 +17,7 @@ const Hero = () => {
       <AnimatedBubbles />
       
       {/* Efek Denyut di Belakang */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-96 md:h-96 bg-[--color-brand-primary] rounded-full opacity-10 blur-3xl animate-[--animation-pulse-hero] -z-10" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-96 md:h-96 bg-(--color-brand-primary) rounded-full opacity-10 blur-3xl animate-[--animation-pulse-hero] -z-10" />
       
       <div className="container mx-auto text-center">
         {/* Judul dengan Animasi Ombak */}
@@ -37,19 +37,19 @@ const Hero = () => {
           />
         </span>
         
-        <p className="text-xl text-[--color-dark-primary] mb-8 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="200">
+        <p className="text-xl text-(--color-dark-primary) mb-8 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="200">
           Cucian bersih, wangi, dan rapi dengan harga terjangkau. Kami siap melayani kebutuhan laundry Anda!
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center" data-aos="fade-up" data-aos-delay="400">
           <button
             onClick={() => scrollToSection('layanan')}
-            className="shine-button bg-[--color-brand-primary] hover:bg-[--color-brand-primary-hover] px-8 py-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg shadow-[--color-brand-primary]/40 hover:cursor-pointer"
+            className="shine-button text-white bg-(--color-brand-primary) hover:bg-(--color-brand-primary-hover) px-8 py-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg shadow-(--color-brand-primary)/40 hover:cursor-pointer"
           >
             Lihat Layanan
           </button>
           <button
             onClick={() => scrollToSection('kontak')}
-            className="shine-button bg-white hover:bg-[--color-light-primary-hover] text-[--color-brand-primary] px-8 py-4 rounded-lg font-semibold transition-all duration-300 border-2 border-[--color-brand-primary] hover:cursor-pointer"
+            className="shine-button bg-white hover:bg-(--color-light-primary-hover) text-(--color-brand-primary) px-8 py-4 rounded-lg font-semibold transition-all duration-300 border-2 border-(--color-brand-primary) hover:cursor-pointer"
           >
             Hubungi Kami
           </button>

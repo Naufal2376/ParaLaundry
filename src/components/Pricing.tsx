@@ -45,19 +45,19 @@ const rowVariants = {
 
 const Pricing = () => {
   return (
-    <section id="harga" className="py-20 px-4 bg-gradient-to-b from-white to-[--color-light-primary] relative z-10">
+    <section id="harga" className="py-20 px-4 bg-gradient-to-b from-white to-(--color-light-primary) relative z-10">
       <div className="container mx-auto">
-        <h2 className="text-4xl font-bold text-center text-[--color-text-primary] mb-4" data-aos="fade-down">
+        <h2 className="text-4xl font-bold text-center text-(--color-text-primary) mb-4" data-aos="fade-down">
           Daftar Harga
         </h2>
-        <p className="text-center text-[--color-dark-primary] mb-12" data-aos="fade-down" data-aos-delay="100">
+        <p className="text-center text-(--color-dark-primary) mb-12" data-aos="fade-down" data-aos-delay="100">
           Harga terjangkau dengan kualitas terbaik
         </p>
         
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden" data-aos="zoom-in-up">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-[--color-brand-primary] to-[--color-brand-primary-active] text-white">
+              <thead className="bg-gradient-to-r from-(--color-brand-primary) to-(--color-brand-primary-active) text-white">
                 <tr>
                   <th className="px-6 py-4 text-left font-semibold">Kategori Layanan</th>
                   <th className="px-6 py-4 text-left font-semibold">Harga</th>
@@ -76,13 +76,13 @@ const Pricing = () => {
                     key={index}
                     variants={rowVariants}
                     whileHover={{ scale: 1.02 }}
-                    className={`border-b border-[--color-light-primary-hover] transition-colors duration-200 ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-[--color-light-primary]'
-                    } hover:bg-[--color-light-primary-hover] hover:shadow-md`}
+                    className={`border-b border-(--color-light-primary-hover) transition-colors duration-200 ${
+                      index % 2 === 0 ? 'bg-white' : 'bg-(--color-light-primary)'
+                    } hover:bg-(--color-light-primary-hover) hover:shadow-md`}
                   >
-                    <td className="px-6 py-4 text-[--color-text-primary] font-medium">{item.kategori}</td>
-                    <td className="px-6 py-4 text-[--color-brand-primary] font-bold">{item.harga}</td>
-                    <td className="px-6 py-4 text-[--color-dark-primary]">{item.estimasi}</td>
+                    <td className="px-6 py-4 text-(--color-text-primary) font-medium">{item.kategori}</td>
+                    <td className="px-6 py-4 text-(--color-brand-primary) font-bold">{item.harga}</td>
+                    <td className="px-6 py-4 text-(--color-dark-primary)">{item.estimasi}</td>
                   </motion.tr>
                 ))}
               </motion.tbody>
@@ -90,7 +90,7 @@ const Pricing = () => {
           </div>
         </div>
         
-        <p className="text-center text-[--color-dark-primary] mt-6 italic" data-aos="fade-up">
+        <p className="text-center text-(--color-dark-primary) mt-6 italic" data-aos="fade-up">
           *Harga dapat berubah sewaktu-waktu.
         </p>
       </div>

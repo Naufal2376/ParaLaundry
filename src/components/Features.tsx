@@ -14,12 +14,12 @@ const featuresList = [
 
 const Features = () => {
   return (
-    <section id="keunggulan" className="py-20 px-4 bg-[--color-light-primary] relative z-10">
+    <section id="keunggulan" className="py-20 px-4 bg-(--color-light-primary) relative z-10">
       <div className="container mx-auto">
-        <h2 className="text-4xl font-bold text-center text-[--color-text-primary] mb-4" data-aos="fade-down">
+        <h2 className="text-4xl font-bold text-center text-(--color-text-primary) mb-4" data-aos="fade-down">
           Mengapa Pilih Kami?
         </h2>
-        <p className="text-center text-[--color-dark-primary] mb-12 max-w-2xl mx-auto" data-aos="fade-down" data-aos-delay="100">
+        <p className="text-center text-(--color-dark-primary) mb-12 max-w-2xl mx-auto" data-aos="fade-down" data-aos-delay="100">
           Nikmati layanan laundry terbaik dengan berbagai keunggulan yang kami tawarkan.
         </p>
 
@@ -31,8 +31,8 @@ const Features = () => {
               data-aos="fade-up"
               data-aos-delay={`${index * 100}`}
             >
-              <CheckCircle className="w-7 h-7 text-[--color-brand-primary] group-hover:rotate-12 transition-transform duration-300" />
-              <p className="text-[--color-text-primary] font-medium">{feature}</p>
+              <CheckCircle className="w-7 h-7 text-(--color-brand-primary) group-hover:rotate-12 transition-transform duration-300" />
+              <p className="text-(--color-text-primary) font-medium">{feature}</p>
             </div>
           ))}
         </div>

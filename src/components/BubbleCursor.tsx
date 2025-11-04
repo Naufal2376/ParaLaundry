@@ -48,7 +48,7 @@ const BubbleCursor = () => {
         {bubbles.map(bubble => (
           <motion.div
             key={bubble.id}
-            className="absolute bg-[--color-brand-primary] rounded-full opacity-70" // Dibuat sedikit transparan
+            className="absolute bg-(--color-brand-primary) rounded-full opacity-70" // Dibuat sedikit transparan
             
             // --- LOGIKA ANIMASI YANG BENAR ---
             style={{

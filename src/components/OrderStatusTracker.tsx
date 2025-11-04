@@ -29,7 +29,7 @@ const OrderStatusTracker: React.FC<OrderStatusTrackerProps> = ({ currentStatus }
         // Tentukan style berdasarkan status
         let iconBgClass = "bg-gray-300";
         let iconColorClass = "text-gray-500";
-        let textClass = "text-[--color-dark-primary]/50";
+        let textClass = "text-(--color-dark-primary)/50";
         let lineClass = "bg-gray-300";
         let iconAnimation = ""; // <-- BARU: Variabel untuk animasi ikon
         let circleAnimation = {};
@@ -37,12 +37,12 @@ const OrderStatusTracker: React.FC<OrderStatusTrackerProps> = ({ currentStatus }
         if (isCompleted) {
           iconBgClass = "bg-green-500";
           iconColorClass = "text-white";
-          textClass = "text-[--color-text-primary]";
+          textClass = "text-(--color-text-primary)";
           lineClass = "bg-green-500";
         } else if (isActive) {
-          iconBgClass = "bg-[--color-brand-primary]";
+          iconBgClass = "bg-(--color-brand-primary)";
           iconColorClass = "text-white";
-          textClass = "text-[--color-text-primary] font-bold";
+          textClass = "text-(--color-text-primary) font-bold";
           lineClass = "bg-gray-300";
           circleAnimation = { scale: 1.1, transition: { repeat: Infinity, repeatType: "mirror", duration: 0.5 } };
           

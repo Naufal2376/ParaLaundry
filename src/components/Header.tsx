@@ -32,10 +32,10 @@ const Header = () => {
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-[--color-brand-primary] to-[--color-brand-primary-active] rounded-lg flex items-center justify-center shadow-lg">
-              <Sparkles className="w-6 h-6" />
+            <div className="w-10 h-10 bg-gradient-to-br from-(--color-brand-primary) to-(--color-brand-primary-active) rounded-lg flex items-center justify-center shadow-lg">
+              <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-[--color-text-primary]">Para Laundry</span>
+            <span className="text-2xl font-bold text-(--color-text-primary)">Para Laundry</span>
           </div>
 
           {/* Desktop Menu (Sekarang berfungsi) */}
@@ -44,7 +44,7 @@ const Header = () => {
               <button
                 key={item}
                 onClick={() => scrollToSection(item.toLowerCase())}
-                className="text-[--color-text-primary] hover:text-[--color-brand-primary] transition-colors duration-300 font-medium hover:cursor-pointer"
+                className="text-(--color-text-primary) hover:text-(--color-brand-primary) transition-colors duration-300 font-medium hover:cursor-pointer"
               >
                 {item}
               </button>
@@ -53,7 +53,7 @@ const Header = () => {
 
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-[--color-text-primary]"
+            className="md:hidden text-(--color-text-primary)"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -66,7 +66,7 @@ const Header = () => {
               <button
                 key={item}
                 onClick={() => scrollToSection(item.toLowerCase())}
-                className="block w-full text-left px-4 py-2 text-[--color-text-primary] hover:bg-[--color-light-primary-hover] rounded-lg transition-colors"
+                className="block w-full text-left px-4 py-2 text-(--color-text-primary) hover:bg-(--color-light-primary-hover) rounded-lg transition-colors"
               >
                 {item}
               </button>

@@ -32,7 +32,7 @@ const WaveText = ({ text }: { text: string }) => {
 
   return (
     <motion.h1
-      className="text-5xl md:text-7xl font-bold text-[--color-text-primary] mb-6 flex overflow-hidden justify-center"
+      className="text-5xl md:text-7xl font-bold text-(--color-text-primary) mb-6 flex overflow-hidden justify-center"
       variants={containerVariants}
       initial="hidden"
       animate="visible"

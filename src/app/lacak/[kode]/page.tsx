@@ -77,8 +77,8 @@ export default function LacakPage() {
     if (kode === undefined || loading) {
       return (
         <div className="flex flex-col items-center justify-center text-center p-8">
-          <Loader className="animate-spin text-[--color-brand-primary]" size={48} />
-          <p className="mt-4 text-lg text-[--color-dark-primary]">Mencari pesanan Anda...</p>
+          <Loader className="animate-spin text-(--color-brand-primary)" size={8} />
+          <p className="mt-4 text-lg text-(--color-dark-primary)">Mencari pesanan Anda...</p>
         </div>
       );
     }
@@ -94,7 +94,7 @@ export default function LacakPage() {
           animate="visible"
         >
           <h2 className="text-2xl font-bold text-red-600 mb-2">Pesanan Tidak Ditemukan</h2>
-          <p className="text-[--color-dark-primary]">
+          <p className="text-(--color-dark-primary)">
             Kode pesanan <span className="font-bold">{kode.toUpperCase()}</span> tidak valid.
           </p>
         </motion.div>
@@ -113,15 +113,15 @@ export default function LacakPage() {
           className="mb-8 p-6 bg-white rounded-xl shadow-lg" 
           variants={fadeUp}
         >
-          <h3 className="text-lg font-semibold text-[--color-dark-primary]">
+          <h3 className="text-lg font-semibold text-(--color-dark-primary)">
             Pelanggan: 
-            <span className="text-xl font-bold text-[--color-text-primary]"> {order.customer}</span>
+            <span className="text-xl font-bold text-(--color-text-primary)"> {order.customer}</span>
           </h3>
-          <p className="text-lg font-semibold text-[--color-dark-primary]">
+          <p className="text-lg font-semibold text-(--color-dark-primary)">
             Kode: 
-            <span className="text-xl font-bold text-[--color-text-primary]"> {kode.toUpperCase()}</span>
+            <span className="text-xl font-bold text-(--color-text-primary)"> {kode.toUpperCase()}</span>
           </p>
-          <p className="mt-2 text-[--color-dark-primary]">{order.items}</p>
+          <p className="mt-2 text-(--color-dark-primary)">{order.items}</p>
         </motion.div>
 
         {/* Tracker Status */}
@@ -133,10 +133,10 @@ export default function LacakPage() {
   return (
     <>
       <Header />
-      <main className="py-20 px-4 bg-gradient-to-b from-white to-[--color-light-primary] relative z-10 min-h-screen">
+      <main className="py-20 px-4 bg-gradient-to-b from-white to-(--color-light-primary) relative z-10 min-h-screen">
         <div className="container mx-auto max-w-2xl">
           <motion.h1 
-            className="text-4xl font-bold text-center text-[--color-text-primary] mb-12" 
+            className="text-4xl font-bold text-center text-(--color-text-primary) mb-12" 
             variants={fadeUp}
             initial="hidden"
             animate="visible"
@@ -144,7 +144,7 @@ export default function LacakPage() {
             Status Pelacakan
           </motion.h1>
           
-          <div className="bg-[--color-light-primary]/50 rounded-2xl shadow-xl p-6 md:p-10">
+          <div className="bg-(--color-light-primary)/50 rounded-2xl shadow-xl p-6 md:p-10">
             {renderContent()}
           </div>
         </div>

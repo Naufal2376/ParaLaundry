@@ -25,7 +25,7 @@ export default function RootLayout({
     <html lang="id">
       <AOSInit />
       <body className={`${poppins.variable} font-poppins`}>
-        <BubbleCursor /> {/* <-- DAN PASTIKAN INI ADA DI SINI */}
+        <BubbleCursor />
         <div className="relative z-10">
           {children}
         </div>

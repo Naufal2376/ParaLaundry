@@ -53,13 +53,13 @@ const QrScanner: React.FC<QrScannerProps> = ({ onScanSuccess, onClose }) => {
       <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md relative" data-aos="zoom-in-up">
         <button
           onClick={onClose}
-          className="absolute -top-4 -right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center text-[--color-text-primary] shadow-lg"
+          className="absolute -top-4 -right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center text-(--color-text-primary) shadow-lg"
           aria-label="Tutup scanner"
         >
           <X />
         </button>
 
-        <h3 className="text-xl font-bold text-center text-[--color-text-primary] mb-4">
+        <h3 className="text-xl font-bold text-center text-(--color-text-primary) mb-4">
           Pindai Kode QR
         </h3>
         

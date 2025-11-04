@@ -30,7 +30,7 @@
   --color-dark-active: var(--dark-active);
   --color-text-primary: var(--text-primary);
   --color-white: var(--white);
-
+  
   /* 🖋️ Font */
   --font-family-poppins: var(--font-poppins);
 
@@ -45,7 +45,6 @@
 }
 
 /* 2️⃣ KEYFRAMES: Semua animasi */
-/* PENTING: Pindahkan keyframes ke @layer utilities */
 @layer utilities {
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
@@ -74,7 +73,7 @@
   }
 }
 
-/* 3️⃣ BASE LAYER: Body, html, dsb. (KURSOR DIPERBAIKI) */
+/* 3️⃣ BASE LAYER: Body, html, dsb. */
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -85,10 +84,7 @@
     background-color: var(--color-light-primary);
     color: var(--color-text-primary);
     font-family: var(--font-family-poppins, "Poppins"), sans-serif;
-    /* HAPUS 'cursor: none;' DARI SINI */
   }
-
-  /* HAPUS 'a, button { cursor: none; }' DARI SINI */
 }
 
 /* 4️⃣ COMPONENTS: (SEMUANYA SUDAH DIPERBAIKI) */
@@ -121,7 +117,7 @@
 
   /* Kartu Layanan (FIXED) */
   .service-card {
-    @apply relative overflow-hidden bg-gradient-to-br from-white to-[--color-light-primary] p-8 rounded-2xl shadow-lg transition-all duration-500 transform;
+    @apply relative overflow-hidden bg-gradient-to-br from-white to-(--color-light-primary) p-8 rounded-2xl shadow-lg transition-all duration-500 transform;
   }
   .service-card:hover {
     @apply -translate-y-2 shadow-2xl; /* Hapus rotate-1 */
@@ -130,6 +126,7 @@
   /* 1. Latar gradien (DIPERBAIKI) */
   .service-card::before {
     content: '';
+    /* 'group-hover' dan 'bg-gradient' dihapus dari @apply */
     @apply absolute inset-0 opacity-0 transition-opacity duration-500 z-0;
     /* Gradien ditulis sebagai CSS asli */
     background-image: linear-gradient(to bottom right, 
@@ -153,7 +150,7 @@
   
   /* 3. Dekorasi sudut muncul */
   .service-card .corner-deco {
-    @apply absolute w-10 h-10 border-[--color-light-primary-hover] opacity-0 transition-all duration-500;
+    @apply absolute w-10 h-10 border-(--color-light-primary-hover) opacity-0 transition-all duration-500;
   }
   .group:hover .corner-deco {
     @apply opacity-100;
