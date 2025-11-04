@@ -11,35 +11,31 @@ interface QrScannerProps {
 }
 
 const QrScanner: React.FC<QrScannerProps> = ({ onScanSuccess, onClose }) => {
-  // ID untuk div yang akan menjadi viewfinder
   const scannerRegionId = "qr-scanner-viewfinder";
 
   useEffect(() => {
-    // Inisialisasi scanner
     const html5QrcodeScanner = new Html5QrcodeScanner(
       scannerRegionId,
       { 
-        fps: 10, // Frame per second untuk scan
-        qrbox: { width: 250, height: 250 }, // Ukuran kotak scan
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
       },
-      false // Verbose (false = nonaktifkan log yang tidak perlu)
+      false
     );
 
-    // Fungsi callback saat berhasil scan
-    const handleSuccess = (decodedText: string, decodedResult: any) => {
-      html5QrcodeScanner.clear(); // Hentikan scanner
-      onScanSuccess(decodedText); // Kirim hasil ke parent
+    // DIPERBAIKI: 'decodedResult: any' diubah menjadi '_decodedResult: unknown'
+    const handleSuccess = (decodedText: string, _decodedResult: unknown) => {
+      html5QrcodeScanner.clear();
+      onScanSuccess(decodedText);
     };
 
-    // Fungsi callback jika ada error (bisa diabaikan)
-    const handleError = (errorMessage: string) => {
-      // console.warn(errorMessage);
+    // DIPERBAIKI: 'errorMessage' diubah menjadi '_errorMessage'
+    const handleError = (_errorMessage: string) => {
+      // Kita memang sengaja tidak melakukan apa-apa saat error
     };
 
-    // Mulai render scanner
     html5QrcodeScanner.render(handleSuccess, handleError);
 
-    // Cleanup: Hentikan scanner saat komponen ditutup
     return () => {
       html5QrcodeScanner.clear().catch(error => {
         console.error("Gagal membersihkan Html5QrcodeScanner.", error);
@@ -48,7 +44,6 @@ const QrScanner: React.FC<QrScannerProps> = ({ onScanSuccess, onClose }) => {
   }, [onScanSuccess]);
 
   return (
-    // Modal Overlay
     <motion.div
       className="fixed inset-0 w-full h-full bg-black/80 backdrop-blur-sm flex items-center justify-center z-50"
       initial={{ opacity: 0 }}
@@ -56,7 +51,6 @@ const QrScanner: React.FC<QrScannerProps> = ({ onScanSuccess, onClose }) => {
       exit={{ opacity: 0 }}
     >
       <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md relative" data-aos="zoom-in-up">
-        {/* Tombol Close */}
         <button
           onClick={onClose}
           className="absolute -top-4 -right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center text-[--color-text-primary] shadow-lg"
@@ -69,7 +63,6 @@ const QrScanner: React.FC<QrScannerProps> = ({ onScanSuccess, onClose }) => {
           Pindai Kode QR
         </h3>
         
-        {/* Ini adalah div di mana viewfinder kamera akan muncul */}
         <div id={scannerRegionId} className="w-full" />
       </div>
     </motion.div>

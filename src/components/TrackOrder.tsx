@@ -31,7 +31,7 @@ const TrackOrder = () => {
       if (lastPart) {
         finalCode = lastPart.toUpperCase();
       }
-    } catch (e) {
+    } catch (_e) {
       // Bukan URL, anggap itu adalah kodenya
     }
 
