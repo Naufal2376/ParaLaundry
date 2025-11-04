@@ -1,49 +1,92 @@
 // src/components/Services.tsx
+"use client";
 import React from 'react';
-import { FaTshirt, FaVestPatches, FaRocket } from 'react-icons/fa';
+import { Shirt, Sparkles, Zap, BedDouble, ShoppingBag, Footprints } from 'lucide-react';
 
+// Daftar layanan yang sudah diperbarui
 const services = [
-  {
-    icon: <FaTshirt size={48} className="text-brand-primary group-hover:text-primary transition-colors duration-300" />,
-    title: 'Laundry Kiloan',
-    description: 'Cocok untuk pakaian sehari-hari. Dicuci, dikeringkan, dan disetrika dengan rapi per kilogram.',
-    delay: '100',
+  { 
+    icon: <Shirt className="w-12 h-12" />, 
+    title: "Cuci Setrika", 
+    desc: "Layanan cuci, kering, dan setrika rapi untuk pakaian harian Anda.", 
+    price: "Rp 6.000/kg" 
   },
-  {
-    icon: <FaVestPatches size={48} className="text-brand-primary group-hover:text-primary transition-colors duration-300" />,
-    title: 'Laundry Satuan',
-    description: 'Perawatan khusus untuk item spesial seperti jas, gaun, kebaya, atau bahan sensitif lainnya.',
-    delay: '200',
+  { 
+    icon: <Sparkles className="w-12 h-12" />, 
+    title: "Cuci Kilat", 
+    desc: "Pakaian Anda bersih dan wangi dalam hitungan jam.", 
+    price: "Rp 10.000/kg" 
   },
-  {
-    icon: <FaRocket size={48} className="text-brand-primary group-hover:text-primary transition-colors duration-300" />,
-    title: 'Layanan Ekspres',
-    description: 'Butuh cepat? Layanan kilat kami memastikan pakaian Anda siap hanya dalam hitungan jam.',
-    delay: '300',
+  { 
+    icon: <BedDouble className="w-12 h-12" />, 
+    title: "Bed Cover", 
+    desc: "Perawatan khusus untuk bed cover agar bersih dan higienis.", 
+    price: "Rp 10.000/kg" 
+  },
+  { 
+    icon: <Footprints className="w-12 h-12" />, 
+    title: "Sepatu", 
+    desc: "Membersihkan sepatu Anda agar terlihat seperti baru kembali.", 
+    price: "Rp 15.000/pcs" 
+  },
+  { 
+    icon: <ShoppingBag className="w-12 h-12" />, 
+    title: "Tas", 
+    desc: "Perlakukan tas kesayangan Anda dengan pembersihan profesional.", 
+    price: "Rp 15.000/kg" 
+  },
+  { 
+    icon: <Zap className="w-12 h-12" />, 
+    title: "Layanan Lain", 
+    desc: "Kami juga melayani Jas, Kebaya, Boneka, Gorden, dan lainnya.", 
+    price: "Hubungi Kami" 
   }
 ];
 
 const Services = () => {
   return (
-    <section id="layanan" className="py-20 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-text-primary">Layanan Unggulan Kami</h2>
-          <div className="w-24 h-1 bg-brand-primary mx-auto mt-4 rounded-full"></div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <section id="layanan" className="py-20 px-4 bg-white relative z-10">
+      <div className="container mx-auto">
+        <h2 className="text-4xl font-bold text-center text-[--color-text-primary] mb-4" data-aos="fade-down">
+          Layanan Kami
+        </h2>
+        <p className="text-center text-[--color-dark-primary] mb-12 max-w-2xl mx-auto" data-aos="fade-down" data-aos-delay="100">
+          Pilih layanan yang sesuai dengan kebutuhan Anda
+        </p>
+        
+        <div className="grid md:grid-cols-3 gap-8">
           {services.map((service, index) => (
-            <div 
-              key={index} 
-              // EFEK BARU: 'group' untuk mengontrol elemen anak saat hover
-              className="group bg-light-primary p-8 rounded-lg shadow-lg border border-light-primary-hover text-center transition-all duration-300 hover:transform hover:-translate-y-2 hover:shadow-2xl hover:bg-brand-primary"
+            <div
+              key={index}
               data-aos="fade-up"
-              data-aos-delay={service.delay}
+              data-aos-delay={`${index * 100}`}
+              className="service-card group" 
             >
-              <div className="flex justify-center mb-4 transform group-hover:scale-110 transition-transform duration-300">{service.icon}</div>
-              {/* EFEK BARU: Teks berubah warna menjadi putih saat card di-hover */}
-              <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-primary transition-colors duration-300">{service.title}</h3>
-              <p className="text-dark-primary group-hover:text-light-primary-hover transition-colors duration-300">{service.description}</p>
+              {/* Dekorasi Sudut (dari globals.css) */}
+              <span className="corner-deco top-0 left-0 border-t-2 border-l-2 rounded-tl-xl" />
+              <span className="corner-deco top-0 right-0 border-t-2 border-r-2 rounded-tr-xl" />
+              <span className="corner-deco bottom-0 left-0 border-b-2 border-l-2 rounded-bl-xl" />
+              <span className="corner-deco bottom-0 right-0 border-b-2 border-r-2 rounded-br-xl" />
+
+              {/* Konten Kartu */}
+              <div className="relative z-20">
+                
+                {/* Ikon HANYA membesar (scale) */}
+                <div className="text-[--color-brand-primary] mb-4 group-hover:scale-125 transition-all duration-500">
+                  {service.icon}
+                </div>
+                
+                {/* Teks TIDAK berubah warna */}
+                <h3 className="text-2xl font-bold text-[--color-text-primary] mb-3 transition-colors duration-300">
+                  {service.title}
+                </h3>
+                <p className="text-[--color-dark-primary] mb-4 transition-colors duration-300">
+                  {service.desc}
+                </p>
+                <p className="text-[--color-brand-primary] font-semibold text-lg transition-colors duration-300">
+                  {service.price}
+                </p>
+              </div>
             </div>
           ))}
         </div>

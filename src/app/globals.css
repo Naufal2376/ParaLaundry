@@ -1,61 +1,161 @@
 /* src/app/globals.css */
 @import "tailwindcss";
 
-/* 1. Definisikan Variables */
-:root {
+/* 1️⃣ THEME: Palet warna, font, dan animasi */
+@theme {
+  /* 🎨 Warna utama */
   --light-primary: #e6f3ff;
   --light-primary-hover: #d9edff;
+  --light-primary-active: #b0d9ff;
+
   --brand-primary: #0084ff;
   --brand-primary-hover: #0077e6;
   --brand-primary-active: #006acc;
+
   --dark-primary: #0063bf;
+  --dark-hover: #004f99;
+  --dark-active: #003b73;
+
   --text-primary: #002e59;
   --white: #ffffff;
-  --font-poppins: var(--font-poppins);
-}
 
-/* 2. Definisikan Keyframes Animasi */
-@keyframes float {
-  50% { transform: translateY(-12px); }
-}
-
-@keyframes spin-slow {
-  to { transform: rotate(360deg); }
-}
-
-/* KUNCI: Keyframe untuk rotasi orbit */
-@keyframes orbit {
-  to { transform: rotate(360deg); }
-}
-
-/* KUNCI: Keyframe untuk melawan rotasi agar ikon tetap tegak */
-@keyframes counter-orbit {
-  to { transform: rotate(-360deg); }
-}
-
-@keyframes pulse {
-  50% { transform: scale(1.05); }
-}
-
-/* 3. Daftarkan Animasi ke Tailwind via @theme */
-@theme {
-  /* ... (Daftarkan semua warna dan font Anda di sini) ... */
+  /* Daftarkan warna agar Tailwind kenal */
   --color-light-primary: var(--light-primary);
-  /* ...dst */
+  --color-light-primary-hover: var(--light-primary-hover);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-hover: var(--brand-primary-hover);
+  --color-brand-primary-active: var(--brand-primary-active);
+  --color-dark-primary: var(--dark-primary);
+  --color-dark-hover: var(--dark-hover);
+  --color-dark-active: var(--dark-active);
+  --color-text-primary: var(--text-primary);
+  --color-white: var(--white);
+
+  /* 🖋️ Font */
   --font-family-poppins: var(--font-poppins);
-  
-  /* Daftarkan animasi */
-  --animation-float-slow: float 4s ease-in-out infinite;
-  --animation-spin-slow: spin-slow 10s linear infinite;
-  --animation-pulse: pulse 3s ease-in-out infinite;
-  --animation-orbit: orbit 30s linear infinite; /* Durasi 30 detik */
-  --animation-counter-orbit: counter-orbit 30s linear infinite; /* Durasi HARUS SAMA */
+
+  /* ✨ Animasi (menggunakan keyframes di bawah) */
+  --animation-float-slow: float 6s ease-in-out infinite;
+  --animation-float-fast: float 4s ease-in-out infinite;
+  --animation-rise-bubble: rise 15s linear infinite;
+  --animation-pulse-hero: pulse 3s ease-out infinite;
+  --animation-bg-pan: backgroundPan 3s linear infinite;
+  --animation-shine: shine 1.5s ease-out infinite;
+  --animation-fadeIn: fadeIn 0.5s ease-out forwards;
 }
 
-/* 4. Style Dasar */
-html { scroll-behavior: smooth; }
-body {
-  background-color: var(--light-primary);
-  color: var(--text-primary);
-  font-family: var(--font-poppins);
+/* 2️⃣ KEYFRAMES: Semua animasi */
+/* PENTING: Pindahkan keyframes ke @layer utilities */
+@layer utilities {
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+  @keyframes rise {
+    from { transform: translateY(100vh) scale(0.5); opacity: 0; }
+    to { transform: translateY(-10vh) scale(1); opacity: 0.8; }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; transform: scale(0.9); }
+    50% { opacity: 0; transform: scale(1.5); }
+  }
+  @keyframes backgroundPan {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  @keyframes shine {
+    from { transform: translateX(-100%) skewX(-20deg); }
+    to { transform: translateX(200%) skewX(-20deg); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* 3️⃣ BASE LAYER: Body, html, dsb. (KURSOR DIPERBAIKI) */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply antialiased overflow-x-hidden;
+    background-color: var(--color-light-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-family-poppins, "Poppins"), sans-serif;
+    /* HAPUS 'cursor: none;' DARI SINI */
+  }
+
+  /* HAPUS 'a, button { cursor: none; }' DARI SINI */
+}
+
+/* 4️⃣ COMPONENTS: (SEMUANYA SUDAH DIPERBAIKI) */
+@layer components {
+  /* Teks Gradien Bergerak (FIXED) */
+  .gradient-text {
+    @apply text-transparent bg-clip-text;
+    background-image: linear-gradient(to right, 
+      var(--color-dark-primary), 
+      var(--color-brand-primary), 
+      var(--color-dark-hover)
+    );
+    background-size: 200% 200%;
+    animation: var(--animation-bg-pan);
+  }
+
+  /* Tombol dengan Efek Kilau */
+  .shine-button {
+    @apply relative overflow-hidden isolate shadow-lg;
+  }
+  .shine-button::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent;
+    animation: var(--animation-shine) 3s ease-in-out infinite;
+    animation-delay: 1s;
+  }
+  .shine-button:hover::after {
+    animation: var(--animation-shine) 1s ease-out;
+  }
+
+  /* Kartu Layanan (FIXED) */
+  .service-card {
+    @apply relative overflow-hidden bg-gradient-to-br from-white to-[--color-light-primary] p-8 rounded-2xl shadow-lg transition-all duration-500 transform;
+  }
+  .service-card:hover {
+    @apply -translate-y-2 shadow-2xl; /* Hapus rotate-1 */
+  }
+  
+  /* 1. Latar gradien (DIPERBAIKI) */
+  .service-card::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-500 z-0;
+    /* Gradien ditulis sebagai CSS asli */
+    background-image: linear-gradient(to bottom right, 
+      var(--color-brand-primary), 
+      var(--color-dark-active)
+    );
+  }
+  /* Logika hover dipisah */
+  .group:hover .service-card::before {
+    @apply opacity-100;
+  }
+  
+  /* 2. Shine effect */
+  .service-card::after {
+    content: '';
+    @apply absolute top-0 left-0 w-1/2 h-full bg-white/20 -translate-x-full opacity-50 skew-x-[-20deg] transition-all duration-700 z-10;
+  }
+  .service-card:hover::after {
+    @apply translate-x-[300px];
+  }
+  
+  /* 3. Dekorasi sudut muncul */
+  .service-card .corner-deco {
+    @apply absolute w-10 h-10 border-[--color-light-primary-hover] opacity-0 transition-all duration-500;
+  }
+  .group:hover .corner-deco {
+    @apply opacity-100;
+  }
 }

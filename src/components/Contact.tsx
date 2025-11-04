@@ -1,36 +1,45 @@
 // src/components/Contact.tsx
+"use client";
 import React from 'react';
-import { FaMapMarkerAlt, FaPhone, FaWhatsapp, FaClock } from 'react-icons/fa';
-
-const contactInfo = [
-  { icon: <FaMapMarkerAlt />, title: "Alamat", content: "Jl. Sudirman No. 123, Palembang" },
-  { icon: <FaPhone />, title: "Telepon", content: "0812-3456-7890", link: "tel:081234567890" },
-  { icon: <FaWhatsapp />, title: "WhatsApp", content: "0812-3456-7890", link: "https://wa.me/6281234567890" },
-  { icon: <FaClock />, title: "Jam Buka", content: "Senin - Sabtu (08:00 - 20:00)" }
-];
+import { Phone, MapPin, Clock } from 'lucide-react';
 
 const Contact = () => {
   return (
-    <section id="kontak" className="py-20 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-text-primary">Hubungi & Kunjungi Kami</h2>
-          <div className="w-24 h-1 bg-brand-primary mx-auto mt-4"></div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-          {contactInfo.map((item, index) => (
-            <div key={index} data-aos="fade-up" data-aos-delay={`${index * 100}`}>
-              <div className="text-brand-primary text-4xl mb-4 inline-block">{item.icon}</div>
-              <h3 className="text-lg font-bold text-text-primary">{item.title}</h3>
-              {item.link ? (
-                <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-dark-primary hover:text-brand-primary transition-colors">
-                  {item.content}
-                </a>
-              ) : (
-                <p className="text-dark-primary">{item.content}</p>
-              )}
+    <section id="kontak" className="py-20 px-4 bg-gradient-to-b from-white to-[--color-light-primary] relative z-10">
+      <div className="container mx-auto max-w-4xl">
+        <h2 className="text-4xl font-bold text-center text-[--color-text-primary] mb-4" data-aos="fade-down">
+          Hubungi Kami
+        </h2>
+        <p className="text-center text-[--color-dark-primary] mb-12" data-aos="fade-down" data-aos-delay="100">
+          Kami siap melayani Anda setiap hari
+        </p>
+        
+        {/* Gunakan 'group' untuk efek hover */}
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="bg-white p-8 rounded-2xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 group" data-aos="fade-up" data-aos-delay="0">
+            <div className="w-16 h-16 bg-gradient-to-br from-[--color-brand-primary] to-[--color-brand-primary-active] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[--color-brand-primary]/30 transition-all duration-300 group-hover:shadow-xl">
+              {/* Ikon beranimasi saat hover */}
+              <Phone className="w-8 h-8 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
             </div>
-          ))}
+            <h3 className="font-bold text-[--color-text-primary] mb-2 text-xl">Telepon</h3>
+            <p className="text-[--color-dark-primary]">0812-3456-7890</p>
+          </div>
+          
+          <div className="bg-white p-8 rounded-2xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 group" data-aos="fade-up" data-aos-delay="100">
+            <div className="w-16 h-16 bg-gradient-to-br from-[--color-brand-primary] to-[--color-brand-primary-active] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[--color-brand-primary]/30 transition-all duration-300 group-hover:shadow-xl">
+              <MapPin className="w-8 h-8 transition-transform duration-300 group-hover:scale-110 group-hover:animate-pulse" />
+            </div>
+            <h3 className="font-bold text-[--color-text-primary] mb-2 text-xl">Alamat</h3>
+            <p className="text-[--color-dark-primary]">Jl. Sudirman No. 123</p>
+          </div>
+          
+          <div className="bg-white p-8 rounded-2xl shadow-lg text-center transform hover:scale-105 transition-all duration-300 group" data-aos="fade-up" data-aos-delay="200">
+            <div className="w-16 h-16 bg-gradient-to-br from-[--color-brand-primary] to-[--color-brand-primary-active] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[--color-brand-primary]/30 transition-all duration-300 group-hover:shadow-xl">
+              <Clock className="w-8 h-8 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
+            </div>
+            <h3 className="font-bold text-[--color-text-primary] mb-2 text-xl">Jam Buka</h3>
+            <p className="text-[--color-dark-primary]">Senin - Sabtu: 08:00 - 20:00</p>
+          </div>
         </div>
       </div>
     </section>

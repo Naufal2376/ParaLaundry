@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { AOSInit } from "@/components/AOSInit";
-
+import BubbleCursor from "@/components/BubbleCursor"; // <-- PASTIKAN INI ADA
 
 const poppins = Poppins({ 
   subsets: ["latin"],
@@ -13,7 +13,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "Para Laundry - Solusi Laundry Cepat & Bersih",
-  description: "Layanan laundry kiloan, satuan, dan ekspres profesional dengan harga terjangkau.",
+  description: "Layanan laundry kiloan, satuan, dan ekspres profesional.",
 };
 
 export default function RootLayout({
@@ -24,8 +24,11 @@ export default function RootLayout({
   return (
     <html lang="id">
       <AOSInit />
-      <body className={`${poppins.variable} font-poppins bg-light-primary text-text-primary`}>
-        {children}
+      <body className={`${poppins.variable} font-poppins`}>
+        <BubbleCursor /> {/* <-- DAN PASTIKAN INI ADA DI SINI */}
+        <div className="relative z-10">
+          {children}
+        </div>
       </body>
     </html>
   );

@@ -1,45 +1,58 @@
-// src/components/Hero.tsx
 "use client";
 import React from 'react';
 import { TypeAnimation } from 'react-type-animation';
-import AnimatedIcon from './AnimatedIcon';
+import FloatingBackgroundIcons from '@/components/FloatingBackgroundIcons';
+import AnimatedBubbles from '@/components/AnimatedBubbles';
+import WaveText from '@/components/WaveText';
 
 const Hero = () => {
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    <section id="hero" className="bg-gradient-to-br from-[--color-light-primary] to-[--color-light-primary-hover] min-h-[90vh] flex items-center py-20 lg:py-0 overflow-hidden">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          
-          {/* Kolom Teks */}
-          <div className="text-center md:text-left" data-aos="fade-right">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-[--color-text-primary] leading-tight">
-              Pakaian Bersih, Hidup Lebih Ringan.
-            </h1>
-            <div className="mt-4 text-lg sm:text-xl md:text-2xl text-[--color-dark-primary] font-semibold h-8" data-aos-delay="200">
-              <TypeAnimation
-                sequence={[
-                  'Layanan Laundry Kiloan.', 2000,
-                  'Layanan Laundry Satuan.', 2000,
-                  'Layanan Ekspres 6 Jam.', 2000,
-                ]}
-                wrapper="span" speed={50} repeat={Infinity}
-              />
-            </div>
-            <p className="mt-6 max-w-xl mx-auto md:mx-0 text-base text-[--color-dark-primary]" data-aos-delay="400">
-              Percayakan cucian Anda pada ahlinya. Kami hadir untuk memberikan solusi laundry yang cepat, bersih, dan wangi.
-            </p>
-            <div className="mt-8" data-aos-delay="600">
-              {/* PERBAIKAN: Menambahkan warna teks putih pada tombol */}
-              <a href="#harga" className="inline-block bg-[--color-brand-primary] text-[--color-white] font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-[--color-brand-primary-hover] active:bg-[--color-brand-primary-active] transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
-                Lihat Daftar Harga
-              </a>
-            </div>
-          </div>
-          
-          {/* Kolom Animasi Ikon */}
-          <div className="flex justify-center items-center h-full" data-aos="fade-left" data-aos-delay="300">
-            <AnimatedIcon /> 
-          </div>
+    <section id="beranda" className="pt-32 pb-20 px-4 min-h-screen flex items-center justify-center relative">
+      {/* Latar Belakang Ramai: Ikon Melayang & Gelembung */}
+      <FloatingBackgroundIcons />
+      <AnimatedBubbles />
+      
+      {/* Efek Denyut di Belakang */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-96 md:h-96 bg-[--color-brand-primary] rounded-full opacity-10 blur-3xl animate-[--animation-pulse-hero] -z-10" />
+      
+      <div className="container mx-auto text-center">
+        {/* Judul dengan Animasi Ombak */}
+        <WaveText text="Solusi Laundry" />
+        
+        {/* Sub-Judul dengan Gradien Bergerak & Animasi Ketik */}
+        <span className="block text-5xl md:text-7xl font-bold gradient-text mt-2 h-20">
+          <TypeAnimation
+            sequence={[
+              'Terpercaya', 2000,
+              'Tercepat', 2000,
+              'Terbersih', 2000,
+            ]}
+            wrapper="span"
+            speed={50}
+            repeat={Infinity}
+          />
+        </span>
+        
+        <p className="text-xl text-[--color-dark-primary] mb-8 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="200">
+          Cucian bersih, wangi, dan rapi dengan harga terjangkau. Kami siap melayani kebutuhan laundry Anda!
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center" data-aos="fade-up" data-aos-delay="400">
+          <button
+            onClick={() => scrollToSection('layanan')}
+            className="shine-button bg-[--color-brand-primary] hover:bg-[--color-brand-primary-hover] px-8 py-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg shadow-[--color-brand-primary]/40 hover:cursor-pointer"
+          >
+            Lihat Layanan
+          </button>
+          <button
+            onClick={() => scrollToSection('kontak')}
+            className="shine-button bg-white hover:bg-[--color-light-primary-hover] text-[--color-brand-primary] px-8 py-4 rounded-lg font-semibold transition-all duration-300 border-2 border-[--color-brand-primary] hover:cursor-pointer"
+          >
+            Hubungi Kami
+          </button>
         </div>
       </div>
     </section>
