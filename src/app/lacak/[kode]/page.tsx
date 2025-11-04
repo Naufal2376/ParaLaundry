@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import OrderStatusTracker from '@/components/OrderStatusTracker';
 import { Loader } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { motion } from 'framer-motion'; // <-- 1. Impor motion
+import { motion } from 'framer-motion';
 
 // --- DATABASE SIMULASI (Tetap sama) ---
 const FAKE_DATABASE: { [key: string]: { customer: string; status: string; items: string } } = {
@@ -37,7 +37,13 @@ export default function LacakPage() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (!kode) return;
+    // Penjaga di useEffect sudah benar.
+    if (!kode) {
+      // Jika tidak ada kode (masih loading params), jangan lakukan apa-apa
+      // Kita akan tunjukkan loader berdasarkan state 'loading'
+      return;
+    }
+
     setLoading(true);
     setError(false);
     
@@ -53,11 +59,22 @@ export default function LacakPage() {
   // Varian animasi untuk 'fade up'
   const fadeUp = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100 } }
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { 
+        type: 'spring' as const,
+        stiffness: 100 
+      } 
+    }
   };
 
   const renderContent = () => {
-    if (loading) {
+    
+    // --- 1. PERBAIKAN DIMULAI DI SINI ---
+    // Jika 'kode' masih undefined (karena params belum siap), 
+    // atau jika kita masih loading, tunjukkan loader.
+    if (kode === undefined || loading) {
       return (
         <div className="flex flex-col items-center justify-center text-center p-8">
           <Loader className="animate-spin text-[--color-brand-primary]" size={48} />
@@ -65,7 +82,9 @@ export default function LacakPage() {
         </div>
       );
     }
+    // --- 1. PERBAIKAN SELESAI ---
 
+    // 2. Sekarang, TypeScript tahu bahwa 'kode' PASTI sebuah string
     if (error || !order) {
       return (
         <motion.div 
@@ -82,18 +101,17 @@ export default function LacakPage() {
       );
     }
 
+    // 3. 'kode' di sini juga PASTI sebuah string
     return (
-      // 2. Bungkus "Detail Pesanan" dan "Tracker" dengan motion.div
-      // Ini akan membuat mereka muncul berurutan (stagger)
       <motion.div
         initial="hidden"
         animate="visible"
-        transition={{ staggerChildren: 0.2 }} // Beri jeda antar elemen
+        transition={{ staggerChildren: 0.2 }}
       >
-        {/* Rincian Pesanan (DIPERBAIKI) */}
+        {/* Rincian Pesanan */}
         <motion.div 
           className="mb-8 p-6 bg-white rounded-xl shadow-lg" 
-          variants={fadeUp} // Gunakan animasi fadeUp
+          variants={fadeUp}
         >
           <h3 className="text-lg font-semibold text-[--color-dark-primary]">
             Pelanggan: 
@@ -106,7 +124,7 @@ export default function LacakPage() {
           <p className="mt-2 text-[--color-dark-primary]">{order.items}</p>
         </motion.div>
 
-        {/* Tracker Status (Sudah menggunakan Framer Motion) */}
+        {/* Tracker Status */}
         <OrderStatusTracker currentStatus={order.status} />
       </motion.div>
     );
@@ -117,7 +135,6 @@ export default function LacakPage() {
       <Header />
       <main className="py-20 px-4 bg-gradient-to-b from-white to-[--color-light-primary] relative z-10 min-h-screen">
         <div className="container mx-auto max-w-2xl">
-          {/* 3. Animasikan Judul dengan Framer Motion, HAPUS data-aos */}
           <motion.h1 
             className="text-4xl font-bold text-center text-[--color-text-primary] mb-12" 
             variants={fadeUp}
