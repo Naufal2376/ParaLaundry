@@ -1,9 +1,9 @@
 // src/components/Pricing.tsx
 "use client";
 import React from 'react';
-import { motion } from 'framer-motion'; // <-- BARU: Impor Framer Motion
+import { motion } from 'framer-motion';
 
-// BARU: Daftar harga diperbarui agar lebih lengkap sesuai gambar
+// Daftar harga yang sudah diperbarui
 const priceList = [
   { kategori: "Cuci Setrika", harga: "Rp 6.000/kg", estimasi: "2-3 hari" },
   { kategori: "Cuci Lipat", harga: "Rp 5.000/kg", estimasi: "2-3 hari" },
@@ -19,24 +19,27 @@ const priceList = [
   { kategori: "Boneka", harga: "Sesuai Ukuran", estimasi: "2-3 hari" },
 ];
 
-// BARU: Varian animasi untuk kontainer <tbody>
+// Varian animasi untuk kontainer <tbody>
 const tableVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1, // Setiap anak (baris) akan muncul dengan jeda 0.1 detik
+      staggerChildren: 0.1, // Setiap baris akan muncul dengan jeda 0.1 detik
     },
   },
 };
 
-// BARU: Varian animasi untuk setiap baris <tr>
+// Varian animasi untuk setiap baris <tr> (DIPERBAIKI)
 const rowVariants = {
-  hidden: { opacity: 0, x: -50 }, // Mulai dari kiri dan transparan
+  hidden: { opacity: 0, x: -50 },
   visible: { 
     opacity: 1, 
     x: 0,
-    transition: { type: 'spring', stiffness: 100 }
+    transition: { 
+      type: 'spring' as const, // <-- DIPERBAIKI: Tambahkan 'as const'
+      stiffness: 100 
+    }
   },
 };
 
@@ -51,12 +54,10 @@ const Pricing = () => {
           Harga terjangkau dengan kualitas terbaik
         </p>
         
-        {/* Kontainer tabel tetap di-zoom */}
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden" data-aos="zoom-in-up">
           <div className="overflow-x-auto">
             <table className="w-full">
-              {/* Header tabel tetap sama */}
-              <thead className="bg-gradient-to-r from-[--color-brand-primary] to-[--color-brand-primary-active]">
+              <thead className="bg-gradient-to-r from-[--color-brand-primary] to-[--color-brand-primary-active] text-white">
                 <tr>
                   <th className="px-6 py-4 text-left font-semibold">Kategori Layanan</th>
                   <th className="px-6 py-4 text-left font-semibold">Harga</th>
@@ -64,19 +65,17 @@ const Pricing = () => {
                 </tr>
               </thead>
               
-              {/* BARU: <tbody> dibungkus dengan motion untuk animasi stagger */}
               <motion.tbody
                 variants={tableVariants}
                 initial="hidden"
-                whileInView="visible" // Animasi dimulai saat <tbody> terlihat
+                whileInView="visible"
                 viewport={{ once: true, amount: 0.2 }}
               >
                 {priceList.map((item, index) => (
-                  // BARU: <tr> dibungkus dengan motion
                   <motion.tr
                     key={index}
                     variants={rowVariants}
-                    whileHover={{ scale: 1.02 }} // Efek hover membesar
+                    whileHover={{ scale: 1.02 }}
                     className={`border-b border-[--color-light-primary-hover] transition-colors duration-200 ${
                       index % 2 === 0 ? 'bg-white' : 'bg-[--color-light-primary]'
                     } hover:bg-[--color-light-primary-hover] hover:shadow-md`}
