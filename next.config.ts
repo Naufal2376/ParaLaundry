@@ -5,8 +5,7 @@ const nextConfig = {
       allowedOrigins: ["zfqw7vn3-3000.asse.devtunnels.ms"],
     },
   },
-  // ✅ Tambahkan ini
-  output: "standalone", // memastikan build berjalan stabil di Vercel
+  output: "standalone",
   reactStrictMode: true,
 };
 

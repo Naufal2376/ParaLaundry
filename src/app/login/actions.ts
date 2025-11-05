@@ -23,10 +23,8 @@ export async function login(formData: FormData) {
 export async function logout() {
   const supabase = await createClient();
 
-  // Hancurkan sesi/cookie
   await supabase.auth.signOut();
 
-  // Segarkan cache dan arahkan kembali ke halaman login
   revalidatePath("/", "layout");
   redirect("/login");
 }

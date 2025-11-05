@@ -5,7 +5,8 @@ import { Sparkles, User, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 
-export const dynamic = "force-dynamic"; // ❗️ jangan prerender halaman login
+// ❗️ Penting: jangan prerender halaman login
+export const dynamic = "force-dynamic";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
@@ -52,9 +53,7 @@ export default function LoginPage() {
           </div>
           
           {message && (
-            <p className="text-sm text-center text-red-500">
-              {message}
-            </p>
+            <p className="text-sm text-center text-red-500">{message}</p>
           )}
 
           <button

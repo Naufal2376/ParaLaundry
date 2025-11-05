@@ -4,7 +4,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 export async function createClient() {
-  // ✅ Tangani kasus di mana cookies() bisa Promise
+  // Tangani kemungkinan cookies() async di Next 15
   const cookieStore = await (async () => {
     const c = cookies();
     return c instanceof Promise ? await c : c;
@@ -22,14 +22,14 @@ export async function createClient() {
           try {
             cookieStore.set({ name, value, ...options });
           } catch {
-            // biasanya gagal saat prerender static
+            // aman, biasanya gagal saat prerender
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value: "", ...options });
           } catch {
-            // aman diabaikan
+            // aman
           }
         },
       },
