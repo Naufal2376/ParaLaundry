@@ -166,3 +166,23 @@
     @apply opacity-100;
   }
 }
+
+@media print {
+  /* Sembunyikan semua elemen di luar nota saat mencetak */
+  body * {
+    visibility: hidden;
+  }
+  .printable-area, .printable-area * {
+    visibility: visible;
+  }
+  .printable-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  /* Sembunyikan elemen UI seperti header, sidebar, dan tombol */
+  .no-print {
+    display: none !important;
+  }
+}

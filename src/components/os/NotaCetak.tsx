@@ -99,27 +99,6 @@ const NotaCetak: React.FC<{ order: Order }> = ({ order }) => {
         </div>
         <p className="text-xs text-center text-gray-600 mt-4">Terima kasih!</p>
       </div>
-
-      {/* CSS Khusus untuk 'Print' */}
-      <style jsx global>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          .printable-area, .printable-area * {
-            visibility: visible;
-          }
-          .printable-area {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

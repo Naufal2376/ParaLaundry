@@ -6,25 +6,24 @@ import PeriodSelector from '../../../components/os/PeriodSelector'; // Pastikan 
 
 type Period = 'hari' | 'minggu' | 'bulan' | 'tahun';
 
-// --- PERBAIKAN 1: Definisikan tipe props yang benar ---
+// --- PERBAIKAN 1: Definisikan tipe props yang benar untuk Server Component ---
 interface LaporanPageProps {
-  searchParams: {
-    period?: Period; // Ini adalah cara yang benar untuk Server Component
+  searchParams?: { // 'searchParams' bisa jadi undefined
+    period?: Period; // 'period' di dalamnya juga bisa undefined
   }
 }
+// -----------------------------------------------------------------
 
+// Fungsi 'getPeriodRangeWIB' Anda sudah terlihat benar
 function getPeriodRangeWIB(period: Period) {
   const now = new Date();
-  // Set ke zona waktu WIB (UTC+7)
-  // Perbaikan: Gunakan zona waktu lokal server, lalu konversi
   const localNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
-  
   const start = new Date(localNow);
   
   if (period === 'hari') {
     start.setHours(0, 0, 0, 0);
   } else if (period === 'minggu') {
-    const day = (localNow.getDay() + 6) % 7; // Senin (1) - Minggu (0) -> Senin (0)
+    const day = (localNow.getDay() + 6) % 7;
     start.setDate(localNow.getDate() - day);
     start.setHours(0, 0, 0, 0);
   } else if (period === 'bulan') {
@@ -42,7 +41,8 @@ function getPeriodRangeWIB(period: Period) {
 }
 
 // --- PERBAIKAN 2: Terapkan tipe props yang baru ---
-const LaporanPage = async ({ searchParams }: LaporanPageProps) => {
+const LaporanPage = async ({ searchParams }: LaporanPageProps) => { // Tipe diterapkan di sini
+  // Pastikan 'period' selalu punya nilai default 'bulan'
   const period: Period = searchParams?.period || 'bulan';
   const range = getPeriodRangeWIB(period);
   const supabase = await createClient();
@@ -50,7 +50,7 @@ const LaporanPage = async ({ searchParams }: LaporanPageProps) => {
   // Pendapatan (orders Lunas)
   const { data: incomeRows, error: incomeError } = await supabase
     .from('orders')
-    .select('total_biaya, tanggal_order') // Hapus status_bayar jika tidak perlu
+    .select('total_biaya, tanggal_order')
     .eq('status_bayar', 'Lunas')
     .gte('tanggal_order', range.start)
     .lte('tanggal_order', range.end);
@@ -58,10 +58,10 @@ const LaporanPage = async ({ searchParams }: LaporanPageProps) => {
   const income = (incomeRows || []).reduce((acc, r) => acc + Number(r.total_biaya || 0), 0);
   if(incomeError) console.error("Error Pendapatan:", incomeError.message);
 
-  // Pengeluaran
+  // Pengeluaran (PERBAIKAN NAMA KOLOM)
   const { data: expenseRows, error: expenseError } = await supabase
     .from('expenses')
-    .select('jumlah, tanggal_pengeluaran') // Sesuaikan nama kolom
+    .select('jumlah, tanggal_pengeluaran') // Sesuai ERD: 'jumlah' dan 'tanggal_pengeluaran'
     .gte('tanggal_pengeluaran', range.start)
     .lte('tanggal_pengeluaran', range.end);
     
@@ -73,7 +73,6 @@ const LaporanPage = async ({ searchParams }: LaporanPageProps) => {
   // Data untuk grafik ringkas
   function bucketKey(d: string) {
     const dt = new Date(d);
-    // Format: YYYY-MM-DD
     return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
   }
   
@@ -85,12 +84,15 @@ const LaporanPage = async ({ searchParams }: LaporanPageProps) => {
   
   const expenseBuckets: Record<string, number> = {};
   (expenseRows || []).forEach((r) => {
-    const k = bucketKey(r.tanggal_pengeluaran); // Sesuaikan nama kolom
+    const k = bucketKey(r.tanggal_pengeluaran); // PERBAIKAN NAMA KOLOM
     expenseBuckets[k] = (expenseBuckets[k] || 0) + Number(r.jumlah || 0);
   });
   
   const allKeys = Array.from(new Set([...Object.keys(incomeBuckets), ...Object.keys(expenseBuckets)])).sort();
-  const maxVal = Math.max(1, ...allKeys.map(k => (incomeBuckets[k] || 0)), ...allKeys.map(k => (expenseBuckets[k] || 0)));
+  // PERBAIKAN: ...allKeys.map(k => (expenseBuckets[k] || 0)) terpisah dari Math.max
+  const maxIncome = Math.max(1, ...allKeys.map(k => (incomeBuckets[k] || 0)));
+  const maxExpense = Math.max(1, ...allKeys.map(k => (expenseBuckets[k] || 0)));
+  const maxVal = Math.max(maxIncome, maxExpense);
 
   return (
     <div>
@@ -159,3 +161,5 @@ const LaporanPage = async ({ searchParams }: LaporanPageProps) => {
     </div>
   );
 }
+
+export default LaporanPage;
