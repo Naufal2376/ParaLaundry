@@ -2,74 +2,95 @@
 import { TrendingUp } from 'lucide-react';
 import React from 'react';
 import { createClient } from '@/lib/supabase/server';
-import PeriodSelector from '../../../components/os/PeriodSelector';
+import PeriodSelector from '../../../components/os/PeriodSelector'; // Pastikan komponen ini ada
 
 type Period = 'hari' | 'minggu' | 'bulan' | 'tahun';
 
+// --- PERBAIKAN 1: Definisikan tipe props yang benar ---
+interface LaporanPageProps {
+  searchParams: {
+    period?: Period; // Ini adalah cara yang benar untuk Server Component
+  }
+}
+
 function getPeriodRangeWIB(period: Period) {
   const now = new Date();
-  now.setUTCHours(now.getUTCHours() + 7);
-  const start = new Date(now);
+  // Set ke zona waktu WIB (UTC+7)
+  // Perbaikan: Gunakan zona waktu lokal server, lalu konversi
+  const localNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+  
+  const start = new Date(localNow);
+  
   if (period === 'hari') {
-    start.setUTCHours(0,0,0,0);
+    start.setHours(0, 0, 0, 0);
   } else if (period === 'minggu') {
-    const day = (now.getUTCDay() + 6) % 7; // Senin sebagai awal
-    start.setUTCDate(now.getUTCDate() - day);
-    start.setUTCHours(0,0,0,0);
+    const day = (localNow.getDay() + 6) % 7; // Senin (1) - Minggu (0) -> Senin (0)
+    start.setDate(localNow.getDate() - day);
+    start.setHours(0, 0, 0, 0);
   } else if (period === 'bulan') {
-    start.setUTCDate(1);
-    start.setUTCHours(0,0,0,0);
-  } else {
-    start.setUTCMonth(0,1);
-    start.setUTCHours(0,0,0,0);
+    start.setDate(1);
+    start.setHours(0, 0, 0, 0);
+  } else { // tahun
+    start.setMonth(0, 1);
+    start.setHours(0, 0, 0, 0);
   }
-  const end = new Date(now);
-  end.setUTCHours(23,59,59,999);
+  
+  const end = new Date(localNow);
+  end.setHours(23, 59, 59, 999);
+  
   return { start: start.toISOString(), end: end.toISOString() };
 }
 
-const LaporanPage = async ({ searchParams }: { searchParams?: { period?: Period } }) => {
-  const period: Period = (searchParams?.period || 'bulan') as Period;
+// --- PERBAIKAN 2: Terapkan tipe props yang baru ---
+const LaporanPage = async ({ searchParams }: LaporanPageProps) => {
+  const period: Period = searchParams?.period || 'bulan';
   const range = getPeriodRangeWIB(period);
   const supabase = await createClient();
 
   // Pendapatan (orders Lunas)
-  const { data: incomeRows } = await supabase
+  const { data: incomeRows, error: incomeError } = await supabase
     .from('orders')
-    .select('total_biaya, status_bayar, tanggal_order')
+    .select('total_biaya, tanggal_order') // Hapus status_bayar jika tidak perlu
     .eq('status_bayar', 'Lunas')
     .gte('tanggal_order', range.start)
     .lte('tanggal_order', range.end);
 
-  const income = (incomeRows || []).reduce((acc, r: any) => acc + Number(r.total_biaya || 0), 0);
+  const income = (incomeRows || []).reduce((acc, r) => acc + Number(r.total_biaya || 0), 0);
+  if(incomeError) console.error("Error Pendapatan:", incomeError.message);
 
   // Pengeluaran
-  const { data: expenseRows } = await supabase
+  const { data: expenseRows, error: expenseError } = await supabase
     .from('expenses')
-    .select('amount, tanggal')
-    .gte('tanggal', range.start)
-    .lte('tanggal', range.end);
+    .select('jumlah, tanggal_pengeluaran') // Sesuaikan nama kolom
+    .gte('tanggal_pengeluaran', range.start)
+    .lte('tanggal_pengeluaran', range.end);
+    
+  const expense = (expenseRows || []).reduce((acc, r) => acc + Number(r.jumlah || 0), 0);
+  if(expenseError) console.error("Error Pengeluaran:", expenseError.message);
 
-  const expense = (expenseRows || []).reduce((acc, r: any) => acc + Number(r.amount || 0), 0);
   const profit = income - expense;
 
-  // Data untuk grafik ringkas (bar mini) per hari/bucket
+  // Data untuk grafik ringkas
   function bucketKey(d: string) {
     const dt = new Date(d);
-    return `${dt.getUTCFullYear()}-${dt.getUTCMonth()+1}-${dt.getUTCDate()}`;
+    // Format: YYYY-MM-DD
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
   }
+  
   const incomeBuckets: Record<string, number> = {};
-  (incomeRows || []).forEach((r: any) => {
+  (incomeRows || []).forEach((r) => {
     const k = bucketKey(r.tanggal_order);
     incomeBuckets[k] = (incomeBuckets[k] || 0) + Number(r.total_biaya || 0);
   });
+  
   const expenseBuckets: Record<string, number> = {};
-  (expenseRows || []).forEach((r: any) => {
-    const k = bucketKey(r.tanggal);
-    expenseBuckets[k] = (expenseBuckets[k] || 0) + Number(r.amount || 0);
+  (expenseRows || []).forEach((r) => {
+    const k = bucketKey(r.tanggal_pengeluaran); // Sesuaikan nama kolom
+    expenseBuckets[k] = (expenseBuckets[k] || 0) + Number(r.jumlah || 0);
   });
+  
   const allKeys = Array.from(new Set([...Object.keys(incomeBuckets), ...Object.keys(expenseBuckets)])).sort();
-  const maxVal = Math.max(1, ...allKeys.map(k => (incomeBuckets[k] || 0), ...allKeys.map(k => (expenseBuckets[k] || 0))));
+  const maxVal = Math.max(1, ...allKeys.map(k => (incomeBuckets[k] || 0)), ...allKeys.map(k => (expenseBuckets[k] || 0)));
 
   return (
     <div>
@@ -87,7 +108,7 @@ const LaporanPage = async ({ searchParams }: { searchParams?: { period?: Period 
 
         <div className="grid md:grid-cols-3 gap-6 mb-6">
           <div className="p-6 rounded-xl border border-(--color-light-primary-active)">
-            <div className="text-sm text-(--color-dark-primary)">Pendapatan</div>
+            <div className="text-sm text-(--color-dark-primary)">Pendapatan (Lunas)</div>
             <div className="text-2xl font-bold text-(--color-text-primary)">Rp {income.toLocaleString('id-ID')}</div>
           </div>
           <div className="p-6 rounded-xl border border-(--color-light-primary-active)">
@@ -138,5 +159,3 @@ const LaporanPage = async ({ searchParams }: { searchParams?: { period?: Period 
     </div>
   );
 }
-
-export default LaporanPage;
