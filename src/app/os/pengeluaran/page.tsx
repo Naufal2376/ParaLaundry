@@ -1,7 +1,7 @@
 // src/app/os/pengeluaran/page.tsx
 "use client";
-import React, { useEffect, useState } from 'react';
-import { Wallet, Save } from 'lucide-react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Wallet, Save, Search } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -16,6 +16,7 @@ export default function ExpensePage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [rows, setRows] = useState<{ expense_id: number; tanggal_pengeluaran: string; keterangan: string; jumlah: number }[]>([]);
   const [editing, setEditing] = useState<{ expense_id: number; keterangan: string; jumlah: number } | null>(null);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     const guard = async () => {
@@ -39,7 +40,7 @@ export default function ExpensePage() {
     guard();
     // Default tanggal = hari ini
     setTanggal(new Date().toISOString().slice(0, 10));
-  }, []);
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +79,16 @@ export default function ExpensePage() {
       setIsLoading(false);
     }
   };
+
+  const filteredRows = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter(r =>
+      new Date(r.tanggal_pengeluaran).toLocaleDateString('id-ID').includes(q) ||
+      r.keterangan.toLowerCase().includes(q) ||
+      String(r.jumlah).includes(q)
+    );
+  }, [rows, query]);
 
   return (
     <div>
@@ -151,7 +162,19 @@ export default function ExpensePage() {
 
       {/* Tabel Daftar Pengeluaran */}
       <div className="bg-white p-6 rounded-2xl shadow-lg mt-8">
-        <h2 className="text-xl font-semibold text-(--color-text-primary) mb-4">Daftar Pengeluaran</h2>
+        <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-(--color-text-primary)">Daftar Pengeluaran</h2>
+            <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Cari pengeluaran..."
+                    className="pl-10 pr-4 py-2 border border-(--color-light-primary-active) rounded-lg focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)"
+                />
+            </div>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -163,7 +186,7 @@ export default function ExpensePage() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {filteredRows.map((r) => (
                 <tr key={r.expense_id} className="border-b">
                   <td className="p-3">{new Date(r.tanggal_pengeluaran).toLocaleDateString('id-ID')}</td>
                   <td className="p-3">
@@ -229,9 +252,9 @@ export default function ExpensePage() {
                   </td>
                 </tr>
               ))}
-              {rows.length === 0 && (
+              {filteredRows.length === 0 && (
                 <tr>
-                  <td className="p-3" colSpan={4}>Belum ada data.</td>
+                  <td className="p-3" colSpan={4}>{rows.length === 0 ? "Belum ada data pengeluaran." : "Tidak ada hasil yang cocok."}</td>
                 </tr>
               )}
             </tbody>
@@ -241,5 +264,3 @@ export default function ExpensePage() {
     </div>
   );
 }
-
-

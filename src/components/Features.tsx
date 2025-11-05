@@ -2,7 +2,7 @@
 "use client";
 import React from 'react';
 // Impor ikon-ikon baru yang relevan
-import { Award, Truck, Percent, Smile, ShieldCheck, Clock } from 'lucide-react';
+import { Award, Truck, Percent, Smile, ShieldCheck, Clock, CreditCard } from 'lucide-react';
 import FloatingBackgroundIcons from '@/components/FloatingBackgroundIcons';
 import AnimatedBubbles from '@/components/AnimatedBubbles';
 
@@ -32,6 +32,11 @@ const features = [
     icon: <Smile className="w-12 h-12 text-(--color-brand-primary)" />,
     title: "Pewangi Tahan Lama",
     desc: "Pilih dari berbagai aroma premium kami yang akan membuat pakaian Anda wangi sepanjang hari."
+  },
+  {
+    icon: <CreditCard className="w-12 h-12 text-(--color-brand-primary)" />,
+    title: "Pembayaran Mudah",
+    desc: "Kami menyediakan berbagai metode pembayaran untuk kemudahan Anda, termasuk tunai dan non-tunai."
   }
 ];
 

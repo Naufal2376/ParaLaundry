@@ -58,7 +58,7 @@ const NotaCetak: React.FC<{ order: Order }> = ({ order }) => {
         {/* Header Nota */}
         <div className="text-center mb-4">
           <h1 className="text-xl font-bold text-black">Para Laundry</h1>
-          <p className="text-xs text-gray-600">Jl. Sudirman No. 123 | 0812-3456-7890</p>
+          <p className="text-xs text-gray-600">Jl. Indralaya-Prabumulih Indralaya (Pertokoan Amanah Depan UNSRI) | 0813-7777-1420</p>
           <hr className="my-2 border-dashed" />
         </div>
 
@@ -96,6 +96,18 @@ const NotaCetak: React.FC<{ order: Order }> = ({ order }) => {
           <div className="bg-white p-2 border">
             <QRCode value={trackingUrl} size={128} />
           </div>
+        </div>
+        <div className="text-xs text-gray-600 mt-6">
+          <h4 className="font-bold mb-2">Ketentuan:</h4>
+          <ol className="list-decimal list-inside space-y-1">
+            <li>Pengambilan barang harus disertai dengan nota</li>
+            <li>Kami tidak bertanggung jawab apabila luntur/susut karena sifat bahannya</li>
+            <li>Jika terjadi kehilangan/kerusakan kami hanya mengganti max. Rp. 50 000 perpotong</li>
+            <li>Penggantian barang jika terjadi kehilangan/kerusakan paling lama 1 bulan</li>
+            <li>Kami tidak bertanggung jawab atas barang yang tidak diambil dalam waktu 30 hari</li>
+            <li>Hak klaim berlaku 24 jam setelah barang diambil</li>
+            <li>Setiap konsumen dianggap setuju dengan aturan tersebut setelah menandatangani nota ini</li>
+          </ol>
         </div>
         <p className="text-xs text-center text-gray-600 mt-4">Terima kasih!</p>
       </div>

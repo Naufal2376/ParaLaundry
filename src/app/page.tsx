@@ -18,7 +18,6 @@ export default function HomePage() {
         <Services />
         <TrackOrder />
         <Pricing />
-        <Contact />
       </main>
       <Footer />
     </>

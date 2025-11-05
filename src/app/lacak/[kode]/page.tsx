@@ -27,8 +27,7 @@ export default function LacakPage() {
       try {
         const supabase = createBrowserSupabase();
         const code = String(kode).toUpperCase();
-        const numMatch = code.match(/\d+/);
-        const numericId = numMatch ? Number(numMatch[0]) : Number(code);
+        const numericId = parseInt(code.replace(/[^0-9]/g, ''), 10);
 
         const { data, error } = await supabase
           .from('orders')
@@ -94,7 +93,7 @@ export default function LacakPage() {
     if (kode === undefined || loading) {
       return (
         <div className="flex flex-col items-center justify-center text-center p-8">
-          <Loader className="animate-spin text-(--color-brand-primary)" size={8} />
+          <Loader className="animate-spin text-(--color-brand-primary)" size={48} />
           <p className="mt-4 text-lg text-(--color-dark-primary)">Mencari pesanan Anda...</p>
         </div>
       );

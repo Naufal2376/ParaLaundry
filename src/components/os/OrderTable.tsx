@@ -1,6 +1,7 @@
 // src/components/os/OrderTable.tsx
 "use client";
 import React, { useState, useTransition, useMemo } from 'react';
+import Link from 'next/link';
 import { updateOrderStatus, updatePaymentStatus } from '@/app/os/transaksi/actions';
 import { AnimatePresence } from 'framer-motion';
 import { QrCodeModal } from './QrCodeModal';
@@ -119,18 +120,46 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders }) => {
       </AnimatePresence>
     
       <div className="bg-white p-6 rounded-2xl shadow-lg mt-8">
-        {/* ... (Header Tabel dengan Input Pencarian tetap sama) ... */}
+        <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-(--color-text-primary)">Daftar Transaksi</h2>
+            <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Cari transaksi..."
+                    className="pl-10 pr-4 py-2 border border-(--color-light-primary-active) rounded-lg focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)"
+                />
+            </div>
+        </div>
         
         <div className={`overflow-x-auto ${isPending ? 'opacity-50 pointer-events-none' : ''}`}>
           <table className="w-full text-left">
             <thead>
-              {/* ... (Header tabel <thead> Anda tetap sama) ... */}
+              <tr className="bg-gray-50">
+                <th className="p-4 cursor-pointer" onClick={() => onSort('order_id')}>
+                    Order ID <SortIcon colKey="order_id" />
+                </th>
+                <th className="p-4 cursor-pointer" onClick={() => onSort('customer')}>
+                    Customer <SortIcon colKey="customer" />
+                </th>
+                <th className="p-4 cursor-pointer" onClick={() => onSort('status_cucian')}>
+                    Status Cucian <SortIcon colKey="status_cucian" />
+                </th>
+                <th className="p-4 cursor-pointer" onClick={() => onSort('status_bayar')}>
+                    Status Bayar <SortIcon colKey="status_bayar" />
+                </th>
+                <th className="p-4 cursor-pointer" onClick={() => onSort('total_biaya')}>
+                    Total <SortIcon colKey="total_biaya" />
+                </th>
+                <th className="p-4">QR Code</th>
+                <th className="p-4">Detail</th>
+              </tr>
             </thead>
             
-            {/* --- PERBAIKAN LOGIKA <tbody> DI SINI --- */}
             <tbody>
               {filteredSorted.length > 0 ? (
-                // JIKA ADA HASIL: Map semua baris
                 filteredSorted.map(order => (
                   <tr key={order.order_id} className="border-b hover:bg-(--color-light-primary)">
                     <td className="p-4 font-semibold text-(--color-brand-primary)">PL-{order.order_id}</td>
@@ -174,18 +203,21 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders }) => {
                         Lihat
                       </button>
                     </td>
+                    <td className="p-4">
+                        <Link href={`/os/transaksi/sukses/${order.order_id}`} className="text-blue-500 hover:underline">
+                            Lihat Detail
+                        </Link>
+                    </td>
                   </tr>
                 ))
               ) : (
-                // JIKA TIDAK ADA HASIL: Tampilkan satu baris "empty state"
                 <tr>
-                  <td colSpan={6} className="p-4 text-center text-(--color-dark-primary)">
+                  <td colSpan={7} className="p-4 text-center text-(--color-dark-primary)">
                     {orders.length === 0 ? "Belum ada data transaksi." : "Tidak ada hasil yang cocok dengan pencarian Anda."}
                   </td>
                 </tr>
               )}
             </tbody>
-            {/* --- AKHIR PERBAIKAN <tbody> --- */}
             
           </table>
         </div>
