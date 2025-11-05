@@ -1,9 +1,9 @@
 // src/components/os/ServiceModal.tsx
 "use client";
 import React, { useEffect } from 'react';
-// DIPERBAIKI: Impor dari 'react-dom' (untuk React 18/Next.js stabil)
+// 1. IMPOR DIPERBAIKI: Impor dari 'react-dom' (untuk React 18/Next.js stabil)
 import { useFormState, useFormStatus } from 'react-dom'; 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { createService, updateService, type ServiceFormState } from '@/app/os/layanan/actions';
 
@@ -20,7 +20,7 @@ interface ServiceModalProps {
   onClose: () => void;
 }
 
-// Tombol Submit
+// Tombol Submit (useFormStatus dari 'react-dom')
 function SubmitButton({ isEditMode }: { isEditMode: boolean }) {
   const { pending } = useFormStatus(); // Ini sekarang akan berfungsi
   return (
@@ -42,13 +42,16 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose }) 
     ? updateService.bind(null, service.service_id)
     : createService;
     
-  // DIPERBAIKI: Gunakan 'useFormState' (nama lama sebelum React 19)
+  // 2. NAMA HOOK DIPERBAIKI: Gunakan 'useFormState' (nama lama dari react-dom)
   const [formState, formAction] = useFormState(action, initialState);
 
   // Efek untuk menutup modal secara otomatis setelah berhasil
   useEffect(() => {
     if (formState && !formState.error) {
-      onClose();
+      const timer = setTimeout(() => {
+        onClose();
+      }, 1000); 
+      return () => clearTimeout(timer);
     }
   }, [formState, onClose]);
 
@@ -94,6 +97,7 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose }) 
               <input 
                 type="number"
                 name="harga"
+                step="any" // Izinkan desimal
                 defaultValue={service?.harga}
                 required
                 className="w-full p-3 border border-(--color-light-primary-active) rounded-lg"
@@ -113,14 +117,15 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose }) 
             </div>
           </div>
           
-          {/* Tombol Submit dan Pesan Error */}
+          {/* Tombol Submit dan Pesan Status */}
           <div className="pt-4">
             <SubmitButton isEditMode={isEditMode} />
-            {formState?.error && (
-              <p className="text-red-500 text-sm mt-2 text-center">{formState.message}</p>
-            )}
-            {formState && !formState.error && (
-               <p className="text-green-600 text-sm mt-2 text-center">{formState.message}</p>
+            {formState?.message && (
+              <p className={`text-sm mt-2 text-center ${
+                formState.error ? 'text-red-500' : 'text-green-600'
+              }`}>
+                {formState.message}
+              </p>
             )}
           </div>
         </form>

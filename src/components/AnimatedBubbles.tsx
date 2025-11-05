@@ -11,11 +11,13 @@ const AnimatedBubbles = () => {
 
   useEffect(() => {
     // Hasilkan gelembung HANYA di dalam useEffect (sisi klien)
-    const newBubbles = Array.from({ length: 8 }, (_, i) => ({
+    const newBubbles = Array.from({ length: 16 }, (_, i) => ({
       id: i,
       style: {
         left: `${Math.random() * 95}%`,
-        animation: `var(--animation-rise-bubble) ${Math.random() * (25 - 10) + 10}s linear ${Math.random() * 10}s infinite`,
+        width: `${Math.random() * (16 - 6) + 6}px`,
+        height: `${Math.random() * (16 - 6) + 6}px`,
+        animation: `var(--animation-rise-bubble) ${Math.random() * (28 - 12) + 12}s linear ${Math.random() * 12}s infinite`,
       },
     }));
     setBubbles(newBubbles);

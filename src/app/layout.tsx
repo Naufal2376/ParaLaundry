@@ -4,6 +4,8 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { AOSInit } from "@/components/AOSInit";
 import BubbleCursor from "@/components/BubbleCursor"; // <-- PASTIKAN INI ADA
+import FloatingBackgroundIcons from "@/components/FloatingBackgroundIcons";
+import AnimatedBubbles from "@/components/AnimatedBubbles";
 
 const poppins = Poppins({ 
   subsets: ["latin"],
@@ -26,6 +28,11 @@ export default function RootLayout({
       <AOSInit />
       <body className={`${poppins.variable} font-poppins`}>
         <BubbleCursor />
+        {/* Background global yang ramai, berada di belakang semua section */}
+        <div className="fixed inset-0 -z-10 pointer-events-none">
+          <FloatingBackgroundIcons />
+          <AnimatedBubbles />
+        </div>
         <div className="relative z-10">
           {children}
         </div>

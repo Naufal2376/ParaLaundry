@@ -2,6 +2,8 @@
 "use client";
 import React from 'react';
 import { motion } from 'framer-motion';
+import FloatingBackgroundIcons from '@/components/FloatingBackgroundIcons';
+import AnimatedBubbles from '@/components/AnimatedBubbles';
 
 // Daftar harga yang sudah diperbarui
 const priceList = [
@@ -45,48 +47,35 @@ const rowVariants = {
 
 const Pricing = () => {
   return (
-    <section id="harga" className="py-20 px-4 bg-gradient-to-b from-white to-(--color-light-primary) relative z-10">
+    <section id="harga" className="py-20 px-4 bg-gradient-to-b from-white to-(--color-light-primary) relative z-10 overflow-hidden">
+      <FloatingBackgroundIcons />
+      <AnimatedBubbles />
       <div className="container mx-auto">
         <h2 className="text-4xl font-bold text-center text-(--color-text-primary) mb-4" data-aos="fade-down">
-          Daftar Harga
+          Daftar Kategori Layanan
         </h2>
         <p className="text-center text-(--color-dark-primary) mb-12" data-aos="fade-down" data-aos-delay="100">
           Harga terjangkau dengan kualitas terbaik
         </p>
         
-        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden" data-aos="zoom-in-up">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gradient-to-r from-(--color-brand-primary) to-(--color-brand-primary-active) text-white">
-                <tr>
-                  <th className="px-6 py-4 text-left font-semibold">Kategori Layanan</th>
-                  <th className="px-6 py-4 text-left font-semibold">Harga</th>
-                  <th className="px-6 py-4 text-left font-semibold">Estimasi</th>
-                </tr>
-              </thead>
-              
-              <motion.tbody
-                variants={tableVariants}
+        <div className="max-w-5xl mx-auto" data-aos="zoom-in-up">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {priceList.map((item, index) => (
+              <motion.div
+                key={index}
+                variants={rowVariants}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.2 }}
+                className="bg-white rounded-2xl shadow-xl p-6 border border-(--color-light-primary-active) hover:shadow-2xl transition-all"
               >
-                {priceList.map((item, index) => (
-                  <motion.tr
-                    key={index}
-                    variants={rowVariants}
-                    whileHover={{ scale: 1.02 }}
-                    className={`border-b border-(--color-light-primary-hover) transition-colors duration-200 ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-(--color-light-primary)'
-                    } hover:bg-(--color-light-primary-hover) hover:shadow-md`}
-                  >
-                    <td className="px-6 py-4 text-(--color-text-primary) font-medium">{item.kategori}</td>
-                    <td className="px-6 py-4 text-(--color-brand-primary) font-bold">{item.harga}</td>
-                    <td className="px-6 py-4 text-(--color-dark-primary)">{item.estimasi}</td>
-                  </motion.tr>
-                ))}
-              </motion.tbody>
-            </table>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xl font-bold text-(--color-text-primary)">{item.kategori}</h3>
+                  <span className="text-xs px-2 py-1 rounded-full bg-(--color-light-primary) text-(--color-brand-primary)">{item.estimasi}</span>
+                </div>
+                <p className="text-(--color-brand-primary) font-semibold text-lg">{item.harga}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
         

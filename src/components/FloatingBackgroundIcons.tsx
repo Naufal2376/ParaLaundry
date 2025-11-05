@@ -16,9 +16,9 @@ const FloatingBackgroundIcons = () => {
 
   useEffect(() => {
     // Hasilkan ikon HANYA di dalam useEffect (sisi klien)
-    const newItems = Array.from({ length: 15 }, (_, i) => {
+    const newItems = Array.from({ length: 28 }, (_, i) => {
       const Icon = icons[i % 3];
-      const size = Math.random() * (24 - 12) + 12;
+      const size = Math.random() * (36 - 12) + 12;
       return {
         id: i,
         Icon,
@@ -26,7 +26,7 @@ const FloatingBackgroundIcons = () => {
         style: {
           top: `${Math.random() * 100}%`,
           left: `${Math.random() * 100}%`,
-          animation: `float ${Math.random() * (10 - 5) + 5}s ease-in-out infinite ${Math.random() * 5}s`,
+          animation: `float ${Math.random() * (14 - 6) + 6}s ease-in-out infinite ${Math.random() * 6}s`,
         },
       };
     });

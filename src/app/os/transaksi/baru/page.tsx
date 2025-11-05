@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Trash2, Save } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { redirect } from 'next/navigation';
 import { createOrder, type OrderData } from './actions';
 
 // Tipe data untuk layanan dari database
@@ -36,16 +37,30 @@ export default function NewTransactionPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // 1. Ambil data layanan dari Supabase saat halaman dimuat
+  // 1. Ambil data layanan dan cek role user saat halaman dimuat
   useEffect(() => {
-    const fetchServices = async () => {
+    const bootstrap = async () => {
       const supabase = createClient();
-      const { data, error } = await supabase.from('services').select('*');
-      if (data) {
-        setServices(data);
+      // Cek role user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        redirect('/login');
+        return;
       }
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      if (profile?.role === 'Owner') {
+        redirect('/os');
+        return;
+      }
+      // Load services
+      const { data } = await supabase.from('services').select('*');
+      if (data) setServices(data);
     };
-    fetchServices();
+    bootstrap();
   }, []);
 
   // 2. Hitung ulang total biaya setiap kali keranjang berubah

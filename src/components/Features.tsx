@@ -3,6 +3,8 @@
 import React from 'react';
 // Impor ikon-ikon baru yang relevan
 import { Award, Truck, Percent, Smile, ShieldCheck, Clock } from 'lucide-react';
+import FloatingBackgroundIcons from '@/components/FloatingBackgroundIcons';
+import AnimatedBubbles from '@/components/AnimatedBubbles';
 
 // Daftar keunggulan baru dengan ikon dan penjelasan
 const features = [
@@ -10,11 +12,6 @@ const features = [
     icon: <Award className="w-12 h-12 text-(--color-brand-primary)" />,
     title: "Detergen Berkualitas",
     desc: "Kami menggunakan detergen premium yang aman, ramah lingkungan, dan terbukti ampuh membersihkan."
-  },
-  {
-    icon: <Truck className="w-12 h-12 text-(--color-brand-primary)" />,
-    title: "Gratis Antar-Jemput",
-    desc: "Hemat waktu Anda. Kami menyediakan layanan antar-jemput gratis untuk min. order 5kg."
   },
   {
     icon: <ShieldCheck className="w-12 h-12 text-(--color-brand-primary)" />,
@@ -40,7 +37,9 @@ const features = [
 
 const Features = () => {
   return (
-    <section id="keunggulan" className="py-20 px-4 bg-white relative z-10">
+    <section id="keunggulan" className="py-20 px-4 bg-white relative z-10 overflow-hidden">
+      <FloatingBackgroundIcons />
+      <AnimatedBubbles />
       <div className="container mx-auto">
         <h2 className="text-4xl font-bold text-center text-(--color-text-primary) mb-4" data-aos="fade-down">
           Mengapa Pilih Kami?

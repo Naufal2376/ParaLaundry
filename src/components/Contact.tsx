@@ -2,10 +2,14 @@
 "use client";
 import React from 'react';
 import { Phone, MapPin, Clock } from 'lucide-react';
+import FloatingBackgroundIcons from '@/components/FloatingBackgroundIcons';
+import AnimatedBubbles from '@/components/AnimatedBubbles';
 
 const Contact = () => {
   return (
-    <section id="kontak" className="py-20 px-4 bg-gradient-to-b from-white to-(--color-light-primary) relative z-10">
+    <section id="kontak" className="py-20 px-4 bg-gradient-to-b from-white to-(--color-light-primary) relative z-10 overflow-hidden">
+      <FloatingBackgroundIcons />
+      <AnimatedBubbles />
       <div className="container mx-auto max-w-4xl">
         <h2 className="text-4xl font-bold text-center text-(--color-text-primary) mb-4" data-aos="fade-down">
           Hubungi Kami

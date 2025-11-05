@@ -14,34 +14,49 @@ const QrScanner: React.FC<QrScannerProps> = ({ onScanSuccess, onClose }) => {
   const scannerRegionId = "qr-scanner-viewfinder";
 
   useEffect(() => {
-    const html5QrcodeScanner = new Html5QrcodeScanner(
-      scannerRegionId,
-      { 
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-      },
-      false
-    );
+    // Buat variabel untuk menyimpan instance scanner
+    let html5QrcodeScanner: Html5QrcodeScanner | null = null;
 
-    // DIPERBAIKI: 'decodedResult: any' diubah menjadi '_decodedResult: unknown'
-    const handleSuccess = (decodedText: string, _decodedResult: unknown) => {
-      html5QrcodeScanner.clear();
-      onScanSuccess(decodedText);
+    // Fungsi untuk inisialisasi dan render scanner
+    const startScanner = () => {
+      // Hanya buat instance baru jika belum ada
+      if (!html5QrcodeScanner) {
+        html5QrcodeScanner = new Html5QrcodeScanner(
+          scannerRegionId,
+          { 
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+          },
+          false 
+        );
+      }
+      
+      const handleSuccess = (decodedText: string, _decodedResult: unknown) => {
+        onScanSuccess(decodedText);
+      };
+
+      const handleError = (_errorMessage: string) => {
+        // Abaikan error (misal: "QR code not found")
+      };
+
+      // Render scanner
+      html5QrcodeScanner.render(handleSuccess, handleError);
     };
 
-    // DIPERBAIKI: 'errorMessage' diubah menjadi '_errorMessage'
-    const handleError = (_errorMessage: string) => {
-      // Kita memang sengaja tidak melakukan apa-apa saat error
-    };
+    // Panggil fungsi untuk memulai
+    startScanner();
 
-    html5QrcodeScanner.render(handleSuccess, handleError);
-
+    // --- INI ADALAH FUNGSI CLEANUP (PEMBERSIH) ---
     return () => {
-      html5QrcodeScanner.clear().catch(error => {
-        console.error("Gagal membersihkan Html5QrcodeScanner.", error);
-      });
+      if (html5QrcodeScanner) {
+        // Hentikan scanner dan bersihkan DOM
+        html5QrcodeScanner.clear().catch(error => {
+          console.error("Gagal membersihkan scanner:", error);
+        });
+        html5QrcodeScanner = null; // Hapus instance
+      }
     };
-  }, [onScanSuccess]);
+  }, [onScanSuccess]); // 'onClose' dihapus dari dependensi agar tidak re-trigger
 
   return (
     <motion.div
@@ -63,6 +78,7 @@ const QrScanner: React.FC<QrScannerProps> = ({ onScanSuccess, onClose }) => {
           Pindai Kode QR
         </h3>
         
+        {/* Div viewfinder */}
         <div id={scannerRegionId} className="w-full" />
       </div>
     </motion.div>

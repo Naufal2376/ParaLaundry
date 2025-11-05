@@ -7,53 +7,70 @@ import OrderStatusTracker from '@/components/OrderStatusTracker';
 import { Loader } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { createClient as createBrowserSupabase } from '@/lib/supabase/client';
 
-// --- DATABASE SIMULASI (Tetap sama) ---
-const FAKE_DATABASE: { [key: string]: { customer: string; status: string; items: string } } = {
-  "PL-123": {
-    customer: "Budi Santoso",
-    status: "Proses Dicuci",
-    items: "Cuci Setrika (5kg), Bed Cover (1pcs)",
-  },
-  "PL-456": {
-    customer: "Citra Lestari",
-    status: "Siap Diambil",
-    items: "Cuci Kilat (3kg)",
-  },
-  "PL-789": {
-    customer: "Agus Wijaya",
-    status: "Selesai",
-    items: "Sepatu (2 pasang)",
-  },
-};
-// -------------------------
+// Data akan diambil dari Supabase pada saat runtime
 
 export default function LacakPage() {
   const params = useParams();
   const kode = Array.isArray(params.kode) ? params.kode[0] : params.kode;
 
   const [loading, setLoading] = useState(true);
-  const [order, setOrder] = useState<{ customer: string; status: string; items: string } | null>(null);
+  const [order, setOrder] = useState<{ customer: string; status: string; itemsText?: string; details?: { nama_layanan: string; jumlah: number; sub_total: number }[] } | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    // Penjaga di useEffect sudah benar.
-    if (!kode) {
-      // Jika tidak ada kode (masih loading params), jangan lakukan apa-apa
-      // Kita akan tunjukkan loader berdasarkan state 'loading'
-      return;
-    }
+    const fetchOrder = async () => {
+      if (!kode) return;
+      setLoading(true);
+      setError(false);
+      try {
+        const supabase = createBrowserSupabase();
+        const code = String(kode).toUpperCase();
+        const numMatch = code.match(/\d+/);
+        const numericId = numMatch ? Number(numMatch[0]) : Number(code);
 
-    setLoading(true);
-    setError(false);
-    
-    setTimeout(() => {
-      const foundOrder = FAKE_DATABASE[kode.toUpperCase()];
-      if (foundOrder) setOrder(foundOrder);
-      else setError(true);
-      setLoading(false);
-    }, 1000); 
+        const { data, error } = await supabase
+          .from('orders')
+          .select(`
+            order_id,
+            status_cucian,
+            customer:customers ( nama ),
+            order_details(
+              jumlah,
+              sub_total,
+              service:services(nama_layanan)
+            )
+          `)
+          .eq('order_id', numericId)
+          .single();
 
+        if (error || !data) {
+          setOrder(null);
+          setError(true);
+        } else {
+          const customerRel = (data as any).customer;
+          const details = ((data as any).order_details || []).map((d: any) => ({
+            nama_layanan: Array.isArray(d.service) ? (d.service[0]?.nama_layanan ?? '') : (d.service?.nama_layanan ?? ''),
+            jumlah: Number(d.jumlah ?? 0),
+            sub_total: Number(d.sub_total ?? 0),
+          }));
+          const itemsText = details.map((d: any) => `${d.nama_layanan} (${d.jumlah})`).join(', ');
+          setOrder({
+            customer: Array.isArray(customerRel) ? (customerRel[0]?.nama ?? 'Tanpa Nama') : (customerRel?.nama ?? 'Tanpa Nama'),
+            status: (data as any).status_cucian ?? 'Tidak diketahui',
+            itemsText,
+            details,
+          });
+        }
+      } catch (_e) {
+        setOrder(null);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrder();
   }, [kode]);
 
   // Varian animasi untuk 'fade up'
@@ -121,7 +138,18 @@ export default function LacakPage() {
             Kode: 
             <span className="text-xl font-bold text-(--color-text-primary)"> {kode.toUpperCase()}</span>
           </p>
-          <p className="mt-2 text-(--color-dark-primary)">{order.items}</p>
+          {order.itemsText && (
+            <p className="mt-2 text-(--color-dark-primary)">{order.itemsText}</p>
+          )}
+          {order.details && order.details.length > 0 && (
+            <ul className="mt-3 text-(--color-dark-primary) list-disc list-inside space-y-1">
+              {order.details.map((d, i) => (
+                <li key={i}>
+                  {d.nama_layanan} — {d.jumlah} • Rp {d.sub_total.toLocaleString('id-ID')}
+                </li>
+              ))}
+            </ul>
+          )}
         </motion.div>
 
         {/* Tracker Status */}

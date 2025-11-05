@@ -3,6 +3,8 @@
 import React from 'react';
 import { motion } from 'framer-motion'; // <-- BARU: Impor motion
 import { Shirt, Sparkles, Zap, BedDouble, ShoppingBag, Footprints } from 'lucide-react';
+import FloatingBackgroundIcons from '@/components/FloatingBackgroundIcons';
+import AnimatedBubbles from '@/components/AnimatedBubbles';
 
 // Daftar layanan (tetap sama)
 const services = [
@@ -46,7 +48,9 @@ const services = [
 
 const Services = () => {
   return (
-    <section id="layanan" className="py-20 px-4 bg-white relative z-10">
+    <section id="layanan" className="py-20 px-4 bg-white relative z-10 overflow-hidden">
+      <FloatingBackgroundIcons />
+      <AnimatedBubbles />
       <div className="container mx-auto">
         <h2 className="text-4xl font-bold text-center text-(--color-text-primary) mb-4" data-aos="fade-down">
           Layanan Kami
@@ -96,9 +100,18 @@ const Services = () => {
                 <p className="text-(--color-dark-primary) mb-4">
                   {service.desc}
                 </p>
-                <p className="text-(--color-brand-primary) font-semibold text-lg">
-                  {service.price}
-                </p>
+                {service.title === "Layanan Lain" ? (
+                  <a
+                    href="#harga"
+                    className="inline-block mt-2 px-4 py-2 rounded-lg border-2 border-(--color-brand-primary) text-(--color-brand-primary) font-semibold hover:bg-(--color-light-primary-hover) transition-colors"
+                  >
+                    Lihat Daftar Harga
+                  </a>
+                ) : (
+                  <p className="text-(--color-brand-primary) font-semibold text-lg">
+                    {service.price}
+                  </p>
+                )}
               </div>
             </div>
           ))}

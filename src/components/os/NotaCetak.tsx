@@ -6,40 +6,35 @@ import { Printer } from 'lucide-react';
 
 // --- 1. PERBAIKAN TIPE DATA DI SINI ---
 type Service = {
-  nama_layanan: string;
-};
-
-type OrderDetail = {
-  jumlah: number;
-  sub_total: number;
-  services: Service[]; // Diubah dari 'Service | null' menjadi 'Service[]'
-};
-
-type Customer = {
-  nama: string;
-  no_hp: string;
-};
-
-type Order = {
-  order_id: number;
-  tanggal_order: string;
-  total_biaya: number;
-  status_bayar: string;
-  customers: Customer[]; // Diubah dari 'Customer | null' menjadi 'Customer[]'
-  order_details: OrderDetail[];
-};
-// --- AKHIR PERBAIKAN TIPE DATA ---
+    nama_layanan: string;
+  } | null;
+  
+  type OrderDetail = {
+    jumlah: number;
+    sub_total: number;
+    service: Service; // <-- Diubah menjadi Objek
+  };
+  
+  type Customer = {
+    nama: string;
+    no_hp: string;
+  } | null;
+  
+  type Order = {
+    order_id: number;
+    tanggal_order: string;
+    total_biaya: number;
+    status_bayar: string;
+    customer: Customer; // <-- Diubah menjadi Objek
+    order_details: OrderDetail[];
+  };
+  // --- AKHIR PERBAIKAN TIPE DATA ---
 
 const NotaCetak: React.FC<{ order: Order }> = ({ order }) => {
+    const trackingUrl = `https://para-laundry.vercel.app/lacak/PL-${order.order_id}`;
+    const handlePrint = () => { window.print(); };
   
-  // Pastikan Anda mengganti ini dengan URL Vercel Anda
-  const trackingUrl = `https://para-laundry-web.vercel.app/lacak/PL-${order.order_id}`;
-
-  const handlePrint = () => {
-    window.print();
-  };
-
-  return (
+    return (
     <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md mx-auto">
       {/* Tombol Cetak */}
       <div className="no-print mb-6 text-center">
@@ -72,7 +67,7 @@ const NotaCetak: React.FC<{ order: Order }> = ({ order }) => {
           <p><strong>ID Pesanan:</strong> PL-{order.order_id}</p>
           <p><strong>Tanggal:</strong> {new Date(order.tanggal_order).toLocaleString('id-ID')}</p>
           {/* --- 2. PERBAIKAN JSX DI SINI --- */}
-          <p><strong>Pelanggan:</strong> {order.customers[0]?.nama || 'N/A'}</p>
+          <p><strong>Pelanggan:</strong> {order.customer?.nama || 'N/A'}</p>
           <p><strong>Status:</strong> {order.status_bayar}</p>
         </div>
         <hr className="my-2 border-dashed" />
@@ -82,7 +77,7 @@ const NotaCetak: React.FC<{ order: Order }> = ({ order }) => {
           {order.order_details.map((item, index) => (
             <div key={index} className="flex justify-between">
               {/* --- 2. PERBAIKAN JSX DI SINI --- */}
-              <span>{item.services[0]?.nama_layanan || 'N/A'} (x{Number(item.jumlah).toLocaleString('id-ID')})</span>
+              <span>{item.service?.nama_layanan || 'N/A'} (x{Number(item.jumlah).toLocaleString('id-ID')})</span>
               <span>Rp {Number(item.sub_total).toLocaleString('id-ID')}</span>
             </div>
           ))}

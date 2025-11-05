@@ -24,7 +24,11 @@ export default async function TransaksiPage() {
     console.error("Error fetching orders:", error.message);
   }
 
-  const orders: Order[] = data || [];
+  const orders: Order[] =
+    (data?.map((o: any) => ({
+      ...o,
+      customer: Array.isArray(o.customer) ? (o.customer[0] ?? null) : (o.customer ?? null),
+    })) as Order[]) || [];
 
   return (
     <div>

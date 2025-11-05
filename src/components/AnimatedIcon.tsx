@@ -13,22 +13,22 @@ const icons = [
 ];
 
 const AnimatedIcon = () => {
-  const orbitRadius = "100px";
-  const orbitDuration = 30;
+  const orbitRadius = "140px";
+  const orbitDuration = 24;
 
   return (
-    <div className="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center">
+    <div className="relative w-80 h-80 md:w-96 md:h-96 flex items-center justify-center">
       
       {/* Ikon Mesin Cuci di Tengah */}
       <motion.div 
-        className="absolute w-32 h-32 md:w-40 md:h-40 bg-white rounded-full flex items-center justify-center shadow-2xl"
+        className="absolute w-40 h-40 md:w-48 md:h-48 bg-white rounded-full flex items-center justify-center shadow-2xl"
         animate={{ scale: [1, 1.05, 1] }}
         transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
       >
-        <div className="w-24 h-24 md:w-32 md:h-32 bg-(--color-light-primary) rounded-full flex items-center justify-center">
+        <div className="w-32 h-32 md:w-40 md:h-40 bg-(--color-light-primary) rounded-full flex items-center justify-center">
           
           {/* DIPERBAIKI: Menggunakan ikon WashingMachine yang benar */}
-          <WashingMachine className="text-5xl md:text-6xl text-(--color-brand-primary) animate-[--animation-spin-slow]" />
+          <WashingMachine size={72} className="md:w-[96px] md:h-[96px] text-(--color-brand-primary) animate-[--animation-spin-slow]" />
 
         </div>
       </motion.div>

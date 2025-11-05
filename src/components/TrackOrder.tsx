@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { QrCode, Send } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
+import FloatingBackgroundIcons from '@/components/FloatingBackgroundIcons';
+import AnimatedBubbles from '@/components/AnimatedBubbles';
 import QrScanner from './QrScanner'; // Pastikan Anda juga sudah membuat file ini
 
 const TrackOrder = () => {
@@ -49,7 +51,9 @@ const TrackOrder = () => {
         )}
       </AnimatePresence>
 
-      <section id="lacak" className="py-20 px-4 bg-white relative z-10">
+      <section id="lacak" className="py-20 px-4 bg-white relative z-10 overflow-hidden">
+        <FloatingBackgroundIcons />
+        <AnimatedBubbles />
         <div className="container mx-auto">
           
           {/* ▼▼▼ PERBAIKAN ADA DI SINI ▼▼▼ */}
