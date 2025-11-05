@@ -44,7 +44,7 @@ const getPaymentClass = (payment: string) => {
 // -----------------------------
 
 const OrderTable: React.FC<OrderTableProps> = ({ orders }) => {
-  let [isPending, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
 
   const handleStatusCucianChange = (orderId: number, newStatus: StatusCucian) => {
     startTransition(async () => {
