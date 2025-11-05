@@ -41,9 +41,13 @@ function getPeriodRangeWIB(period: Period) {
 }
 
 // --- PERBAIKAN 2: Terapkan tipe props yang baru ---
-const LaporanPage = async ({ searchParams }: LaporanPageProps) => { // Tipe diterapkan di sini
+const LaporanPage = async ({
+    searchParams,
+  }: {
+    searchParams?: { [key: string]: string | string[] | undefined };
+  }) => {
   // Pastikan 'period' selalu punya nilai default 'bulan'
-  const period: Period = searchParams?.period || 'bulan';
+  const period = (searchParams?.period as Period) || 'bulan';
   const range = getPeriodRangeWIB(period);
   const supabase = await createClient();
 
