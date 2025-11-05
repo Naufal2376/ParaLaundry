@@ -1,13 +1,14 @@
-// src/lib/supabase/server.ts
-"use server"; // <-- Tandai sebagai Modul Server
+"use server";
 
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
-// Jadikan fungsi ini ASYNC
-export async function createClient() { 
-  // AWAIT cookies() untuk mendapatkan cookie store yang sebenarnya
-  const cookieStore = await cookies(); 
+export async function createClient() {
+  // ✅ Tangani kasus di mana cookies() bisa Promise
+  const cookieStore = await (async () => {
+    const c = cookies();
+    return c instanceof Promise ? await c : c;
+  })();
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,15 +21,15 @@ export async function createClient() {
         set(name: string, value: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value, ...options });
-          } catch (error) {
-            // Tangani jika cookie tidak bisa di-set
+          } catch {
+            // biasanya gagal saat prerender static
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
-            cookieStore.set({ name, value: '', ...options });
-          } catch (error) {
-            // Tangani jika cookie tidak bisa dihapus
+            cookieStore.set({ name, value: "", ...options });
+          } catch {
+            // aman diabaikan
           }
         },
       },

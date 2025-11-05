@@ -1,15 +1,13 @@
-// next.config.ts
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
     serverActions: {
-      // Izinkan permintaan dari URL Dev Tunnel Anda
       allowedOrigins: ["zfqw7vn3-3000.asse.devtunnels.ms"],
     },
   },
-  // ... (sisa konfigurasi Anda mungkin ada di sini)
+  // ✅ Tambahkan ini
+  output: "standalone", // memastikan build berjalan stabil di Vercel
+  reactStrictMode: true,
 };
 
-// Gunakan 'export default' (sintaks ES Module/TypeScript)
 export default nextConfig;
