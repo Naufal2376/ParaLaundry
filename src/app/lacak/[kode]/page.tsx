@@ -13,6 +13,13 @@ import { createClient as createBrowserSupabase } from '@/lib/supabase/client';
 
 export default function LacakPage() {
   const params = useParams();
+  
+  // 1. Tambahkan definisi type untuk data order
+  type OrderData = {
+    customer_name: string;
+    status_cucian: string;
+    details: { nama_layanan: string; jumlah: number; sub_total: number }[];
+  };
   const kode = Array.isArray(params.kode) ? params.kode[0] : params.kode;
 
   const [loading, setLoading] = useState(true);
@@ -27,38 +34,25 @@ export default function LacakPage() {
       setError(false);
       try {
         const supabase = createBrowserSupabase();
-        const code = String(kode).toUpperCase();
+        const code = String(kode).toUpperCase();        
         const numericId = parseInt(code.replace(/[^0-9]/g, ''), 10);
         console.log("Parsed numericId:", numericId);
 
-        const { data, error } = await supabase
-          .from('orders')
-          .select(`
-            order_id,
-            status_cucian,
-            customer:customers ( nama ),
-            order_details(
-              jumlah,
-              sub_total,
-              service:services(nama_layanan)
-            )
-          `)
-          .eq('order_id', numericId)
+        // --- PERUBAHAN: Panggil fungsi RPC 'get_order_by_id' ---
+        const { data, error } = await supabase.rpc('get_order_by_id', {
+            order_id_input: numericId,
+          })
           .maybeSingle();
 
         if (error || !data) {
           setOrder(null);
           setError(true);
         } else {
-          const customerRel = (data as any).customer;
-          const details = ((data as any).order_details || []).map((d: any) => ({
-            nama_layanan: Array.isArray(d.service) ? (d.service[0]?.nama_layanan ?? '') : (d.service?.nama_layanan ?? ''),
-            jumlah: Number(d.jumlah ?? 0),
-            sub_total: Number(d.sub_total ?? 0),
-          }));
-          const itemsText = details.map((d: any) => `${d.nama_layanan} (${d.jumlah})`).join(', ');
+          const details = (data as OrderData).details || [];
+          const itemsText = details.map(d => `${d.nama_layanan} (${d.jumlah})`).join(', ');
+
           setOrder({
-            customer: Array.isArray(customerRel) ? (customerRel[0]?.nama ?? 'Tanpa Nama') : (customerRel?.nama ?? 'Tanpa Nama'),
+            customer: (data as OrderData).customer_name ?? 'Tanpa Nama',
             status: (data as any).status_cucian ?? 'Tidak diketahui',
             itemsText,
             details,

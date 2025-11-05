@@ -2,7 +2,7 @@
 const nextConfig = {
   experimental: {
     serverActions: {
-      allowedOrigins: ["zfqw7vn3-3000.asse.devtunnels.ms"],
+      allowedOrigins: ["para-laundry.vercel.app"],
     },
   },
   output: "standalone",
