@@ -1,38 +1,75 @@
 // src/components/Features.tsx
 "use client";
 import React from 'react';
-import { CheckCircle } from 'lucide-react';
+// Impor ikon-ikon baru yang relevan
+import { Award, Truck, Percent, Smile, ShieldCheck, Clock } from 'lucide-react';
 
-const featuresList = [
-  "Detergen berkualitas dan aman",
-  "Pewangi tahan lama",
-  "Gratis antar-jemput (min. 5kg)",
-  "Sistem pembayaran fleksibel",
-  "Garansi cucian bersih",
-  "Harga terjangkau"
+// Daftar keunggulan baru dengan ikon dan penjelasan
+const features = [
+  {
+    icon: <Award className="w-12 h-12 text-(--color-brand-primary)" />,
+    title: "Detergen Berkualitas",
+    desc: "Kami menggunakan detergen premium yang aman, ramah lingkungan, dan terbukti ampuh membersihkan."
+  },
+  {
+    icon: <Truck className="w-12 h-12 text-(--color-brand-primary)" />,
+    title: "Gratis Antar-Jemput",
+    desc: "Hemat waktu Anda. Kami menyediakan layanan antar-jemput gratis untuk min. order 5kg."
+  },
+  {
+    icon: <ShieldCheck className="w-12 h-12 text-(--color-brand-primary)" />,
+    title: "Garansi Cucian Bersih",
+    desc: "Kepuasan Anda adalah jaminan kami. Tidak bersih? Kami cuci ulang, gratis!"
+  },
+  {
+    icon: <Clock className="w-12 h-12 text-(--color-brand-primary)" />,
+    title: "Pengerjaan Tepat Waktu",
+    desc: "Kami menghargai waktu Anda. Pesanan Anda akan selesai sesuai dengan estimasi yang dijanjikan."
+  },
+  {
+    icon: <Percent className="w-12 h-12 text-(--color-brand-primary)" />,
+    title: "Harga Terjangkau",
+    desc: "Dapatkan kualitas layanan laundry premium dengan harga yang kompetitif dan transparan."
+  },
+  {
+    icon: <Smile className="w-12 h-12 text-(--color-brand-primary)" />,
+    title: "Pewangi Tahan Lama",
+    desc: "Pilih dari berbagai aroma premium kami yang akan membuat pakaian Anda wangi sepanjang hari."
+  }
 ];
 
 const Features = () => {
   return (
-    <section id="keunggulan" className="py-20 px-4 bg-(--color-light-primary) relative z-10">
+    <section id="keunggulan" className="py-20 px-4 bg-white relative z-10">
       <div className="container mx-auto">
         <h2 className="text-4xl font-bold text-center text-(--color-text-primary) mb-4" data-aos="fade-down">
           Mengapa Pilih Kami?
         </h2>
         <p className="text-center text-(--color-dark-primary) mb-12 max-w-2xl mx-auto" data-aos="fade-down" data-aos-delay="100">
-          Nikmati layanan laundry terbaik dengan berbagai keunggulan yang kami tawarkan.
+          Kepuasan pelanggan adalah prioritas utama kami
         </p>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          {featuresList.map((feature, index) => (
+        
+        {/* BARU: Layout kartu dengan ikon + penjelasan */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {features.map((feature, index) => (
             <div
               key={index}
-              className="bg-white p-6 rounded-xl shadow-md flex items-start space-x-4 transform hover:scale-105 transition-all duration-300 group"
-              data-aos="fade-up"
+              data-aos="fade-up" // Animasi 'fade-up'
               data-aos-delay={`${index * 100}`}
+              className="bg-gradient-to-br from-(--color-light-primary) to-white p-8 rounded-2xl shadow-lg transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl"
             >
-              <CheckCircle className="w-7 h-7 text-(--color-brand-primary) group-hover:rotate-12 transition-transform duration-300" />
-              <p className="text-(--color-text-primary) font-medium">{feature}</p>
+              {/* Ikon */}
+              <div className="mb-4">
+                {feature.icon}
+              </div>
+              {/* Judul */}
+              <h3 className="text-2xl font-bold text-(--color-text-primary) mb-3">
+                {feature.title}
+              </h3>
+              {/* Penjelasan */}
+              <p className="text-(--color-dark-primary)">
+                {feature.desc}
+              </p>
             </div>
           ))}
         </div>

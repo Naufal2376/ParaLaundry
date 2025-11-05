@@ -1,9 +1,10 @@
 // src/components/Services.tsx
-"use client";
+"use client"; // <-- BARU: Wajib untuk Framer Motion
 import React from 'react';
+import { motion } from 'framer-motion'; // <-- BARU: Impor motion
 import { Shirt, Sparkles, Zap, BedDouble, ShoppingBag, Footprints } from 'lucide-react';
 
-// Daftar layanan yang sudah diperbarui
+// Daftar layanan (tetap sama)
 const services = [
   { 
     icon: <Shirt className="w-12 h-12" />, 
@@ -62,7 +63,7 @@ const Services = () => {
               data-aos-delay={`${index * 100}`}
               className="service-card group" 
             >
-              {/* Dekorasi Sudut (dari globals.css) */}
+              {/* Dekorasi Sudut */}
               <span className="corner-deco top-0 left-0 border-t-2 border-l-2 rounded-tl-xl" />
               <span className="corner-deco top-0 right-0 border-t-2 border-r-2 rounded-tr-xl" />
               <span className="corner-deco bottom-0 left-0 border-b-2 border-l-2 rounded-bl-xl" />
@@ -71,19 +72,31 @@ const Services = () => {
               {/* Konten Kartu */}
               <div className="relative z-20">
                 
-                {/* Ikon HANYA membesar (scale) */}
-                <div className="text-(--color-brand-primary) mb-4 group-hover:scale-125 transition-all duration-500">
+                {/* --- PERUBAHAN DI SINI --- */}
+                {/* Ikon dibungkus dengan motion.div untuk animasi hover */}
+                <motion.div
+                  className="text-(--color-brand-primary) mb-4"
+                  // Saat di-hover oleh 'group' (kartu), ikon akan beranimasi
+                  whileHover={{ 
+                    scale: 1.25, 
+                    rotate: [0, 10, -10, 10, 0], // Efek bergoyang/jiggle
+                  }}
+                  transition={{ 
+                    duration: 0.5, 
+                    ease: "easeInOut" 
+                  }}
+                >
                   {service.icon}
-                </div>
+                </motion.div>
+                {/* --- AKHIR PERUBAHAN --- */}
                 
-                {/* Teks TIDAK berubah warna */}
-                <h3 className="text-2xl font-bold text-(--color-text-primary) mb-3 transition-colors duration-300">
+                <h3 className="text-2xl font-bold text-(--color-text-primary) mb-3">
                   {service.title}
                 </h3>
-                <p className="text-(--color-dark-primary) mb-4 transition-colors duration-300">
+                <p className="text-(--color-dark-primary) mb-4">
                   {service.desc}
                 </p>
-                <p className="text-(--color-brand-primary) font-semibold text-lg transition-colors duration-300">
+                <p className="text-(--color-brand-primary) font-semibold text-lg">
                   {service.price}
                 </p>
               </div>

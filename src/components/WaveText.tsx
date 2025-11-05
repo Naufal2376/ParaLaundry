@@ -5,43 +5,35 @@ import { motion } from 'framer-motion';
 const WaveText = ({ text }: { text: string }) => {
   const letters = Array.from(text);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: (i = 1) => ({
-      opacity: 1,
-      transition: { staggerChildren: 0.05, delayChildren: 0.04 * i },
-    }),
-  };
-
-  const letterVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring" as const, // <-- DIPERBAIKI: Tambahkan 'as const' di sini
-        damping: 12,
-        stiffness: 100,
-        repeat: Infinity,
-        repeatDelay: 2,
-        repeatType: "mirror" as const,
-        duration: 0.5
-      },
-    },
-  };
-
   return (
     <motion.h1
-      className="text-5xl md:text-7xl font-bold text-(--color-text-primary) mb-6 flex overflow-hidden justify-center"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
+      // overflow-hidden tidak lagi diperlukan
+      className="text-5xl md:text-7xl font-bold text-(--color-text-primary) mb-6 flex justify-center"
+      // Hapus variants, initial, dan animate dari kontainer
     >
       {letters.map((letter, index) => (
         <motion.span 
           key={index} 
-          variants={letterVariants} 
+          // Hapus 'variants' dari sini
           className={letter === ' ' ? 'mx-2' : ''}
+          
+          // --- KODE BARU DIMULAI DI SINI ---
+          // Animasikan properti 'y' (naik dan turun)
+          animate={{
+            y: [0, -15, 0] // Keyframes: Posisi Awal -> Puncak -> Kembali ke Awal
+          }}
+          // Atur transisi untuk loop tak terbatas
+          transition={{
+            duration: 2, // Durasi satu siklus gelombang (naik dan turun)
+            repeat: Infinity, // Ulangi selamanya
+            ease: "easeInOut", // Gerakan yang halus
+            
+            // INI ADALAH KUNCI EFEK GELOMBANG:
+            // Setiap huruf akan memulai animasinya 0.1 detik
+            // setelah huruf sebelumnya.
+            delay: index * 0.1 
+          }}
+          // --- KODE BARU SELESAI ---
         >
           {letter}
         </motion.span>

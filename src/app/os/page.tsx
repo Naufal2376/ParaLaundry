@@ -1,20 +1,36 @@
 // src/app/os/page.tsx
-"use client"
 import React from 'react';
 import StatCard from '@/components/os/StatCard';
-import OrderTable from '@/components/os/OrderTable';
+import OrderTable, { type Order } from '@/components/os/OrderTable'; 
 import { FilePlus, Loader, PackageCheck } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { createClient } from '@/lib/supabase/server';
 
-const DashboardPage = () => {
+const DashboardPage = async () => {
+  const supabase = await createClient();
+  
+  // --- PERBAIKAN PADA KUERI SELECT ---
+  const { data, error } = await supabase
+    .from('orders')
+    .select(`
+      order_id,
+      customer_id,
+      status_cucian,
+      total_biaya,
+      status_bayar,
+      customer:customers ( nama ) 
+    `) // <-- Diubah menjadi 'customer:customers' (alias)
+    .order('tanggal_order', { ascending: false })
+    .limit(5);
+
+  if (error) {
+    console.error("Error fetching recent orders:", error.message);
+  }
+  
+  // Tipe data ini sekarang akan cocok dengan 'Order' di OrderTable
+  const recentOrders: Order[] = data || [];
+
   return (
-    // Gunakan motion.div untuk animasi fade-in sederhana saat halaman dimuat
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      {/* Header Halaman */}
+    <div>
       <header className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-(--color-text-primary)">Dashboard Pegawai</h1>
@@ -29,11 +45,11 @@ const DashboardPage = () => {
         </a>
       </header>
 
-      {/* Kartu Statistik */}
+      {/* Kartu StatCard Anda tetap sama */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard 
           title="Perlu Dikerjakan" 
-          value="2 Pesanan"
+          value="2 Pesanan" 
           icon={<Loader className="text-yellow-600" />} 
           colorClass="bg-yellow-100"
         />
@@ -51,9 +67,8 @@ const DashboardPage = () => {
         />
       </div>
 
-      {/* Tabel Pesanan */}
-      <OrderTable />
-    </motion.div>
+      <OrderTable orders={recentOrders} />
+    </div>
   );
 };
 
