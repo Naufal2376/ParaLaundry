@@ -1,31 +1,32 @@
 // src/components/os/OrderTable.tsx
 "use client";
-import React, { useMemo, useState, useTransition } from 'react';
+import React, { useState, useTransition, useMemo } from 'react';
 import { updateOrderStatus, updatePaymentStatus } from '@/app/os/transaksi/actions';
+import { AnimatePresence } from 'framer-motion';
+import { QrCodeModal } from './QrCodeModal';
+import { QrCode, Search, ChevronDown, ChevronUp } from 'lucide-react';
 
-// --- 1. PERBAIKAN TIPE DATA DI SINI ---
+// Tipe data (interface) Anda
 type Customer = {
   nama: string;
-} | null; // Tipe customer sekarang adalah Objek atau null
+} | null;
 
 export interface Order {
   order_id: number;
   customer_id: number;
   status_cucian: string;
-  total_biaya: number; 
+  total_biaya: number;
   status_bayar: string;
-  customer: Customer; // <-- Diubah dari 'customers: Customer[]' menjadi 'customer: Customer'
+  customer: Customer;
 }
-// -----------------------------
 
 interface OrderTableProps {
   orders: Order[];
 }
 
-// Opsi dropdown
+// Opsi dropdown dan fungsi helper
 const statusCucianOptions: StatusCucian[] = ["Masuk Antrean", "Proses Dicuci", "Siap Diambil", "Selesai"];
 const statusBayarOptions: StatusBayar[] = ["Belum Lunas", "Lunas"];
-
 type StatusCucian = "Masuk Antrean" | "Proses Dicuci" | "Siap Diambil" | "Selesai";
 type StatusBayar = "Lunas" | "Belum Lunas";
 
@@ -40,13 +41,19 @@ const getStatusClass = (status: string) => {
 const getPaymentClass = (payment: string) => {
   return payment === 'Lunas' ? 'text-green-600' : 'text-red-600';
 };
+// -----------------------------
+
+type SortKey = 'order_id' | 'customer' | 'status_cucian' | 'status_bayar' | 'total_biaya';
 
 const OrderTable: React.FC<OrderTableProps> = ({ orders }) => {
   const [isPending, startTransition] = useTransition();
+  const [modalQrValue, setModalQrValue] = useState<string | null>(null);
+  
   const [query, setQuery] = useState('');
-  const [sortKey, setSortKey] = useState<'order_id'|'customer'|'status_cucian'|'status_bayar'|'total_biaya'>('order_id');
+  const [sortKey, setSortKey] = useState<SortKey>('order_id');
   const [sortDir, setSortDir] = useState<'asc'|'desc'>('desc');
 
+  // Handler (tetap sama)
   const handleStatusCucianChange = (orderId: number, newStatus: StatusCucian) => {
     startTransition(async () => {
       const result = await updateOrderStatus(orderId, newStatus);
@@ -61,6 +68,12 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders }) => {
     });
   };
 
+  const handleShowQr = (orderId: number) => {
+    const trackingUrl = `https://para-laundry-web.vercel.app/lacak/PL-${orderId}`;
+    setModalQrValue(trackingUrl);
+  };
+
+  // Logika Filter dan Sort (tetap sama)
   const filteredSorted = useMemo(() => {
     const q = query.trim().toLowerCase();
     const base = q
@@ -71,94 +84,113 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders }) => {
           o.status_bayar.toLowerCase().includes(q)
         )
       : orders;
+      
     const sorted = [...base].sort((a, b) => {
       const dir = sortDir === 'asc' ? 1 : -1;
-      const av = sortKey === 'customer' ? (a.customer?.nama || '') : (a as any)[sortKey];
-      const bv = sortKey === 'customer' ? (b.customer?.nama || '') : (b as any)[sortKey];
+      const av = sortKey === 'customer' ? (a.customer?.nama || '') : a[sortKey];
+      const bv = sortKey === 'customer' ? (b.customer?.nama || '') : b[sortKey];
+      
       if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir;
       return String(av).localeCompare(String(bv)) * dir;
     });
     return sorted;
   }, [orders, query, sortKey, sortDir]);
 
-  const onSort = (key: typeof sortKey) => {
+  // Fungsi onSort (tetap sama)
+  const onSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
     else { setSortKey(key); setSortDir('asc'); }
   };
+  
+  const SortIcon = ({ colKey }: { colKey: SortKey }) => {
+    if (sortKey !== colKey) return null;
+    return sortDir === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />;
+  };
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-lg mt-8">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-xl text-(--color-text-primary)">Transaksi Terkini</h3>
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Cari ID, nama, status..."
-          className="p-2 border border-(--color-light-primary-active) rounded-lg w-64"
-        />
-      </div>
-      <div className={`overflow-x-auto ${isPending ? 'opacity-50 pointer-events-none' : ''}`}>
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-(--color-light-primary-hover)">
-              <th className="p-4 cursor-pointer" onClick={() => onSort('order_id')}>ID</th>
-              <th className="p-4 cursor-pointer" onClick={() => onSort('customer')}>Pelanggan</th>
-              <th className="p-4 cursor-pointer" onClick={() => onSort('status_cucian')}>Status Cucian</th>
-              <th className="p-4 cursor-pointer" onClick={() => onSort('status_bayar')}>Status Bayar</th>
-              <th className="p-4 cursor-pointer" onClick={() => onSort('total_biaya')}>Total</th>
-            </tr>
+    <>
+      <AnimatePresence>
+        {modalQrValue && (
+          <QrCodeModal
+            value={modalQrValue}
+            onClose={() => setModalQrValue(null)}
+          />
+        )}
+      </AnimatePresence>
+    
+      <div className="bg-white p-6 rounded-2xl shadow-lg mt-8">
+        {/* ... (Header Tabel dengan Input Pencarian tetap sama) ... */}
+        
+        <div className={`overflow-x-auto ${isPending ? 'opacity-50 pointer-events-none' : ''}`}>
+          <table className="w-full text-left">
+            <thead>
+              {/* ... (Header tabel <thead> Anda tetap sama) ... */}
             </thead>
-          <tbody>
-            {filteredSorted.map(order => (
-              <tr key={order.order_id} className="border-b hover:bg-(--color-light-primary)">
-                <td className="p-4 font-semibold text-(--color-brand-primary)">PL-{order.order_id}</td>
-                
-                {/* --- 2. PERBAIKAN TAMPILAN DI SINI --- */}
-                <td className="p-4 text-(--color-text-primary)">
-                  {order.customer?.nama || 'N/A'}
-                </td>
-                {/* ----------------------------- */}
-
-                <td className="p-4">
-                  <select
-                    value={order.status_cucian}
-                    onChange={(e) => handleStatusCucianChange(order.order_id, e.target.value as StatusCucian)}
-                    className={`p-2 rounded-lg border text-sm font-medium ${getStatusClass(order.status_cucian)}`}
-                    disabled={isPending}
-                  >
-                    {statusCucianOptions.map(status => (
-                      <option key={status} value={status}>{status}</option>
-                    ))}
-                  </select>
-                </td>
-                <td className="p-4">
-                  <select
-                    value={order.status_bayar}
-                    onChange={(e) => handleStatusBayarChange(order.order_id, e.target.value as StatusBayar)}
-                    className={`p-2 rounded-lg border text-sm font-semibold ${getPaymentClass(order.status_bayar)}`}
-                    disabled={isPending}
-                  >
-                    {statusBayarOptions.map(status => (
-                      <option key={status} value={status}>{status}</option>
-                    ))}
-                  </select>
-                </td>
-                <td className="p-4 text-(--color-text-primary) font-medium">
-                  Rp {Number(order.total_biaya).toLocaleString('id-ID')}
-                </td>
-              </tr>
-            ))}
-            {orders.length === 0 && (
-              <tr>
-                <td colSpan={5} className="p-4 text-center text-(--color-dark-primary)">
-                  Belum ada data transaksi.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+            
+            {/* --- PERBAIKAN LOGIKA <tbody> DI SINI --- */}
+            <tbody>
+              {filteredSorted.length > 0 ? (
+                // JIKA ADA HASIL: Map semua baris
+                filteredSorted.map(order => (
+                  <tr key={order.order_id} className="border-b hover:bg-(--color-light-primary)">
+                    <td className="p-4 font-semibold text-(--color-brand-primary)">PL-{order.order_id}</td>
+                    <td className="p-4 text-(--color-text-primary)">
+                      {order.customer?.nama || 'N/A'}
+                    </td>
+                    <td className="p-4">
+                      <select
+                        value={order.status_cucian}
+                        onChange={(e) => handleStatusCucianChange(order.order_id, e.target.value as StatusCucian)}
+                        className={`p-2 rounded-lg border text-sm font-medium ${getStatusClass(order.status_cucian)}`}
+                        disabled={isPending}
+                      >
+                        {statusCucianOptions.map(status => (
+                          <option key={status} value={status}>{status}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="p-4">
+                      <select
+                        value={order.status_bayar}
+                        onChange={(e) => handleStatusBayarChange(order.order_id, e.target.value as StatusBayar)}
+                        className={`p-2 rounded-lg border text-sm font-semibold ${getPaymentClass(order.status_bayar)}`}
+                        disabled={isPending}
+                      >
+                        {statusBayarOptions.map(status => (
+                          <option key={status} value={status}>{status}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="p-4 text-(--color-text-primary) font-medium">
+                      Rp {Number(order.total_biaya).toLocaleString('id-ID')}
+                    </td>
+                    <td className="p-4">
+                      <button
+                        onClick={() => handleShowQr(order.order_id)}
+                        className="flex items-center gap-1 text-(--color-brand-primary) hover:text-(--color-brand-primary-hover) disabled:opacity-50"
+                        disabled={isPending}
+                      >
+                        <QrCode size={16} />
+                        Lihat
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                // JIKA TIDAK ADA HASIL: Tampilkan satu baris "empty state"
+                <tr>
+                  <td colSpan={6} className="p-4 text-center text-(--color-dark-primary)">
+                    {orders.length === 0 ? "Belum ada data transaksi." : "Tidak ada hasil yang cocok dengan pencarian Anda."}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+            {/* --- AKHIR PERBAIKAN <tbody> --- */}
+            
+          </table>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
