@@ -22,12 +22,14 @@ export default function LacakPage() {
   useEffect(() => {
     const fetchOrder = async () => {
       if (!kode) return;
+      console.log("Raw kode from URL:", kode);
       setLoading(true);
       setError(false);
       try {
         const supabase = createBrowserSupabase();
         const code = String(kode).toUpperCase();
         const numericId = parseInt(code.replace(/[^0-9]/g, ''), 10);
+        console.log("Parsed numericId:", numericId);
 
         const { data, error } = await supabase
           .from('orders')
@@ -42,7 +44,7 @@ export default function LacakPage() {
             )
           `)
           .eq('order_id', numericId)
-          .single();
+          .maybeSingle();
 
         if (error || !data) {
           setOrder(null);
@@ -160,7 +162,7 @@ export default function LacakPage() {
   return (
     <>
       <Header />
-      <main className="py-20 px-4 bg-gradient-to-b from-white to-(--color-light-primary) relative z-10 min-h-screen">
+      <main className="py-20 px-4 bg-gradient-to-b from-white to-(--color-light-primary) min-h-screen">
         <div className="container mx-auto max-w-2xl">
           <motion.h1 
             className="text-4xl font-bold text-center text-(--color-text-primary) mb-12" 

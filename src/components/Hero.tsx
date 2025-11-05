@@ -21,12 +21,10 @@ const Hero = () => {
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           
-          {/* Kolom Kiri: Teks */}
-          {/* DIPERBAIKI: 'md:text-left' dihapus di sini */}
           <div className="text-center z-10" data-aos="fade-right">
             <WaveText text="Solusi Laundry" />
-            
-            <span className="block text-5xl md:text-7xl font-bold gradient-text mt-2 h-20">
+
+            <span className="block text-5xl md:text-7xl font-bold gradient-text mt-2 h-20 md:h-24">
               <TypeAnimation
                 sequence={[
                   'Terpercaya', 2000,
@@ -38,13 +36,11 @@ const Hero = () => {
                 repeat={Infinity}
               />
             </span>
-            
-            {/* DIPERBAIKI: 'md:mx-0' dihapus agar paragraf juga center */}
-            <p className="text-xl text-(--color-dark-primary) mb-8 max-w-xl mx-auto" data-aos-delay="200">
+
+            <p className="text-lg md:text-xl text-(--color-dark-primary) mb-8 max-w-xl mx-auto" data-aos-delay="200">
               Cucian bersih, wangi, dan rapi dengan harga terjangkau. Kami siap melayani kebutuhan laundry Anda!
             </p>
-            
-            {/* DIPERBAIKI: 'md:justify-start' dihapus agar tombol center */}
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center" data-aos-delay="400">
               <button
                 onClick={() => scrollToSection('lacak')}

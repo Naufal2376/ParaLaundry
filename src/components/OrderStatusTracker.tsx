@@ -53,32 +53,29 @@ const OrderStatusTracker: React.FC<OrderStatusTrackerProps> = ({ currentStatus }
         }
 
         return (
-          <motion.div 
-            key={step.name} 
+          <motion.div
+            key={step.name}
             className="flex items-start"
-            // DIPERBAIKI: Ubah 'x: -50' menjadi 'y: 20' (mulai dari bawah)
             initial={{ opacity: 0, y: 20 }}
-            // DIPERBAIKI: Ubah 'x: 0' menjadi 'y: 0' (selesai di posisi asli)
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.2, type: "spring", stiffness: 100 }}
           >
-            {/* Lingkaran Ikon dan Garis Vertikal */}
-            <div className="flex flex-col items-center mr-6">
+            {/* Icon Container */}
+            <div className="flex flex-col items-center mr-4">
               <motion.div
-                className={`w-12 h-12 rounded-full flex items-center justify-center ${iconBgClass} transition-colors duration-500`}
+                className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center ${iconBgClass} transition-colors duration-500`}
                 animate={circleAnimation}
               >
-                {/* BARU: Terapkan animasi putar di sini */}
                 <span className={`${iconColorClass} ${iconAnimation}`}>{step.icon}</span>
               </motion.div>
               {index < STEPS.length - 1 && (
-                <div className={`w-1 h-16 mt-2 ${lineClass} transition-colors duration-500`} />
+                <div className={`w-0.5 md:w-1 h-16 mt-2 ${lineClass} transition-colors duration-500`} />
               )}
             </div>
-            
-            {/* Teks Status */}
-            <div className="pt-2">
-              <h3 className={`text-lg md:text-xl ${textClass} transition-colors duration-500`}>
+
+            {/* Text Content */}
+            <div className="pt-1 md:pt-2">
+              <h3 className={`text-base md:text-xl ${textClass} transition-colors duration-500`}>
                 {step.name}
               </h3>
             </div>
