@@ -2,7 +2,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, Sparkles } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+import Image from 'next/image'; // <-- 1. Impor Next/Image
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -38,9 +39,14 @@ const Header = () => {
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2" onClick={() => handleNavClick('beranda')} style={{ cursor: 'pointer' }}>
-            <div className="w-10 h-10 bg-gradient-to-br from-(--color-brand-primary) to-(--color-brand-primary-active) rounded-lg flex items-center justify-center shadow-lg">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
+            {/* 2. Ganti <img> dengan <Image /> */}
+            <Image 
+              src="/ParaLaundry.png" 
+              alt="Para Laundry Logo" 
+              width={32} 
+              height={32}
+              className="rounded-md"
+            />
             <span className="text-2xl font-bold text-(--color-text-primary)">Para Laundry</span>
           </div>
 
@@ -50,7 +56,8 @@ const Header = () => {
               <button
                 key={item}
                 onClick={() => handleNavClick(item.toLowerCase())}
-                className="text-(--color-text-primary) hover:text-(--color-brand-primary) transition-colors duration-300 font-medium hover:cursor-pointer"
+                // 3. Hapus hover:cursor-pointer (sudah default)
+                className="text-(--color-text-primary) hover:text-(--color-brand-primary) transition-colors duration-300 font-medium"
               >
                 {item}
               </button>

@@ -2,10 +2,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
-import { AOSInit } from "@/components/AOSInit";
-import BubbleCursor from "@/components/BubbleCursor"; // <-- PASTIKAN INI ADA
-import FloatingBackgroundIcons from "@/components/FloatingBackgroundIcons";
-import AnimatedBubbles from "@/components/AnimatedBubbles";
+import AppShell from "@/components/AppShell"; // <-- Impor Shell Klien kita
 
 const poppins = Poppins({ 
   subsets: ["latin"],
@@ -13,11 +10,13 @@ const poppins = Poppins({
   variable: '--font-poppins'
 });
 
+// Sekarang 'metadata' Anda akan berfungsi kembali!
 export const metadata: Metadata = {
   title: "Para Laundry - Solusi Laundry Cepat & Bersih",
   description: "Layanan laundry kiloan, satuan, dan ekspres profesional.",
 };
 
+// Ini sekarang adalah Server Component (TANPA "use client")
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,17 +24,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <AOSInit />
       <body className={`${poppins.variable} font-poppins`}>
-        <BubbleCursor />
-        {/* Background global yang ramai, berada di belakang semua section */}
-        <div className="fixed inset-0 -z-10 pointer-events-none">
-          <FloatingBackgroundIcons />
-          <AnimatedBubbles />
-        </div>
-        <div className="relative z-10">
+        {/* AppShell adalah Client Component yang berisi:
+          - Preloader
+          - AOSInit
+          - BubbleCursor
+          - FloatingBackgroundIcons
+          - AnimatedBubbles
+          - Dan {children} (halaman Anda)
+        */}
+        <AppShell>
           {children}
-        </div>
+        </AppShell>
       </body>
     </html>
   );
