@@ -42,8 +42,8 @@ const Sidebar: React.FC<SidebarProps> = ({ userRole }) => {
         <Image 
               src="/ParaLaundry.png" 
               alt="Para Laundry Logo" 
-              width={48} 
-              height={48}
+              width={60} 
+              height={60}
               className="rounded-md"
             />
         </div>

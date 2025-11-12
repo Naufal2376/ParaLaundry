@@ -43,8 +43,8 @@ const Header = () => {
             <Image 
               src="/ParaLaundry.png" 
               alt="Para Laundry Logo" 
-              width={48} 
-              height={48}
+              width={60} 
+              height={60}
               className="rounded-md"
             />
             <span className="text-2xl font-bold text-(--color-text-primary)">Para Laundry</span>
