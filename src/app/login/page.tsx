@@ -5,6 +5,7 @@ import { Sparkles, User, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import Image from 'next/image';
 
 // ❗️ Penting: jangan prerender halaman login
 export const dynamic = "force-dynamic";
@@ -22,8 +23,14 @@ function Login() {
         transition={{ type: "spring", stiffness: 100 }}
       >
         <div className="flex items-center justify-center space-x-2 mb-6">
-          <div className="w-10 h-10 bg-gradient-to-br from-(--color-brand-primary) to-(--color-brand-primary-active) rounded-lg flex items-center justify-center shadow-lg">
-            <Sparkles className="w-6 h-6 text-white" />
+          <div className="from-(--color-brand-primary) to-(--color-brand-primary-active) flex items-center justify-center">
+          <Image 
+                src="/ParaLaundry.png" 
+                alt="Para Laundry Logo" 
+                width={32} 
+                height={32}
+                className="rounded-md"
+              />
           </div>
           <span className="text-2xl font-bold text-(--color-text-primary)">
             Para Laundry OS

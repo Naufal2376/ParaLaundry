@@ -4,6 +4,7 @@ import React from 'react';
 import { LayoutDashboard, FileText, List, PieChart, LogOut, Sparkles, TrendingUp, UserCheck, UserCog } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { logout } from '@/app/login/actions';
+import Image from 'next/image';
 
 // --- KODE SIMULASI DIHAPUS ---
 // type UserRole = "Pegawai" | "Owner"; <-- HAPUS
@@ -37,8 +38,14 @@ const Sidebar: React.FC<SidebarProps> = ({ userRole }) => {
     <aside className="w-64 h-screen flex flex-col p-4 bg-white shadow-2xl sticky top-0">
       {/* Logo */}
       <div className="flex items-center space-x-2 mb-6 px-2">
-        <div className="w-10 h-10 bg-gradient-to-br from-(--color-brand-primary) to-(--color-brand-primary-active) rounded-lg flex items-center justify-center shadow-lg">
-          <Sparkles className="w-6 h-6 text-white" />
+        <div className="from-(--color-brand-primary) to-(--color-brand-primary-active) flex items-center justify-center">
+        <Image 
+              src="/ParaLaundry.png" 
+              alt="Para Laundry Logo" 
+              width={32} 
+              height={32}
+              className="rounded-md"
+            />
         </div>
         <span className="text-2xl font-bold text-(--color-text-primary)">Para Laundry</span>
       </div>
