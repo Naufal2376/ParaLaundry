@@ -27,6 +27,7 @@ interface SidebarProps {
 
 // 2. Terima 'userRole' sebagai prop
 const Sidebar: React.FC<SidebarProps> = ({ userRole }) => {
+  // This is a temporary comment to trigger linter re-evaluation.
   const pathname = usePathname();
 
   // 3. Saring link navigasi berdasarkan 'userRole' dari prop
