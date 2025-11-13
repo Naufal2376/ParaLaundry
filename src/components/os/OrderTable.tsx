@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { updateOrderStatus, updatePaymentStatus } from '@/app/os/transaksi/actions';
 import { AnimatePresence } from 'framer-motion';
 import { QrCodeModal } from './QrCodeModal';
+import OrderCard from './OrderCard';
 import { QrCode, Search, ChevronDown, ChevronUp } from 'lucide-react';
 
 // Tipe data (interface) Anda
@@ -26,12 +27,12 @@ interface OrderTableProps {
 }
 
 // Opsi dropdown dan fungsi helper
-const statusCucianOptions: StatusCucian[] = ["Masuk Antrean", "Proses Dicuci", "Siap Diambil", "Selesai"];
-const statusBayarOptions: StatusBayar[] = ["Belum Lunas", "Lunas"];
-type StatusCucian = "Masuk Antrean" | "Proses Dicuci" | "Siap Diambil" | "Selesai";
-type StatusBayar = "Lunas" | "Belum Lunas";
+export const statusCucianOptions: StatusCucian[] = ["Masuk Antrean", "Proses Dicuci", "Siap Diambil", "Selesai"];
+export const statusBayarOptions: StatusBayar[] = ["Belum Lunas", "Lunas"];
+export type StatusCucian = "Masuk Antrean" | "Proses Dicuci" | "Siap Diambil" | "Selesai";
+export type StatusBayar = "Lunas" | "Belum Lunas";
 
-const getStatusClass = (status: string) => {
+export const getStatusClass = (status: string) => {
   switch (status) {
     case 'Proses Dicuci': return 'bg-yellow-100 text-yellow-800';
     case 'Siap Diambil': return 'bg-green-100 text-green-800';
@@ -39,7 +40,7 @@ const getStatusClass = (status: string) => {
     default: return 'bg-gray-100 text-gray-800';
   }
 };
-const getPaymentClass = (payment: string) => {
+export const getPaymentClass = (payment: string) => {
   return payment === 'Lunas' ? 'text-green-600' : 'text-red-600';
 };
 // -----------------------------
@@ -134,7 +135,7 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders }) => {
             </div>
         </div>
         
-        <div className={`overflow-x-auto ${isPending ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className={`hidden md:block overflow-x-auto ${isPending ? 'opacity-50 pointer-events-none' : ''}`}>
           <table className="w-full text-left">
             <thead>
               <tr className="bg-gray-50">
@@ -220,6 +221,24 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders }) => {
             </tbody>
             
           </table>
+        </div>
+        <div className="md:hidden">
+          {filteredSorted.length > 0 ? (
+            filteredSorted.map(order => (
+              <OrderCard
+                key={order.order_id}
+                order={order}
+                onStatusCucianChange={handleStatusCucianChange}
+                onStatusBayarChange={handleStatusBayarChange}
+                onShowQr={handleShowQr}
+                isPending={isPending}
+              />
+            ))
+          ) : (
+            <div className="p-4 text-center text-(--color-dark-primary)">
+              {orders.length === 0 ? "Belum ada data transaksi." : "Tidak ada hasil yang cocok dengan pencarian Anda."}
+            </div>
+          )}
         </div>
       </div>
     </>

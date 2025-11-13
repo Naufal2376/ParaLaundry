@@ -1,5 +1,5 @@
 // src/app/os/layout.tsx
-import Sidebar from "@/components/os/Sidebar";
+import DashboardWrapper from "@/components/os/DashboardWrapper";
 import React from "react";
 import { createClient } from "@/lib/supabase/server"; // Impor klien server
 import { redirect } from 'next/navigation';
@@ -39,12 +39,8 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-(--color-light-primary)">
-      {/* 3. Oper 'userRole' sebagai prop ke Sidebar */}
-      <Sidebar userRole={userRole} />
-      <main className="flex-1 p-8 overflow-auto">
-        {children}
-      </main>
-    </div>
+    <DashboardWrapper userRole={userRole}>
+      {children}
+    </DashboardWrapper>
   );
 }

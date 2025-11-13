@@ -80,21 +80,6 @@ const Footer = () => {
                 <span>Senin - Minggu: 08:00 - 20:00</span>
               </li>
             </ul>
-          </div>
-
-          {/* Kolom 3: Lokasi & Sosial Media */}
-          <div>
-            <h4 className="font-semibold text-lg mb-4">Lokasi Kami</h4>
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3983.561161404419!2d104.64730337372316!3d-3.209271340749092!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e3bbdc16ddbddd9%3A0x30316d636eaf6ccd!2sPARA%20LAUNDRY!5e0!3m2!1sid!2sid!4v1762359866146!5m2!1sid!2sid" // Placeholder URL
-              width="100%"
-              height="150"
-              style={{ border: 0 }}
-              allowFullScreen={true}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="rounded-lg opacity-90"
-            ></iframe>
             {/* Ikon Sosial Media */}
             <div className="flex space-x-4 mt-4">
               {socialIcons.map((social, index) => (
@@ -109,6 +94,21 @@ const Footer = () => {
                 </a>
               ))}
             </div>
+          </div>
+
+          {/* Kolom 3: Lokasi */}
+          <div>
+            <h4 className="font-semibold text-lg mb-4">Lokasi Kami</h4>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3983.561161404419!2d104.64730337372316!3d-3.209271340749092!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e3bbdc16ddbddd9%3A0x30316d636eaf6ccd!2sPARA%20LAUNDRY!5e0!3m2!1sid!2sid!4v1762359866146!5m2!1sid!2sid" // Placeholder URL
+              width="100%"
+              height="150"
+              style={{ border: 0 }}
+              allowFullScreen={true}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="rounded-lg opacity-90"
+            ></iframe>
           </div>
         </div>
 

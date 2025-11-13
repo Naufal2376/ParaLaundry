@@ -159,7 +159,7 @@ export default function NewTransactionPage() {
     <div>
       <header className="flex items-center gap-4 mb-8">
         <FileText className="w-8 h-8 text-(--color-brand-primary)" />
-        <h1 className="text-3xl font-bold text-(--color-text-primary)">
+        <h1 className="text-2xl md:text-3xl font-bold text-(--color-text-primary)">
           Buat Transaksi Baru
         </h1>
       </header>
@@ -263,7 +263,7 @@ export default function NewTransactionPage() {
             <button 
               type="submit"
               disabled={isLoading}
-              className="shine-button w-full md:w-auto flex items-center justify-center bg-(--color-brand-primary) text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition-all hover:scale-105 disabled:opacity-50"
+              className="shine-button w-full md:w-auto flex items-center justify-center bg-(--color-brand-primary) text-white font-semibold px-4 py-2 md:px-6 md:py-3 rounded-lg shadow-lg transition-all hover:scale-105 disabled:opacity-50"
             >
               <Save className="mr-2" size={20} />
               {isLoading ? "Menyimpan..." : "Simpan Transaksi"}

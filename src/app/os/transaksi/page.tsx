@@ -34,7 +34,7 @@ export default async function TransaksiPage() {
     <div>
       <header className="flex items-center gap-4 mb-8">
         <List className="w-8 h-8 text-(--color-brand-primary)" />
-        <h1 className="text-3xl font-bold text-(--color-text-primary)">
+        <h1 className="text-2xl md:text-3xl font-bold text-(--color-text-primary)">
           Daftar Semua Transaksi
         </h1>
       </header>

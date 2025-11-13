@@ -1,35 +1,35 @@
 // src/app/os/page.tsx
 import React from 'react';
 import StatCard from '@/components/os/StatCard';
-import OrderTable, { type Order } from '@/components/os/OrderTable'; 
-// Impor ikon baru
-import { FilePlus, Loader, PackageCheck, CheckCircle, Wallet, TrendingUp } from 'lucide-react'; 
+import OrderTable, { type Order } from '@/components/os/OrderTable';
+import PieChartComponent from '@/components/os/PieChartComponent';
+import BarChartComponent from '@/components/os/BarChartComponent';
+import { FilePlus, Loader, PackageCheck, CheckCircle, Wallet, TrendingUp } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 
-// Fungsi helper untuk rentang waktu (tetap sama)
-function getTodayRangeWIB() {
-  const now = new Date();
-  // Set ke zona waktu WIB (UTC+7)
-  const localNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
-  
-  const startOfDay = new Date(localNow);
-  startOfDay.setHours(0, 0, 0, 0); // Set ke 00:00 WIB
+function getDailyRangeWIB(date: Date) {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const dateString = formatter.format(date); // YYYY-MM-DD in Jakarta time
 
-  const endOfDay = new Date(localNow);
-  endOfDay.setHours(23, 59, 59, 999); // Set ke 23:59 WIB
+  const startOfDayInJakarta = new Date(`${dateString}T00:00:00+07:00`);
+  const endOfDayInJakarta = new Date(`${dateString}T23:59:59.999+07:00`);
 
   return {
-    start: startOfDay.toISOString(),
-    end: endOfDay.toISOString(),
+    start: startOfDayInJakarta.toISOString(),
+    end: endOfDayInJakarta.toISOString(),
+    name: startOfDayInJakarta.toLocaleDateString('id-ID', { weekday: 'short', timeZone: 'Asia/Jakarta' }),
   };
 }
 
-
 const DashboardPage = async () => {
   const supabase = await createClient();
-  const today = getTodayRangeWIB();
+  const today = getDailyRangeWIB(new Date());
   
-  // --- 1. Ambil Peran Pengguna ---
   const { data: { user } } = await supabase.auth.getUser();
   const { data: profile } = await supabase
     .from('profiles')
@@ -38,7 +38,6 @@ const DashboardPage = async () => {
     .single();
   const role = profile?.role || 'Pegawai';
 
-  // --- 2. Ambil Data Transaksi Terbaru (5) ---
   const { data: recentOrdersData, error: ordersError } = await supabase
     .from('orders')
     .select(`
@@ -52,25 +51,21 @@ const DashboardPage = async () => {
     .order('tanggal_order', { ascending: false })
     .limit(5);
 
-  // --- 3. Ambil Data Statistik (Masuk Antrean) ---
   const { count: masukAntreanCount, error: masukAntreanError } = await supabase
     .from('orders')
     .select('*', { count: 'exact', head: true })
     .eq('status_cucian', 'Masuk Antrean');
 
-  // --- 4. Ambil Data Statistik (Sedang Dikerjakan) ---
   const { count: sedangDikerjakanCount, error: sedangDikerjakanError } = await supabase
     .from('orders')
     .select('*', { count: 'exact', head: true })
     .eq('status_cucian', 'Proses Dicuci');
   
-  // --- 5. Ambil Data Statistik (Siap Diambil) ---
   const { count: siapDiambilCount, error: siapDiambilError } = await supabase
     .from('orders')
     .select('*', { count: 'exact', head: true })
     .eq('status_cucian', 'Siap Diambil');
 
-  // --- 6. (BARU) Ambil Data Statistik (Selesai Hari Ini) ---
   const { count: selesaiHariIniCount, error: selesaiHariIniError } = await supabase
     .from('orders')
     .select('*', { count: 'exact', head: true })
@@ -78,7 +73,6 @@ const DashboardPage = async () => {
     .gte('tanggal_order', today.start)
     .lte('tanggal_order', today.end);
 
-  // --- 7. Ambil Data Statistik (Pendapatan Hari Ini) ---
   const { data: pendapatanData, error: pendapatanError } = await supabase
     .from('orders')
     .select('total_biaya')
@@ -88,9 +82,8 @@ const DashboardPage = async () => {
     
   const totalPendapatan = pendapatanData?.reduce((acc, order) => acc + Number(order.total_biaya), 0) || 0;
 
-  // --- 8. (BARU) Ambil Data Statistik (Pengeluaran Hari Ini) ---
   let totalPengeluaran = 0;
-  if (role === 'Owner') { // Hanya Owner yang bisa lihat pengeluaran
+  if (role === 'Owner') {
     const { data: pengeluaranData, error: pengeluaranError } = await supabase
       .from('expenses')
       .select('jumlah')
@@ -101,7 +94,6 @@ const DashboardPage = async () => {
     totalPengeluaran = pengeluaranData?.reduce((acc, expense) => acc + Number(expense.jumlah), 0) || 0;
   }
   
-  // Tangani error (opsional)
   if (ordersError || masukAntreanError || siapDiambilError || sedangDikerjakanError || pendapatanError || selesaiHariIniError) {
     console.error("Error fetching dashboard data");
   }
@@ -112,35 +104,63 @@ const DashboardPage = async () => {
       customer: Array.isArray(o.customer) ? (o.customer[0] ?? null) : (o.customer ?? null),
     })) as Order[]) || [];
 
+  const last7DaysData = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dayRange = getDailyRangeWIB(d);
+
+    const { data: dailyData, error } = await supabase
+      .from('orders')
+      .select('total_biaya')
+      .eq('status_bayar', 'Lunas')
+      .gte('tanggal_order', dayRange.start)
+      .lte('tanggal_order', dayRange.end);
+
+    if (error) console.error(`Error fetching data for ${dayRange.start.split('T')[0]}:`, error.message);
+
+    const dailyTotal = dailyData?.reduce((acc, order) => acc + Number(order.total_biaya), 0) || 0;
+    last7DaysData.push({
+      name: dayRange.name,
+      pendapatan: dailyTotal,
+    });
+  }
+
+  const pieChartData = [
+    { name: 'Masuk Antrean', value: masukAntreanCount || 0 },
+    { name: 'Dikerjakan', value: sedangDikerjakanCount || 0 },
+    { name: 'Siap Diambil', value: siapDiambilCount || 0 },
+    { name: 'Selesai Hari Ini', value: selesaiHariIniCount || 0 },
+  ];
+
   return (
     <div>
-      {/* Header Halaman (DIPERBARUI) */}
       <header className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-(--color-text-primary)">Dashboard {role}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-(--color-text-primary)">Dashboard {role}</h1>
           <p className="text-(--color-dark-primary)">Selamat datang kembali!</p>
         </div>
-        {/* Tombol dinamis berdasarkan Peran */}
         {role === 'Owner' ? (
           <a
-            href="/os/laporan" // Owner melihat laporan lengkap
-            className="shine-button flex items-center bg-(--color-dark-primary) text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition-transform hover:scale-105"
+            href="/os/laporan"
+            className="shine-button flex items-center bg-(--color-dark-primary) text-white font-semibold px-4 py-2 md:px-6 md:py-3 rounded-lg shadow-lg transition-transform hover:scale-105"
           >
             <TrendingUp className="mr-2 text-xl" />
-            Lihat Laporan Lengkap
+            <span className="hidden md:inline">Lihat Laporan Lengkap</span>
+            <span className="md:hidden">Laporan</span>
           </a>
         ) : (
           <a
             href="/os/transaksi/baru"
-            className="shine-button flex items-center bg-(--color-brand-primary) text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition-transform hover:scale-105"
+            className="shine-button flex items-center bg-(--color-brand-primary) text-white font-semibold px-4 py-2 md:px-6 md:py-3 rounded-lg shadow-lg transition-transform hover:scale-105"
           >
             <FilePlus className="mr-2 text-xl" />
-            Buat Transaksi Baru
+            <span className="hidden md:inline">Buat Transaksi Baru</span>
+            <span className="md:hidden">Baru</span>
           </a>
         )}
       </header>
 
-      {/* Kartu Statistik (DIPERBARUI) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
           title="Masuk Antrean" 
@@ -168,7 +188,6 @@ const DashboardPage = async () => {
         />
       </div>
       
-      {/* Kartu Statistik Keuangan (BARU) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         <StatCard 
           title="Pendapatan Hari Ini (Lunas)" 
@@ -176,7 +195,6 @@ const DashboardPage = async () => {
           icon={<span className="text-green-600 font-bold text-xl">Rp</span>} 
           colorClass="bg-green-100"
         />
-        {/* Hanya tampilkan Pengeluaran & Laba untuk Owner */}
         {role === 'Owner' && (
           <>
             <StatCard 
@@ -193,6 +211,11 @@ const DashboardPage = async () => {
             />
           </>
         )}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <PieChartComponent data={pieChartData} />
+        <BarChartComponent data={last7DaysData} />
       </div>
 
       <OrderTable orders={recentOrders} />

@@ -1,9 +1,10 @@
-// src/app/os/pengeluaran/page.tsx
 "use client";
 import React, { useEffect, useState, useMemo } from 'react';
 import { Wallet, Save, Search } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import ExpenseCard from '@/components/os/ExpenseCard';
+import DashboardWrapper from '@/components/os/DashboardWrapper';
 
 export default function ExpensePage() {
   const router = useRouter();
@@ -91,14 +92,14 @@ export default function ExpensePage() {
   }, [rows, query]);
 
   return (
-    <div>
+    <DashboardWrapper>
       <header className="flex items-center gap-4 mb-8">
         <Wallet className="w-8 h-8 text-(--color-brand-primary)" />
-        <h1 className="text-3xl font-bold text-(--color-text-primary)">Catat Pengeluaran</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-(--color-text-primary)">Catat Pengeluaran</h1>
       </header>
 
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-lg max-w-3xl">
-        <div className="grid md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-2xl shadow-lg max-w-3xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm mb-1 text-(--color-dark-primary)">Tanggal</label>
             <input
@@ -122,7 +123,7 @@ export default function ExpensePage() {
               <option>Lainnya</option>
             </select>
           </div>
-          <div>
+          <div className="md:col-span-2">
             <label className="block text-sm mb-1 text-(--color-dark-primary)">Nominal (Rp)</label>
             <input
               type="number"
@@ -150,39 +151,40 @@ export default function ExpensePage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="shine-button flex items-center bg-(--color-brand-primary) text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:scale-105 disabled:opacity-50"
+            className="shine-button flex items-center bg-(--color-brand-primary) text-white font-semibold px-4 py-2 md:px-6 md:py-3 rounded-lg shadow-lg hover:scale-105 disabled:opacity-50"
           >
             <Save className="mr-2" size={18} />
             {isLoading ? 'Menyimpan...' : 'Simpan'}
           </button>
-          {errorMessage && <span className="text-red-500">{errorMessage}</span>}
-          {successMessage && <span className="text-green-600">{successMessage}</span>}
+          {errorMessage && <span className="text-red-500 text-sm">{errorMessage}</span>}
+          {successMessage && <span className="text-green-600 text-sm">{successMessage}</span>}
         </div>
       </form>
 
-      {/* Tabel Daftar Pengeluaran */}
-      <div className="bg-white p-6 rounded-2xl shadow-lg mt-8">
-        <div className="flex items-center justify-between mb-4">
+      {/* Daftar Pengeluaran */}
+      <div className="bg-white p-4 md:p-6 rounded-2xl shadow-lg mt-8">
+        <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
             <h2 className="text-xl font-semibold text-(--color-text-primary)">Daftar Pengeluaran</h2>
-            <div className="relative">
+            <div className="relative w-full md:w-auto">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Cari pengeluaran..."
-                    className="pl-10 pr-4 py-2 border border-(--color-light-primary-active) rounded-lg focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)"
+                    className="w-full pl-10 pr-4 py-2 border border-(--color-light-primary-active) rounded-lg focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)"
                 />
             </div>
         </div>
-        <div className="overflow-x-auto">
+        {/* Tampilan Tabel untuk Desktop */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-(--color-light-primary-active)">
                 <th className="p-3">Tanggal</th>
                 <th className="p-3">Keterangan</th>
-                <th className="p-3">Jumlah</th>
-                <th className="p-3">Aksi</th>
+                <th className="p-3 text-right">Jumlah</th>
+                <th className="p-3 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -192,7 +194,7 @@ export default function ExpensePage() {
                   <td className="p-3">
                     {editing?.expense_id === r.expense_id ? (
                       <input
-                        className="p-2 border rounded"
+                        className="p-2 border rounded w-full"
                         value={editing.keterangan}
                         onChange={(e) => setEditing({ ...editing, keterangan: e.target.value })}
                       />
@@ -200,7 +202,7 @@ export default function ExpensePage() {
                       r.keterangan
                     )}
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 text-right">
                     {editing?.expense_id === r.expense_id ? (
                       <input
                         type="number"
@@ -212,7 +214,7 @@ export default function ExpensePage() {
                       `Rp ${Number(r.jumlah).toLocaleString('id-ID')}`
                     )}
                   </td>
-                  <td className="p-3 space-x-2">
+                  <td className="p-3 space-x-2 text-center">
                     {editing?.expense_id === r.expense_id ? (
                       <button
                         type="button"
@@ -244,9 +246,11 @@ export default function ExpensePage() {
                       type="button"
                       className="px-3 py-1 bg-red-500 text-white rounded"
                       onClick={async () => {
-                        const supabase = createClient();
-                        await supabase.from('expenses').delete().eq('expense_id', r.expense_id);
-                        setRows(rows.filter(x => x.expense_id !== r.expense_id));
+                        if(window.confirm("Anda yakin ingin menghapus pengeluaran ini?")){
+                          const supabase = createClient();
+                          await supabase.from('expenses').delete().eq('expense_id', r.expense_id);
+                          setRows(rows.filter(x => x.expense_id !== r.expense_id));
+                        }
                       }}
                     >Hapus</button>
                   </td>
@@ -254,13 +258,54 @@ export default function ExpensePage() {
               ))}
               {filteredRows.length === 0 && (
                 <tr>
-                  <td className="p-3" colSpan={4}>{rows.length === 0 ? "Belum ada data pengeluaran." : "Tidak ada hasil yang cocok."}</td>
+                  <td className="p-3 text-center" colSpan={4}>{rows.length === 0 ? "Belum ada data pengeluaran." : "Tidak ada hasil yang cocok."}</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+        {/* Tampilan Card untuk Mobile */}
+        <div className="md:hidden mt-4 space-y-4">
+          {filteredRows.length > 0 ? (
+            filteredRows.map((expense) => (
+              <ExpenseCard
+                key={expense.expense_id}
+                expense={expense}
+                onEdit={(exp) => setEditing({ expense_id: exp.expense_id, keterangan: exp.keterangan, jumlah: Number(exp.jumlah) })}
+                onDelete={async (id) => {
+                  if(window.confirm("Anda yakin ingin menghapus pengeluaran ini?")){
+                    const supabase = createClient();
+                    await supabase.from('expenses').delete().eq('expense_id', id);
+                    setRows(rows.filter(x => x.expense_id !== id));
+                  }
+                }}
+                isEditing={editing?.expense_id === expense.expense_id}
+                editingExpense={editing}
+                setEditingExpense={setEditing}
+                onSaveEdit={async (exp) => {
+                  const supabase = createClient();
+                  const { error } = await supabase
+                    .from('expenses')
+                    .update({ keterangan: editing?.keterangan, jumlah: editing?.jumlah })
+                    .eq('expense_id', exp.expense_id);
+                  if (!error) {
+                    setEditing(null);
+                    const { data } = await supabase
+                      .from('expenses')
+                      .select('expense_id, tanggal_pengeluaran, keterangan, jumlah')
+                      .order('tanggal_pengeluaran', { ascending: false });
+                    if (data) setRows(data as any);
+                  }
+                }}
+              />
+            ))
+          ) : (
+            <div className="p-4 text-center text-(--color-dark-primary)">
+              {rows.length === 0 ? "Belum ada data pengeluaran." : "Tidak ada hasil yang cocok."}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </DashboardWrapper>
   );
 }

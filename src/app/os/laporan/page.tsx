@@ -102,7 +102,7 @@ const LaporanPage = async (props: { searchParams?: Promise<Record<string, string
     <div>
       <header className="flex items-center gap-4 mb-8">
         <TrendingUp className="w-8 h-8 text-(--color-brand-primary)" />
-        <h1 className="text-3xl font-bold text-(--color-text-primary)">
+        <h1 className="text-2xl md:text-3xl font-bold text-(--color-text-primary)">
           Laporan Keuangan
         </h1>
       </header>

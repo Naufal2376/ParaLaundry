@@ -2,6 +2,7 @@
 "use client"; // <-- INI ADALAH KUNCI UTAMA
 
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation'; // <-- Impor hook
 import { AnimatePresence } from 'framer-motion';
 import { AOSInit } from "@/components/AOSInit";
 import { PreloaderVisuals } from "@/components/Preloader";
@@ -14,17 +15,23 @@ export default function AppShell({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // State untuk mengelola preloader
   const [isLoading, setIsLoading] = useState(true);
+  const pathname = usePathname(); // <-- Dapatkan path saat ini
 
   useEffect(() => {
-    // Simulasi waktu loading
+    // Jika path adalah halaman dashboard, jangan tampilkan preloader
+    if (pathname.startsWith('/os')) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Simulasi waktu loading untuk halaman lain
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 2500); // Tampilkan preloader selama 2.5 detik
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [pathname]); // <-- Tambahkan pathname sebagai dependensi
 
   return (
     <>

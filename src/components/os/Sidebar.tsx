@@ -35,7 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({ userRole }) => {
   );
 
   return (
-    <aside className="w-64 h-screen flex flex-col p-4 bg-white shadow-2xl sticky top-0">
+    <aside className="w-64 flex flex-col p-4 bg-white h-full">
       {/* Logo */}
       <div className="flex items-center space-x-2 mb-6 px-2">
         <div className="from-(--color-brand-primary) to-(--color-brand-primary-active) flex items-center justify-center">

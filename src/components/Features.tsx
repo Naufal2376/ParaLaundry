@@ -60,7 +60,7 @@ const Features = () => {
               key={index}
               data-aos="fade-up" // Animasi 'fade-up'
               data-aos-delay={`${index * 100}`}
-              className="bg-gradient-to-br from-(--color-light-primary) to-white p-8 rounded-2xl shadow-lg transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl"
+              className="bg-gradient-to-br from-(--color-light-primary) to-white px-4 py-8 sm:px-8 rounded-2xl shadow-lg transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl"
             >
               {/* Ikon */}
               <div className="mb-4">

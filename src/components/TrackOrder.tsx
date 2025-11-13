@@ -73,7 +73,7 @@ const TrackOrder = () => {
           {/* ▲▲▲ PERBAIKAN ADA DI SINI ▲▲▲ */}
 
           <div 
-            className="max-w-3xl mx-auto bg-gradient-to-br from-(--color-light-primary) to-white p-6 md:p-12 rounded-2xl shadow-xl" 
+            className="max-w-3xl mx-auto bg-gradient-to-br from-(--color-light-primary) to-white px-4 py-6 md:px-12 md:py-12 rounded-2xl shadow-xl" 
             data-aos="zoom-in-up"
           >
             <div className="grid md:grid-cols-3 gap-6 items-center">

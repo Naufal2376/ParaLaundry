@@ -98,7 +98,7 @@ export default function UpdateStatusPage() {
     <div>
       <header className="flex items-center gap-4 mb-8">
         <QrCode className="w-8 h-8 text-(--color-brand-primary)" />
-        <h1 className="text-3xl font-bold text-(--color-text-primary)">Update Status Cucian</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-(--color-text-primary)">Update Status Cucian</h1>
       </header>
 
       {isScannerOpen && (
