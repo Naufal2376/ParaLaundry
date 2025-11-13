@@ -133,7 +133,7 @@ export default function LacakPage() {
               {order.details.map((item, index) => (
                 <li key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
                   <span>{item.nama_layanan} ({item.jumlah})</span>
-                  <span className="font-medium">Rp {(item.sub_total ?? 0).toLocaleString('id-ID')}</span>
+                  <span className="font-medium">Total: Rp {(item.sub_total ?? 0).toLocaleString('id-ID')}</span>
                 </li>
               ))}
             </ul>
