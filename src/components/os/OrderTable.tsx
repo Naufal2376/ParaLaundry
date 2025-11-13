@@ -71,7 +71,7 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders }) => {
   };
 
   const handleShowQr = (orderId: number) => {
-    const trackingUrl = `https://para-laundry-web.vercel.app/lacak/PL-${orderId}`;
+    const trackingUrl = `https://para-laundry.vercel.app/lacak/PL-${orderId}`;
     setModalQrValue(trackingUrl);
   };
 
