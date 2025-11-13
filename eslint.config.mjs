@@ -6,7 +6,7 @@ import tsParser from "@typescript-eslint/parser";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 
 const eslintConfig = [
-  // ... (konfigurasi 'ignores' Anda)
+  // Konfigurasi dasar
   {
     ignores: [
       ".next/**",
@@ -33,7 +33,7 @@ const eslintConfig = [
       "@typescript-eslint": tsPlugin,
     },
     rules: {
-      // ... (Aturan yang direkomendasikan)
+      // Terapkan aturan yang direkomendasikan
       ...reactPlugin.configs.recommended.rules,
       ...reactHooksPlugin.configs.recommended.rules,
       ...nextPlugin.configs.recommended.rules,
@@ -41,7 +41,8 @@ const eslintConfig = [
       ...tsPlugin.configs.recommended.rules,
       
       // --- PERBAIKAN DI SINI ---
-      "react/react-in-jsx-scope": "off", // 1. Tambahkan ini untuk mematikan error JSX
+      "react/react-in-jsx-scope": "off", // (Perbaikan dari sebelumnya)
+      "react/prop-types": "off",         // 1. TAMBAHKAN BARIS INI (Mematikan error prop-types)
       // -------------------------
 
       // Aturan kustom Anda
