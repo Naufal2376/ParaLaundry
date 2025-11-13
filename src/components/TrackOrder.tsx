@@ -93,7 +93,7 @@ const TrackOrder = () => {
                   Masukkan kode pesanan (e.g., PL-123) atau pindai (scan) QR code pada nota Anda.
                 </p>
                 
-                <form className="flex gap-2" onSubmit={handleSubmit}>
+                <form className="flex flex-col sm:flex-row gap-2" onSubmit={handleSubmit}>
                   <input 
                     type="text" 
                     placeholder="Ketik kode Anda..." 
