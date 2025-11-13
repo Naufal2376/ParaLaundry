@@ -17,8 +17,8 @@ interface OrderItem {
 export interface OrderData {
   customerName: string;
   customerPhone: string;
-  paymentStatus: string;
   totalBiaya: number;
+  jumlahBayar: number;
   items: OrderItem[];
 }
 
@@ -62,13 +62,15 @@ export async function createOrder(data: OrderData) {
 
   // --- Langkah 3: Buat Transaksi (Order) Utama ---
   // Sesuai ERD Anda: order_id, customer_id, user_id, total_biaya, status_bayar, status_cucian
+  const status_bayar = data.jumlahBayar >= data.totalBiaya ? 'Lunas' : 'Belum Lunas';
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
       customer_id: customerId,
       user_id: pegawaiUserId,
       total_biaya: data.totalBiaya,
-      status_bayar: data.paymentStatus,
+      jumlah_bayar: data.jumlahBayar, // <-- Simpan jumlah bayar
+      status_bayar: status_bayar,
       status_cucian: 'Masuk Antrean', // Sesuai flowchart, ini adalah status default
     })
     .select('order_id') // Kita butuh ID order baru untuk nota

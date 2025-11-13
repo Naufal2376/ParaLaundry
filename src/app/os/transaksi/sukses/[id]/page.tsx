@@ -18,6 +18,7 @@ export default async function SuccessPage(props: any) {
       tanggal_order,
       total_biaya,
       status_bayar,
+      jumlah_bayar,
       customer:customers ( nama, no_hp ),
       order_details (
         jumlah,
@@ -38,6 +39,7 @@ export default async function SuccessPage(props: any) {
     tanggal_order: string;
     total_biaya: number;
     status_bayar: string;
+    jumlah_bayar: number;
     customer: { nama: string; no_hp: string } | null;
     order_details: {
       jumlah: number;

@@ -3,20 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Trash2, Save } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation'; // <-- 1. Impor useRouter
 import { createOrder, type OrderData } from './actions';
 
-// Tipe data untuk layanan dari database
+// ... (Interface Service dan CartItem tetap sama) ...
 interface Service {
   service_id: number;
   nama_layanan: string;
   harga: number;
   satuan: string;
 }
-
-// Tipe data untuk item di keranjang
 interface CartItem {
-  id: number; // ID unik untuk UI (e.g., Date.now())
+  id: number;
   service_id: number;
   nama_layanan: string;
   harga: number;
@@ -24,16 +22,21 @@ interface CartItem {
   jumlah: number;
   sub_total: number;
 }
+// ---------------------------------------------
 
 export default function NewTransactionPage() {
+  const router = useRouter(); // <-- 2. Inisialisasi router
   const [services, setServices] = useState<Service[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
-  const [paymentStatus, setPaymentStatus] = useState('Belum Lunas');
+  
+  // State untuk pembayaran (sesuai update terakhir)
+  const [jumlahBayar, setJumlahBayar] = useState<number | ''>('');
+  const [kembalian, setKembalian] = useState(0);
+  
   const [totalBiaya, setTotalBiaya] = useState(0);
-
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -41,10 +44,9 @@ export default function NewTransactionPage() {
   useEffect(() => {
     const bootstrap = async () => {
       const supabase = createClient();
-      // Cek role user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        redirect('/login');
+        router.push('/login'); // <-- 3. Gunakan router.push
         return;
       }
       const { data: profile } = await supabase
@@ -53,7 +55,7 @@ export default function NewTransactionPage() {
         .eq('id', user.id)
         .single();
       if (profile?.role === 'Owner') {
-        redirect('/os');
+        router.push('/os'); // <-- 3. Gunakan router.push
         return;
       }
       // Load services
@@ -61,13 +63,18 @@ export default function NewTransactionPage() {
       if (data) setServices(data);
     };
     bootstrap();
-  }, []);
+  }, [router]); // <-- 4. Tambahkan router ke dependency array
 
-  // 2. Hitung ulang total biaya setiap kali keranjang berubah
+  // 2. Hitung ulang total biaya DAN kembalian
   useEffect(() => {
     const total = cart.reduce((acc, item) => acc + item.sub_total, 0);
     setTotalBiaya(total);
-  }, [cart]);
+    
+    const bayar = Number(jumlahBayar) || 0;
+    const sisa = bayar - total;
+    setKembalian(sisa > 0 ? sisa : 0);
+    
+  }, [cart, jumlahBayar]);
 
   // 3. Fungsi untuk menambah item baru ke keranjang
   const addItem = () => {
@@ -133,11 +140,12 @@ export default function NewTransactionPage() {
       return;
     }
     
+    // 5. Hapus paymentStatus, kirim jumlahBayar
     const orderData: OrderData = {
       customerName,
       customerPhone,
-      paymentStatus,
       totalBiaya,
+      jumlahBayar: Number(jumlahBayar) || 0,
       items: cart.map(item => ({
         service_id: item.service_id,
         jumlah: item.jumlah,
@@ -200,6 +208,8 @@ export default function NewTransactionPage() {
                     onChange={(e) => updateItem(item.id, 'service', e.target.value)}
                     className="flex-grow p-3 border border-(--color-light-primary-active) rounded-lg"
                   >
+                    {/* Tambahkan opsi placeholder */}
+                    {services.length === 0 && <option>Memuat layanan...</option>}
                     {services.map(s => (
                       <option key={s.service_id} value={s.service_id}>
                         {s.nama_layanan} (Rp {s.harga}/{s.satuan})
@@ -222,11 +232,9 @@ export default function NewTransactionPage() {
                     = Rp {item.sub_total.toLocaleString('id-ID')}
                   </span>
                   
-                  {/* --- PERBAIKAN DI SINI --- */}
                   <button type="button" onClick={() => removeItem(item.id)} className="text-red-500 p-3">
                     <Trash2 size={20} />
                   </button>
-                  {/* --- AKHIR PERBAIKAN --- */}
                 </div>
               ))}
               <button 
@@ -239,17 +247,27 @@ export default function NewTransactionPage() {
             </div>
           </div>
 
-          {/* Pembayaran */}
+          {/* 6. Perbarui bagian Pembayaran */}
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-(--color-text-primary) mb-4">3. Pembayaran</h2>
-            <select 
-              value={paymentStatus}
-              onChange={(e) => setPaymentStatus(e.target.value)}
-              className="w-full md:w-1/2 p-3 border border-(--color-light-primary-active) rounded-lg"
-            >
-              <option value="Belum Lunas">Belum Lunas</option>
-              <option value="Lunas">Lunas</option>
-            </select>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-(--color-dark-primary) mb-1">Jumlah Bayar (Rp)</label>
+                <input 
+                  type="number"
+                  placeholder="0"
+                  value={jumlahBayar}
+                  onChange={(e) => setJumlahBayar(e.target.value ? Number(e.target.value) : '')}
+                  className="w-full p-3 border border-(--color-light-primary-active) rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-(--color-dark-primary) mb-1">Kembalian (Rp)</label>
+                <div className="w-full p-3 border border-gray-200 bg-gray-50 rounded-lg text-(--color-dark-primary) font-medium">
+                  Rp {kembalian.toLocaleString('id-ID')}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Total & Simpan */}

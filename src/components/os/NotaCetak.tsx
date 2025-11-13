@@ -6,35 +6,40 @@ import { Printer } from 'lucide-react';
 
 // --- 1. PERBAIKAN TIPE DATA DI SINI ---
 type Service = {
-    nama_layanan: string;
-  } | null;
-  
-  type OrderDetail = {
-    jumlah: number;
-    sub_total: number;
-    service: Service; // <-- Diubah menjadi Objek
-  };
-  
-  type Customer = {
-    nama: string;
-    no_hp: string;
-  } | null;
-  
-  type Order = {
-    order_id: number;
-    tanggal_order: string;
-    total_biaya: number;
-    status_bayar: string;
-    customer: Customer; // <-- Diubah menjadi Objek
-    order_details: OrderDetail[];
-  };
-  // --- AKHIR PERBAIKAN TIPE DATA ---
+  nama_layanan: string;
+} | null;
+
+type OrderDetail = {
+  jumlah: number;
+  sub_total: number;
+  service: Service; // <-- Diubah menjadi Objek
+};
+
+type Customer = {
+  nama: string;
+  no_hp: string;
+} | null;
+
+type Order = {
+  order_id: number;
+  tanggal_order: string;
+  total_biaya: number;
+  status_bayar: string;
+  jumlah_bayar: number;
+  customer: Customer; // <-- Diubah menjadi Objek
+  order_details: OrderDetail[];
+};
+// --- AKHIR PERBAIKAN TIPE DATA ---
 
 const NotaCetak: React.FC<{ order: Order }> = ({ order }) => {
-    const trackingUrl = `https://para-laundry.vercel.app/lacak/PL-${order.order_id}`;
-    const handlePrint = () => { window.print(); };
-  
-    return (
+  const trackingUrl = `https://para-laundry.vercel.app/lacak/PL-${order.order_id}`;
+  const handlePrint = () => { window.print(); };
+
+  const total = Number(order.total_biaya);
+  const bayar = Number(order.jumlah_bayar);
+  const kembalian = bayar - total;
+
+  return (
     <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md mx-auto">
       {/* Tombol Cetak */}
       <div className="no-print mb-6 text-center">
@@ -84,10 +89,20 @@ const NotaCetak: React.FC<{ order: Order }> = ({ order }) => {
         </div>
         <hr className="my-2 border-dashed" />
 
-        {/* Total */}
-        <div className="flex justify-between text-lg font-bold text-black">
-          <span>TOTAL</span>
-          <span>Rp {Number(order.total_biaya).toLocaleString('id-ID')}</span>
+        {/* Total, Bayar, Kembalian */}
+        <div className="text-xs text-gray-800 space-y-1">
+          <div className="flex justify-between font-bold text-sm">
+            <span>TOTAL</span>
+            <span>Rp {total.toLocaleString('id-ID')}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>BAYAR</span>
+            <span>Rp {bayar.toLocaleString('id-ID')}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>KEMBALI</span>
+            <span>Rp {kembalian.toLocaleString('id-ID')}</span>
+          </div>
         </div>
 
         {/* QR Code */}
