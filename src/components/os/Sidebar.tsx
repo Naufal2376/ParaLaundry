@@ -1,10 +1,10 @@
 // src/components/os/Sidebar.tsx
 "use client";
-import React from 'react';
 import { LayoutDashboard, FileText, List, PieChart, LogOut, Sparkles, TrendingUp, UserCheck, UserCog } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { logout } from '@/app/login/actions';
 import Image from 'next/image';
+import Link from 'next/link';
 
 // --- KODE SIMULASI DIHAPUS ---
 // type UserRole = "Pegawai" | "Owner"; <-- HAPUS
@@ -70,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ userRole }) => {
             const isActive = pathname === link.href;
             return (
               <li key={link.name} className="mb-2">
-                <a 
+                <Link 
                   href={link.href}
                   className={`
                     flex items-center p-3 rounded-lg font-semibold transition-all duration-200
@@ -81,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({ userRole }) => {
                 >
                   <span className="mr-3">{link.icon}</span>
                   {link.name}
-                </a>
+                </Link>
               </li>
             );
           })}

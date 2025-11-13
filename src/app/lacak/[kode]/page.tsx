@@ -116,7 +116,7 @@ export default function LacakPage() {
           
           <hr className="my-4" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="flex items-center gap-2">
               <Calendar size={16} className="text-(--color-brand-primary)" />
               <strong>Tgl Order:</strong> {formatDate(order.tanggal_order)}
@@ -125,7 +125,7 @@ export default function LacakPage() {
               <CheckCircle size={16} className="text-green-500" />
               <strong>Tgl Selesai:</strong> {formatDate(order.tanggal_selesai)}
             </div>
-          </div>
+          </div> */}
 
           <div className="mt-6">
             <h4 className="font-semibold text-md mb-2">Detail Layanan:</h4>
@@ -133,20 +133,20 @@ export default function LacakPage() {
               {order.details.map((item, index) => (
                 <li key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
                   <span>{item.nama_layanan} ({item.jumlah})</span>
-                  <span className="font-medium">Rp {item.sub_total.toLocaleString('id-ID')}</span>
+                  <span className="font-medium">Rp {(item.sub_total ?? 0).toLocaleString('id-ID')}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="mt-6 text-right">
+          {/* <div className="mt-6 text-right">
             <p className="text-lg font-semibold text-(--color-dark-primary)">
               Total Biaya:
               <span className="block text-2xl font-bold text-(--color-text-primary)">
-                Rp {order.total_biaya.toLocaleString('id-ID')}
+                Rp {(order.total_biaya ?? 0).toLocaleString('id-ID')}
               </span>
             </p>
-          </div>
+          </div> */}
         </motion.div>
 
         <OrderStatusTracker currentStatus={order.status_cucian} />

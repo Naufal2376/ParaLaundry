@@ -8,7 +8,7 @@ const WaveText = ({ text }: { text: string }) => {
   return (
     <motion.h1
       // overflow-hidden tidak lagi diperlukan
-      className="text-5xl md:text-7xl font-bold text-(--color-text-primary) mb-6 flex justify-center flex-wrap"
+      className="text-4xl sm:text-5xl md:text-7xl font-bold text-(--color-text-primary) mb-6 flex justify-center whitespace-nowrap"
       // Hapus variants, initial, dan animate dari kontainer
     >
       {letters.map((letter, index) => (
