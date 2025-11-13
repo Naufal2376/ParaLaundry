@@ -18,6 +18,7 @@ export default function ExpensePage() {
   const [rows, setRows] = useState<{ expense_id: number; tanggal_pengeluaran: string; keterangan: string; jumlah: number }[]>([]);
   const [editing, setEditing] = useState<{ expense_id: number; keterangan: string; jumlah: number } | null>(null);
   const [query, setQuery] = useState('');
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     const guard = async () => {
@@ -29,6 +30,7 @@ export default function ExpensePage() {
         .select('role')
         .eq('id', user.id)
         .single();
+      setUserRole(profile?.role || null);
       // Hanya Owner yang boleh membuka halaman ini
       if (profile?.role !== 'Owner') { router.push('/os'); return; }
       // Load awal daftar pengeluaran
@@ -92,7 +94,7 @@ export default function ExpensePage() {
   }, [rows, query]);
 
   return (
-    <DashboardWrapper>
+    <DashboardWrapper userRole={userRole}>
       <header className="flex items-center gap-4 mb-8">
         <Wallet className="w-8 h-8 text-(--color-brand-primary)" />
         <h1 className="text-2xl md:text-3xl font-bold text-(--color-text-primary)">Catat Pengeluaran</h1>
