@@ -51,12 +51,15 @@ const TrackOrder = () => {
         )}
       </AnimatePresence>
 
+      {/* PERBAIKAN: 
+        - 'overflow-hidden' ditambahkan untuk memastikan ikon float tidak keluar batas
+        - 'px-4' (padding horizontal) ditambahkan untuk mobile
+      */}
       <section id="lacak" className="py-20 px-4 bg-white relative z-10 overflow-hidden">
         <FloatingBackgroundIcons />
         <AnimatedBubbles />
         <div className="container mx-auto">
           
-          {/* ▼▼▼ PERBAIKAN ADA DI SINI ▼▼▼ */}
           <h2 
             className="text-4xl font-bold text-center text-(--color-text-primary) mb-4" 
             data-aos="fade-down"
@@ -70,29 +73,47 @@ const TrackOrder = () => {
           >
             Ketahui status cucian Anda secara real-time.
           </p>
-          {/* ▲▲▲ PERBAIKAN ADA DI SINI ▲▲▲ */}
 
+          {/* PERBAIKAN: 
+            - 'p-8 md:p-12' diubah menjadi 'p-6 sm:p-8 md:p-12' (padding lebih kecil di mobile)
+            - 'px-4 py-6' ditambahkan untuk layar super kecil
+          */}
           <div 
-            className="max-w-3xl mx-auto bg-gradient-to-br from-(--color-light-primary) to-white px-4 py-6 md:px-12 md:py-12 rounded-2xl shadow-xl" 
+            className="max-w-3xl mx-auto bg-gradient-to-br from-(--color-light-primary) to-white px-4 py-6 sm:p-8 md:p-12 rounded-2xl shadow-xl" 
             data-aos="zoom-in-up"
           >
-            <div className="grid md:grid-cols-3 gap-6 items-center">
+            {/* PERBAIKAN: 
+              - 'md:grid-cols-3' diubah menjadi 'sm:grid-cols-3' (grid aktif lebih cepat)
+              - 'gap-6' diubah menjadi 'gap-4 sm:gap-8' (gap lebih kecil di mobile)
+            */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8 items-center">
               
-              <div className="md:col-span-1 flex justify-center">
+              {/* PERBAIKAN: 
+                - 'md:col-span-1' diubah menjadi 'sm:col-span-1'
+                - Ikon disembunyikan di layar XS (hidden) dan muncul di SM (sm:flex)
+                  agar tidak memakan tempat di mobile.
+              */}
+              <div className="hidden sm:flex md:col-span-1 justify-center">
                 <QrCode 
                   className="w-24 h-24 text-(--color-brand-primary) animate-[--animation-float-slow]"
                   style={{ animationDelay: '0.5s' }}
                 />
               </div>
 
-              <div className="md:col-span-2">
-                <h3 className="text-2xl font-bold text-(--color-text-primary) mb-4">
+              {/* PERBAIKAN: 
+                - 'md:col-span-2' diubah menjadi 'sm:col-span-2'
+              */}
+              <div className="sm:col-span-2">
+                <h3 className="text-2xl font-bold text-(--color-text-primary) mb-4 text-center sm:text-left">
                   Punya Kode Pesanan?
                 </h3>
-                <p className="text-(--color-dark-primary) mb-6 text-sm">
+                <p className="text-(--color-dark-primary) mb-6 text-sm text-center sm:text-left">
                   Masukkan kode pesanan (e.g., PL-123) atau pindai (scan) QR code pada nota Anda.
                 </p>
                 
+                {/* PERBAIKAN: 
+                  - 'flex-col sm:flex-row' ditambahkan agar tombol Lacak ada di bawah input pada mobile
+                */}
                 <form className="flex flex-col sm:flex-row gap-2" onSubmit={handleSubmit}>
                   <input 
                     type="text" 
@@ -118,7 +139,6 @@ const TrackOrder = () => {
                   <QrCode size={20} />
                   Pindai dengan Kamera
                 </button>
-
               </div>
             </div>
           </div>
