@@ -35,6 +35,7 @@ export default function NewTransactionPage() {
   // State untuk pembayaran (sesuai update terakhir)
   const [jumlahBayar, setJumlahBayar] = useState<number | ''>('');
   const [kembalian, setKembalian] = useState(0);
+  const [bayarSaatPengambilan, setBayarSaatPengambilan] = useState(false);
   
   const [totalBiaya, setTotalBiaya] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,11 +71,17 @@ export default function NewTransactionPage() {
     const total = cart.reduce((acc, item) => acc + item.sub_total, 0);
     setTotalBiaya(total);
     
-    const bayar = Number(jumlahBayar) || 0;
-    const sisa = bayar - total;
-    setKembalian(sisa > 0 ? sisa : 0);
+    // Jika bayar saat pengambilan, set jumlah bayar dan kembalian ke 0
+    if (bayarSaatPengambilan) {
+      setJumlahBayar(0);
+      setKembalian(0);
+    } else {
+      const bayar = Number(jumlahBayar) || 0;
+      const sisa = bayar - total;
+      setKembalian(sisa > 0 ? sisa : 0);
+    }
     
-  }, [cart, jumlahBayar]);
+  }, [cart, jumlahBayar, bayarSaatPengambilan]);
 
   // 3. Fungsi untuk menambah item baru ke keranjang
   const addItem = () => {
@@ -145,7 +152,8 @@ export default function NewTransactionPage() {
       customerName,
       customerPhone,
       totalBiaya,
-      jumlahBayar: Number(jumlahBayar) || 0,
+      jumlahBayar: bayarSaatPengambilan ? 0 : (Number(jumlahBayar) || 0),
+      bayarSaatPengambilan,
       items: cart.map(item => ({
         service_id: item.service_id,
         jumlah: item.jumlah,
@@ -250,6 +258,27 @@ export default function NewTransactionPage() {
           {/* 6. Perbarui bagian Pembayaran */}
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-(--color-text-primary) mb-4">3. Pembayaran</h2>
+            
+            {/* Opsi Bayar Saat Pengambilan */}
+            <div className="mb-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={bayarSaatPengambilan}
+                  onChange={(e) => {
+                    setBayarSaatPengambilan(e.target.checked);
+                    if (e.target.checked) {
+                      setJumlahBayar(0);
+                    }
+                  }}
+                  className="w-5 h-5 text-(--color-brand-primary) border-gray-300 rounded focus:ring-(--color-brand-primary)"
+                />
+                <span className="text-(--color-text-primary) font-medium">
+                  Bayar saat pengambilan
+                </span>
+              </label>
+            </div>
+
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-(--color-dark-primary) mb-1">Jumlah Bayar (Rp)</label>
@@ -257,8 +286,15 @@ export default function NewTransactionPage() {
                   type="number"
                   placeholder="0"
                   value={jumlahBayar}
-                  onChange={(e) => setJumlahBayar(e.target.value ? Number(e.target.value) : '')}
-                  className="w-full p-3 border border-(--color-light-primary-active) rounded-lg"
+                  onChange={(e) => {
+                    if (!bayarSaatPengambilan) {
+                      setJumlahBayar(e.target.value ? Number(e.target.value) : '');
+                    }
+                  }}
+                  disabled={bayarSaatPengambilan}
+                  className={`w-full p-3 border border-(--color-light-primary-active) rounded-lg ${
+                    bayarSaatPengambilan ? 'bg-gray-100 cursor-not-allowed' : ''
+                  }`}
                 />
               </div>
               <div>
@@ -268,6 +304,14 @@ export default function NewTransactionPage() {
                 </div>
               </div>
             </div>
+            
+            {bayarSaatPengambilan && (
+              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  <strong>Status:</strong> Pembayaran akan dilakukan saat pengambilan barang
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Total & Simpan */}

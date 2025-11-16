@@ -19,6 +19,7 @@ export interface OrderData {
   customerPhone: string;
   totalBiaya: number;
   jumlahBayar: number;
+  bayarSaatPengambilan?: boolean;
   items: OrderItem[];
 }
 
@@ -62,14 +63,18 @@ export async function createOrder(data: OrderData) {
 
   // --- Langkah 3: Buat Transaksi (Order) Utama ---
   // Sesuai ERD Anda: order_id, customer_id, user_id, total_biaya, status_bayar, status_cucian
-  const status_bayar = data.jumlahBayar >= data.totalBiaya ? 'Lunas' : 'Belum Lunas';
+  // Jika bayar saat pengambilan, status_bayar = 'Belum Lunas' dan jumlah_bayar = 0
+  const status_bayar = data.bayarSaatPengambilan 
+    ? 'Belum Lunas' 
+    : (data.jumlahBayar >= data.totalBiaya ? 'Lunas' : 'Belum Lunas');
+  
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
       customer_id: customerId,
       user_id: pegawaiUserId,
       total_biaya: data.totalBiaya,
-      jumlah_bayar: data.jumlahBayar, // <-- Simpan jumlah bayar
+      jumlah_bayar: data.bayarSaatPengambilan ? 0 : data.jumlahBayar, // <-- Jika bayar saat pengambilan, set ke 0
       status_bayar: status_bayar,
       status_cucian: 'Masuk Antrean', // Sesuai flowchart, ini adalah status default
     })

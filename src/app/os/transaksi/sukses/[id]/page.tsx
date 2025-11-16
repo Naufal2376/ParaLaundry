@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import NotaCetak from '@/components/os/NotaCetak';
 import React from 'react';
 import { FilePlus } from 'lucide-react';
-import { redirect } from 'next/navigation';
+import { redirect } from 'next/navigation'; 
 
 export default async function SuccessPage(props: any) {
   const { id } = (await props.params) || {};
@@ -11,6 +11,7 @@ export default async function SuccessPage(props: any) {
 
   const supabase = await createClient();
 
+  // Query dengan alias yang benar (seperti di halaman lain)
   const { data: order, error } = await supabase
     .from('orders')
     .select(`
@@ -34,36 +35,41 @@ export default async function SuccessPage(props: any) {
     redirect('/os');
   }
 
-  const typedOrder: {
-    order_id: number;
-    tanggal_order: string;
-    total_biaya: number;
-    status_bayar: string;
-    jumlah_bayar: number;
-    customer: { nama: string; no_hp: string } | null;
-    order_details: {
-      jumlah: number;
-      sub_total: number;
-      service: { nama_layanan: string } | null;
-    }[];
-  } = {
-    ...order,
-    customer: Array.isArray(order.customer)
-      ? order.customer[0] ?? null
-      : order.customer ?? null,
-    order_details: (order.order_details || []).map((d: any) => ({
-      ...d,
-      service: Array.isArray(d.service)
-        ? d.service[0] ?? null
-        : d.service ?? null,
-    })),
+  // Handle data yang bisa berupa object atau array (seperti di status/page.tsx)
+  const customerData = (order as any).customer;
+  const customer = Array.isArray(customerData) 
+    ? (customerData[0] || null) 
+    : (customerData || null);
+
+  const orderDetails = ((order as any).order_details || []).map((detail: any) => {
+    const serviceData = detail.service;
+    const service = Array.isArray(serviceData) 
+      ? (serviceData[0] || null) 
+      : (serviceData || null);
+    
+    return {
+      jumlah: detail.jumlah,
+      sub_total: detail.sub_total,
+      service: service,
+    };
+  });
+
+  // Transform data untuk NotaCetak
+  const transformedOrder = {
+    order_id: order.order_id,
+    tanggal_order: order.tanggal_order,
+    total_biaya: order.total_biaya,
+    status_bayar: order.status_bayar,
+    jumlah_bayar: order.jumlah_bayar,
+    customer: customer,
+    order_details: orderDetails,
   };
 
   return (
-    <div className="py-12 px-4">
+    <div className="py-12 px-4 bg-(--color-light-primary)">
       <div className="max-w-md mx-auto">
-        <NotaCetak order={typedOrder} />
-        <div className="mt-4 text-center">
+        <NotaCetak order={transformedOrder} />
+        <div className="mt-4 text-center no-print">
           <a
             href="/os/transaksi/baru"
             className="shine-button flex items-center justify-center w-full bg-white text-(--color-brand-primary) font-semibold px-6 py-3 rounded-lg shadow-lg border border-(--color-light-primary-active) hover:bg-(--color-light-primary-hover)"

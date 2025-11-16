@@ -13,6 +13,7 @@ import Link from 'next/link';
 // Definisikan semua link yang mungkin ada
 const allNavLinks = [
   { name: 'Dashboard', href: '/os', icon: <LayoutDashboard />, roles: ['Pegawai', 'Owner'] },
+  { name: 'Transaksi Baru', href: '/os/transaksi/baru', icon: <Sparkles />, roles: ['Pegawai'] },
   { name: 'Pengeluaran', href: '/os/pengeluaran', icon: <FileText />, roles: ['Owner'] },
   { name: 'Daftar Transaksi', href: '/os/transaksi', icon: <List />, roles: ['Pegawai', 'Owner'] },
   { name: 'Update Status', href: '/os/status', icon: <UserCheck />, roles: ['Pegawai'] },

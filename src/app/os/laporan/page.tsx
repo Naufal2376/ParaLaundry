@@ -1,27 +1,39 @@
 // src/app/os/laporan/page.tsx
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Wallet } from 'lucide-react';
 import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import PeriodSelector from '../../../components/os/PeriodSelector';
+import BarChartComponent from '@/components/os/BarChartComponent';
+import PieChartComponent from '@/components/os/PieChartComponent';
+import StatCard from '@/components/os/StatCard';
+import { redirect } from 'next/navigation';
+
+// Type untuk search params pada Next.js 15:
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 type Period = 'hari' | 'minggu' | 'bulan' | 'tahun';
 
-// Fungsi pembantu: hitung rentang waktu berdasarkan WIB
+interface LaporanPageProps {
+  searchParams: SearchParams;
+}
+
 function getPeriodRangeWIB(period: Period) {
   const now = new Date();
   const localNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
   const start = new Date(localNow);
 
   if (period === 'hari') {
+    start.setDate(start.getDate() - 6);
     start.setHours(0, 0, 0, 0);
   } else if (period === 'minggu') {
-    const day = (localNow.getDay() + 6) % 7;
-    start.setDate(localNow.getDate() - day);
+    start.setDate(start.getDate() - 27);
     start.setHours(0, 0, 0, 0);
   } else if (period === 'bulan') {
+    start.setMonth(start.getMonth() - 11);
     start.setDate(1);
     start.setHours(0, 0, 0, 0);
-  } else {
+  } else { // tahun
+    start.setFullYear(start.getFullYear() - 4);
     start.setMonth(0, 1);
     start.setHours(0, 0, 0, 0);
   }
@@ -32,167 +44,197 @@ function getPeriodRangeWIB(period: Period) {
   return { start: start.toISOString(), end: end.toISOString() };
 }
 
-// ✅ FIX: gunakan PageProps bawaan Next.js dan resolve searchParams (karena bisa berupa Promise)
-const LaporanPage = async (props: { searchParams?: Promise<Record<string, string>> }) => {
-  const searchParams = (await props.searchParams) || {};
-  const period = (searchParams.period as Period) || 'bulan';
-  const range = getPeriodRangeWIB(period);
-  const supabase = await createClient();
+export default async function LaporanPage({ searchParams }: LaporanPageProps) {
+  const resolvedParams = await searchParams;
+  const period: Period = (resolvedParams?.period as Period) || "bulan";
 
-  // === PENDAPATAN ===
+  const supabase = await createClient();
+  
+  // Auth
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.role !== 'Owner') redirect('/os');
+
+  const { start, end } = getPeriodRangeWIB(period);
+
+  // Pendapatan (orders Lunas)
   const { data: incomeRows, error: incomeError } = await supabase
     .from('orders')
     .select('total_biaya, tanggal_order')
     .eq('status_bayar', 'Lunas')
-    .gte('tanggal_order', range.start)
-    .lte('tanggal_order', range.end);
+    .gte('tanggal_order', start)
+    .lte('tanggal_order', end);
 
-  const income = (incomeRows || []).reduce(
-    (acc, r) => acc + Number(r.total_biaya || 0),
-    0
-  );
-  if (incomeError) console.error('Error Pendapatan:', incomeError.message);
+  const income = (incomeRows || []).reduce((acc, r) => acc + Number(r.total_biaya || 0), 0);
+  if (incomeError) console.error("Error Pendapatan:", incomeError.message);
 
-  // === PENGELUARAN ===
+  // Pengeluaran
   const { data: expenseRows, error: expenseError } = await supabase
     .from('expenses')
     .select('jumlah, tanggal_pengeluaran')
-    .gte('tanggal_pengeluaran', range.start)
-    .lte('tanggal_pengeluaran', range.end);
+    .gte('tanggal_pengeluaran', start)
+    .lte('tanggal_pengeluaran', end);
 
-  const expense = (expenseRows || []).reduce(
-    (acc, r) => acc + Number(r.jumlah || 0),
-    0
-  );
-  if (expenseError) console.error('Error Pengeluaran:', expenseError.message);
+  const expense = (expenseRows || []).reduce((acc, r) => acc + Number(r.jumlah || 0), 0);
+  if (expenseError) console.error("Error Pengeluaran:", expenseError.message);
 
   const profit = income - expense;
 
-  // === BUCKET DATA UNTUK GRAFIK ===
-  function bucketKey(d: string) {
+  // Status Operasional Count
+  const { count: masukAntreanCount } = await supabase
+    .from('orders').select('*', { count: 'exact', head: true })
+    .eq('status_cucian', 'Masuk Antrean');
+
+  const { count: prosesDicuciCount } = await supabase
+    .from('orders').select('*', { count: 'exact', head: true })
+    .eq('status_cucian', 'Proses Dicuci');
+
+  const { count: siapDiambilCount } = await supabase
+    .from('orders').select('*', { count: 'exact', head: true })
+    .eq('status_cucian', 'Siap Diambil');
+
+  function getWeekStartDate(d: Date) {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+    return new Date(date.setDate(diff));
+  }
+
+  function bucketKey(d: string, p: Period) {
     const dt = new Date(d);
-    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(
-      2,
-      '0'
-    )}-${String(dt.getDate()).padStart(2, '0')}`;
+    if (p === 'hari') {
+      return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+    } else if (p === 'minggu') {
+      const weekStart = getWeekStartDate(dt);
+      return `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`;
+    } else if (p === 'bulan') {
+      return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
+    } else { // tahun
+      return `${dt.getFullYear()}`;
+    }
   }
 
   const incomeBuckets: Record<string, number> = {};
-  (incomeRows || []).forEach((r) => {
-    const k = bucketKey(r.tanggal_order);
-    incomeBuckets[k] = (incomeBuckets[k] || 0) + Number(r.total_biaya || 0);
-  });
-
   const expenseBuckets: Record<string, number> = {};
-  (expenseRows || []).forEach((r) => {
-    const k = bucketKey(r.tanggal_pengeluaran);
-    expenseBuckets[k] = (expenseBuckets[k] || 0) + Number(r.jumlah || 0);
+  const allKeys = new Set<string>();
+
+  const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+
+  if (period === 'hari') {
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = bucketKey(d.toISOString(), 'hari');
+      allKeys.add(key);
+      incomeBuckets[key] = 0;
+      expenseBuckets[key] = 0;
+    }
+  } else if (period === 'minggu') {
+    for (let i = 3; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i * 7);
+      const key = bucketKey(d.toISOString(), 'minggu');
+      allKeys.add(key);
+      incomeBuckets[key] = 0;
+      expenseBuckets[key] = 0;
+    }
+  } else if (period === 'bulan') {
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const key = bucketKey(d.toISOString(), 'bulan');
+      allKeys.add(key);
+      incomeBuckets[key] = 0;
+      expenseBuckets[key] = 0;
+    }
+  } else if (period === 'tahun') {
+    for (let i = 4; i >= 0; i--) {
+      const d = new Date(today.getFullYear() - i, 0, 1);
+      const key = bucketKey(d.toISOString(), 'tahun');
+      allKeys.add(key);
+      incomeBuckets[key] = 0;
+      expenseBuckets[key] = 0;
+    }
+  }
+
+  (incomeRows || []).forEach((r) => {
+    const k = bucketKey(r.tanggal_order, period);
+    if (k in incomeBuckets) {
+      incomeBuckets[k] = (incomeBuckets[k] || 0) + Number(r.total_biaya || 0);
+    }
   });
 
-  const allKeys = Array.from(
-    new Set([...Object.keys(incomeBuckets), ...Object.keys(expenseBuckets)])
-  ).sort();
+  (expenseRows || []).forEach((r) => {
+    const k = bucketKey(r.tanggal_pengeluaran, period);
+    if (k in expenseBuckets) {
+      expenseBuckets[k] = (expenseBuckets[k] || 0) + Number(r.jumlah || 0);
+    }
+  });
+  
+  const sortedKeys = Array.from(allKeys).sort();
 
-  const maxIncome = Math.max(1, ...allKeys.map((k) => incomeBuckets[k] || 0));
-  const maxExpense = Math.max(1, ...allKeys.map((k) => expenseBuckets[k] || 0));
-  const maxVal = Math.max(maxIncome, maxExpense);
+  const barChartData = sortedKeys.map(k => ({
+    name: k,
+    pendapatan: incomeBuckets[k] || 0,
+    pengeluaran: expenseBuckets[k] || 0,
+  }));
 
-  // === RETURN UI ===
+  const pieChartData = [
+    { name: 'Masuk Antrean', value: masukAntreanCount || 0 },
+    { name: 'Dikerjakan', value: prosesDicuciCount || 0 },
+    { name: 'Siap Diambil', value: siapDiambilCount || 0 },
+  ];
+
   return (
     <div>
       <header className="flex items-center gap-4 mb-8">
-        <TrendingUp className="w-8 h-8 text-(--color-brand-primary)" />
-        <h1 className="text-2xl md:text-3xl font-bold text-(--color-text-primary)">
+        <TrendingUp className="w-8 h-8 text-[--color-brand-primary]" />
+        <h1 className="text-2xl md:text-3xl font-bold text-[--color-text-primary]">
           Laporan Keuangan
         </h1>
       </header>
 
       <div className="bg-white p-8 rounded-2xl shadow-lg">
-        <div className="mb-6">
+        <div className="mb-6 max-w-md">
           <PeriodSelector period={period} />
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-6">
-          <div className="p-6 rounded-xl border border-(--color-light-primary-active)">
-            <div className="text-sm text-(--color-dark-primary)">
-              Pendapatan (Lunas)
-            </div>
-            <div className="text-2xl font-bold text-(--color-text-primary)">
-              Rp {income.toLocaleString('id-ID')}
-            </div>
-          </div>
-          <div className="p-6 rounded-xl border border-(--color-light-primary-active)">
-            <div className="text-sm text-(--color-dark-primary)">Pengeluaran</div>
-            <div className="text-2xl font-bold text-(--color-text-primary)">
-              Rp {expense.toLocaleString('id-ID')}
-            </div>
-          </div>
-          <div className="p-6 rounded-xl border border-(--color-light-primary-active)">
-            <div className="text-sm text-(--color-dark-primary)">Laba Bersih</div>
-            <div
-              className={`text-2xl font-bold ${
-                profit >= 0 ? 'text-green-600' : 'text-red-600'
-              }`}
-            >
-              Rp {profit.toLocaleString('id-ID')}
-            </div>
-          </div>
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <StatCard 
+            title={`Pendapatan (${period})`} 
+            value={`Rp ${income.toLocaleString('id-ID')}`}
+            icon={<span className="text-green-600 font-bold text-xl">Rp</span>} 
+            colorClass="bg-green-100"
+          />
+          <StatCard 
+            title={`Pengeluaran (${period})`} 
+            value={`Rp ${expense.toLocaleString('id-ID')}`}
+            icon={<Wallet className="text-red-600" />} 
+            colorClass="bg-red-100"
+          />
+          <StatCard 
+            title={`Laba Bersih (${period})`} 
+            value={`Rp ${profit.toLocaleString('id-ID')}`}
+            icon={<span className={`font-bold text-xl ${profit >= 0 ? 'text-indigo-600' : 'text-red-600'}`}>Rp</span>} 
+            colorClass={profit >= 0 ? "bg-indigo-100" : "bg-red-100"}
+          />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="font-semibold text-(--color-text-primary) mb-3">
-              Ringkasan Pendapatan
-            </h3>
-            <div className="rounded-xl border border-(--color-light-primary-active) p-4 text-(--color-dark-primary)">
-              Total transaksi lunas: {(incomeRows || []).length}
-            </div>
-            <div className="mt-4">
-              <div className="flex items-end gap-1 h-24">
-                {allKeys.map((k) => (
-                  <div
-                    key={`i-${k}`}
-                    title={`${k} • Rp ${(incomeBuckets[k] || 0).toLocaleString(
-                      'id-ID'
-                    )}`}
-                    className="w-2 bg-(--color-brand-primary)"
-                    style={{
-                      height: `${((incomeBuckets[k] || 0) / maxVal) * 100}%`,
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <BarChartComponent data={barChartData} />
           </div>
           <div>
-            <h3 className="font-semibold text-(--color-text-primary) mb-3">
-              Ringkasan Pengeluaran
-            </h3>
-            <div className="rounded-xl border border-(--color-light-primary-active) p-4 text-(--color-dark-primary)">
-              Total catatan pengeluaran: {(expenseRows || []).length}
-            </div>
-            <div className="mt-4">
-              <div className="flex items-end gap-1 h-24">
-                {allKeys.map((k) => (
-                  <div
-                    key={`e-${k}`}
-                    title={`${k} • Rp ${(expenseBuckets[k] || 0).toLocaleString(
-                      'id-ID'
-                    )}`}
-                    className="w-2 bg-red-400"
-                    style={{
-                      height: `${((expenseBuckets[k] || 0) / maxVal) * 100}%`,
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
+            <PieChartComponent data={pieChartData} />
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-// ✅ ekspor default — wajib untuk Next.js App Router
-export default LaporanPage;
+}

@@ -31,20 +31,50 @@ export async function updateOrderStatus(orderId: number, newStatus: StatusCucian
 
 /**
  * Memperbarui status pembayaran untuk order_id tertentu.
+ * Jika status diubah menjadi "Lunas" dari "Belum Lunas" dengan jumlah_bayar = 0,
+ * maka jumlah_bayar akan diupdate menjadi total_biaya (bayar saat pengambilan).
  */
 export async function updatePaymentStatus(orderId: number, newStatus: StatusBayar) {
   const supabase = await createClient();
   
+  // Ambil data order saat ini untuk cek apakah perlu update jumlah_bayar
+  const { data: currentOrder, error: fetchError } = await supabase
+    .from('orders')
+    .select('status_bayar, jumlah_bayar, total_biaya')
+    .eq('order_id', orderId)
+    .single();
+
+  if (fetchError || !currentOrder) {
+    return { error: `Gagal mengambil data pesanan: ${fetchError?.message}` };
+  }
+
+  // Jika status diubah menjadi "Lunas" dari "Belum Lunas" dan jumlah_bayar = 0
+  // (artinya bayar saat pengambilan), update jumlah_bayar menjadi total_biaya
+  const isBayarSaatPengambilan = 
+    currentOrder.status_bayar === 'Belum Lunas' && 
+    currentOrder.jumlah_bayar === 0 && 
+    newStatus === 'Lunas';
+
+  const updateData: { status_bayar: StatusBayar; jumlah_bayar?: number } = {
+    status_bayar: newStatus,
+  };
+
+  if (isBayarSaatPengambilan) {
+    updateData.jumlah_bayar = currentOrder.total_biaya;
+  }
+
   const { error } = await supabase
     .from('orders')
-    .update({ status_bayar: newStatus })
+    .update(updateData)
     .eq('order_id', orderId);
 
   if (error) {
     return { error: `Gagal memperbarui status pembayaran: ${error.message}` };
   }
 
+  // Refresh cache untuk update pendapatan di dashboard dan laporan
   revalidatePath('/os/transaksi');
   revalidatePath('/os');
+  revalidatePath('/os/laporan');
   return { success: true };
 }

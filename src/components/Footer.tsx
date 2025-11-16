@@ -3,15 +3,16 @@
 import React from 'react';
 import Image from 'next/image'; // <-- 1. Impor Image
 import { usePathname, useRouter } from 'next/navigation'; // <-- 2. Impor hooks
-import { Facebook, Instagram, Twitter, MessageCircle, MapPin, Phone, Clock } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
+import { Facebook, Instagram, Twitter, MapPin, Phone, Clock } from 'lucide-react';
 
 const Footer = () => {
-  const navItems = ['Beranda', 'Layanan', 'Lacak', 'Harga', 'Keunggulan', 'Kontak'];
+  const navItems = ['Beranda', 'Keunggulan', 'Layanan', 'Lacak', 'Harga'];
   const socialIcons = [
     { icon: <Instagram size={20} />, href: '#' },
     { icon: <Facebook size={20} />, href: '#' },
     { icon: <Twitter size={20} />, href: '#' },
-    { icon: <MessageCircle size={20} />, href: '#' }, // Untuk WhatsApp
+    { icon: <FaWhatsapp size={20} />, href: 'https://wa.me/6281377771420' }, // Untuk WhatsApp
   ];
 
   // 3. Tambahkan logika navigasi yang "pintar"

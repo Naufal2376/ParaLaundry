@@ -24,6 +24,7 @@ export interface Order {
 
 interface OrderTableProps {
   orders: Order[];
+  userRole: string | null;
 }
 
 // Opsi dropdown dan fungsi helper
@@ -47,7 +48,7 @@ export const getPaymentClass = (payment: string) => {
 
 type SortKey = 'order_id' | 'customer' | 'status_cucian' | 'status_bayar' | 'total_biaya';
 
-const OrderTable: React.FC<OrderTableProps> = ({ orders }) => {
+const OrderTable: React.FC<OrderTableProps> = ({ orders, userRole }) => {
   const [isPending, startTransition] = useTransition();
   const [modalQrValue, setModalQrValue] = useState<string | null>(null);
   
@@ -168,28 +169,40 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders }) => {
                       {order.customer?.nama || 'N/A'}
                     </td>
                     <td className="p-4">
-                      <select
-                        value={order.status_cucian}
-                        onChange={(e) => handleStatusCucianChange(order.order_id, e.target.value as StatusCucian)}
-                        className={`p-2 rounded-lg border text-sm font-medium ${getStatusClass(order.status_cucian)}`}
-                        disabled={isPending}
-                      >
-                        {statusCucianOptions.map(status => (
-                          <option key={status} value={status}>{status}</option>
-                        ))}
-                      </select>
+                      {userRole === 'Owner' ? (
+                        <div className={`p-2 rounded-lg text-sm font-medium ${getStatusClass(order.status_cucian)}`}>
+                          {order.status_cucian}
+                        </div>
+                      ) : (
+                        <select
+                          value={order.status_cucian}
+                          onChange={(e) => handleStatusCucianChange(order.order_id, e.target.value as StatusCucian)}
+                          className={`p-2 rounded-lg border text-sm font-medium ${getStatusClass(order.status_cucian)}`}
+                          disabled={isPending}
+                        >
+                          {statusCucianOptions.map(status => (
+                            <option key={status} value={status}>{status}</option>
+                          ))}
+                        </select>
+                      )}
                     </td>
                     <td className="p-4">
-                      <select
-                        value={order.status_bayar}
-                        onChange={(e) => handleStatusBayarChange(order.order_id, e.target.value as StatusBayar)}
-                        className={`p-2 rounded-lg border text-sm font-semibold ${getPaymentClass(order.status_bayar)}`}
-                        disabled={isPending}
-                      >
-                        {statusBayarOptions.map(status => (
-                          <option key={status} value={status}>{status}</option>
-                        ))}
-                      </select>
+                      {userRole === 'Owner' ? (
+                        <div className={`p-2 rounded-lg text-sm font-semibold ${getPaymentClass(order.status_bayar)}`}>
+                          {order.status_bayar}
+                        </div>
+                      ) : (
+                        <select
+                          value={order.status_bayar}
+                          onChange={(e) => handleStatusBayarChange(order.order_id, e.target.value as StatusBayar)}
+                          className={`p-2 rounded-lg border text-sm font-semibold ${getPaymentClass(order.status_bayar)}`}
+                          disabled={isPending}
+                        >
+                          {statusBayarOptions.map(status => (
+                            <option key={status} value={status}>{status}</option>
+                          ))}
+                        </select>
+                      )}
                     </td>
                     <td className="p-4 text-(--color-text-primary) font-medium">
                       Rp {Number(order.total_biaya).toLocaleString('id-ID')}
@@ -228,6 +241,7 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders }) => {
               <OrderCard
                 key={order.order_id}
                 order={order}
+                userRole={userRole}
                 onStatusCucianChange={handleStatusCucianChange}
                 onStatusBayarChange={handleStatusBayarChange}
                 onShowQr={handleShowQr}

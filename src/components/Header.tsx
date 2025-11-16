@@ -30,7 +30,7 @@ const Header = () => {
     }
   };
 
-  const navItems = ['Beranda', 'Layanan', 'Lacak', 'Harga', 'Keunggulan'];
+  const navItems = ['Beranda', 'Keunggulan', 'Layanan', 'Lacak', 'Harga'];
 
   return (
     <header className={`fixed w-full z-50 transition-all duration-300 ${

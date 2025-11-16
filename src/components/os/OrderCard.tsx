@@ -7,13 +7,14 @@ import Link from 'next/link';
 
 interface OrderCardProps {
   order: Order;
+  userRole: string | null;
   onStatusCucianChange: (orderId: number, newStatus: any) => void;
   onStatusBayarChange: (orderId: number, newStatus: any) => void;
   onShowQr: (orderId: number) => void;
   isPending: boolean;
 }
 
-const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusCucianChange, onStatusBayarChange, onShowQr, isPending }) => {
+const OrderCard: React.FC<OrderCardProps> = ({ order, userRole, onStatusCucianChange, onStatusBayarChange, onShowQr, isPending }) => {
   return (
     <div className="bg-white p-4 rounded-lg shadow mb-4">
       <div className="flex justify-between items-start">
@@ -28,29 +29,41 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusCucianChange, onSt
       <div className="mt-4 grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm text-gray-500">Status Cucian</label>
-          <select
-            value={order.status_cucian}
-            onChange={(e) => onStatusCucianChange(order.order_id, e.target.value)}
-            className={`w-full p-2 rounded-lg border text-sm font-medium ${getStatusClass(order.status_cucian)}`}
-            disabled={isPending}
-          >
-            {statusCucianOptions.map(status => (
-              <option key={status} value={status}>{status}</option>
-            ))}
-          </select>
+          {userRole === 'Owner' ? (
+            <div className={`w-full p-2 rounded-lg text-sm font-medium ${getStatusClass(order.status_cucian)}`}>
+              {order.status_cucian}
+            </div>
+          ) : (
+            <select
+              value={order.status_cucian}
+              onChange={(e) => onStatusCucianChange(order.order_id, e.target.value)}
+              className={`w-full p-2 rounded-lg border text-sm font-medium ${getStatusClass(order.status_cucian)}`}
+              disabled={isPending}
+            >
+              {statusCucianOptions.map(status => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          )}
         </div>
         <div>
           <label className="text-sm text-gray-500">Status Bayar</label>
-          <select
-            value={order.status_bayar}
-            onChange={(e) => onStatusBayarChange(order.order_id, e.target.value)}
-            className={`w-full p-2 rounded-lg border text-sm font-semibold ${getPaymentClass(order.status_bayar)}`}
-            disabled={isPending}
-          >
-            {statusBayarOptions.map(status => (
-              <option key={status} value={status}>{status}</option>
-            ))}
-          </select>
+          {userRole === 'Owner' ? (
+            <div className={`w-full p-2 rounded-lg text-sm font-semibold ${getPaymentClass(order.status_bayar)}`}>
+              {order.status_bayar}
+            </div>
+          ) : (
+            <select
+              value={order.status_bayar}
+              onChange={(e) => onStatusBayarChange(order.order_id, e.target.value)}
+              className={`w-full p-2 rounded-lg border text-sm font-semibold ${getPaymentClass(order.status_bayar)}`}
+              disabled={isPending}
+            >
+              {statusBayarOptions.map(status => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
       <div className="mt-4 flex justify-between items-center">

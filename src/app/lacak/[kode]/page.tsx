@@ -1,3 +1,4 @@
+// src/app/lacak/[kode]/page.tsx
 "use client";
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
@@ -18,9 +19,10 @@ type OrderData = {
   status_bayar: string;
 };
 
-// Helper untuk format tanggal
-const formatDate = (dateString: string | null) => {
-  if (!dateString) return 'Belum Selesai';
+// --- PERBAIKAN DI SINI ---
+// Tambahkan 'undefined' ke tipe parameter
+const formatDate = (dateString: string | null | undefined) => {
+  if (!dateString) return 'Belum Selesai'; // Ini sudah menangani null/undefined
   return new Date(dateString).toLocaleDateString('id-ID', {
     day: 'numeric',
     month: 'long',
@@ -29,6 +31,7 @@ const formatDate = (dateString: string | null) => {
     minute: '2-digit'
   });
 };
+// --- AKHIR PERBAIKAN ---
 
 export default function LacakPage() {
   const params = useParams();
@@ -47,6 +50,10 @@ export default function LacakPage() {
         const supabase = createBrowserSupabase();
         const code = String(kode).toUpperCase();
         const numericId = parseInt(code.replace(/[^0-9]/g, ''), 10);
+
+        if (isNaN(numericId)) {
+          throw new Error("Kode tidak valid");
+        }
 
         const { data, error } = await supabase.rpc('get_order_by_id', {
             order_id_input: numericId,
@@ -87,6 +94,7 @@ export default function LacakPage() {
     if (error || !order) {
       return (
         <motion.div className="text-center p-8" variants={fadeUp} initial="hidden" animate="visible">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-red-600 mb-2">Pesanan Tidak Ditemukan</h2>
           <p className="text-(--color-dark-primary)">
             Kode pesanan <span className="font-bold">{kode.toUpperCase()}</span> tidak valid.
@@ -116,37 +124,37 @@ export default function LacakPage() {
           
           <hr className="my-4" />
 
-          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="flex items-center gap-2">
               <Calendar size={16} className="text-(--color-brand-primary)" />
               <strong>Tgl Order:</strong> {formatDate(order.tanggal_order)}
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle size={16} className="text-green-500" />
+              <CheckCircle size={16} className={order.tanggal_selesai ? 'text-green-500' : 'text-gray-400'} />
               <strong>Tgl Selesai:</strong> {formatDate(order.tanggal_selesai)}
             </div>
-          </div> */}
+          </div>
 
           <div className="mt-6">
             <h4 className="font-semibold text-md mb-2">Detail Layanan:</h4>
             <ul className="space-y-2">
               {order.details.map((item, index) => (
                 <li key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
-                  <span>{item.nama_layanan} ({item.jumlah})</span>
+                  <span>{item.nama_layanan} (x{item.jumlah})</span>
                   <span className="font-medium">Total: Rp {(item.sub_total ?? 0).toLocaleString('id-ID')}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* <div className="mt-6 text-right">
+          <div className="mt-6 text-right">
             <p className="text-lg font-semibold text-(--color-dark-primary)">
               Total Biaya:
               <span className="block text-2xl font-bold text-(--color-text-primary)">
                 Rp {(order.total_biaya ?? 0).toLocaleString('id-ID')}
               </span>
             </p>
-          </div> */}
+          </div>
         </motion.div>
 
         <OrderStatusTracker currentStatus={order.status_cucian} />

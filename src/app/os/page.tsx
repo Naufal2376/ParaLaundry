@@ -218,7 +218,7 @@ const DashboardPage = async () => {
         <BarChartComponent data={last7DaysData} />
       </div>
 
-      <OrderTable orders={recentOrders} />
+      <OrderTable orders={recentOrders} userRole={role} />
     </div>
   );
 };
