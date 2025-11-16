@@ -10,13 +10,24 @@ type StatusBayar = "Lunas" | "Belum Lunas";
 
 /**
  * Memperbarui status cucian untuk order_id tertentu.
+ * Jika status diubah menjadi "Selesai", maka tanggal_selesai akan diisi dengan timestamp saat ini.
  */
 export async function updateOrderStatus(orderId: number, newStatus: StatusCucian) {
   const supabase = await createClient();
   
+  // Siapkan data update
+  const updateData: { status_cucian: StatusCucian; tanggal_selesai?: string } = {
+    status_cucian: newStatus,
+  };
+
+  // Jika status diubah menjadi "Selesai", set tanggal_selesai dengan timestamp saat ini
+  if (newStatus === 'Selesai') {
+    updateData.tanggal_selesai = new Date().toISOString();
+  }
+
   const { error } = await supabase
     .from('orders')
-    .update({ status_cucian: newStatus })
+    .update(updateData)
     .eq('order_id', orderId);
 
   if (error) {
@@ -26,6 +37,7 @@ export async function updateOrderStatus(orderId: number, newStatus: StatusCucian
   // Penting: Refresh data di halaman transaksi agar tabel diperbarui
   revalidatePath('/os/transaksi');
   revalidatePath('/os'); // Refresh dashboard juga
+  revalidatePath('/lacak'); // Refresh halaman lacak juga
   return { success: true };
 }
 

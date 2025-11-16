@@ -55,17 +55,64 @@ export default function LacakPage() {
           throw new Error("Kode tidak valid");
         }
 
-        const { data, error } = await supabase.rpc('get_order_by_id', {
-            order_id_input: numericId,
-          })
-          .maybeSingle();
+        // Query langsung ke tabel orders dengan semua field yang diperlukan
+        const { data: orderData, error: orderError } = await supabase
+          .from('orders')
+          .select(`
+            order_id,
+            tanggal_order,
+            tanggal_selesai,
+            total_biaya,
+            status_bayar,
+            status_cucian,
+            customer:customers ( nama ),
+            order_details (
+              jumlah,
+              sub_total,
+              service:services ( nama_layanan )
+            )
+          `)
+          .eq('order_id', numericId)
+          .single();
 
-        if (error || !data) {
+        if (orderError || !orderData) {
           setOrder(null);
           setError(true);
-        } else {
-          setOrder(data as OrderData);
+          return;
         }
+
+        // Handle customer data (bisa array atau object)
+        const customerData = (orderData as any).customer;
+        const customerName = Array.isArray(customerData) 
+          ? (customerData[0]?.nama || 'N/A') 
+          : (customerData?.nama || 'N/A');
+
+        // Handle order details
+        const details = ((orderData as any).order_details || []).map((detail: any) => {
+          const serviceData = detail.service;
+          const service = Array.isArray(serviceData) 
+            ? (serviceData[0] || null) 
+            : (serviceData || null);
+          
+          return {
+            nama_layanan: service?.nama_layanan || 'N/A',
+            jumlah: Number(detail.jumlah || 0),
+            sub_total: Number(detail.sub_total || 0),
+          };
+        });
+
+        // Transform data sesuai dengan OrderData type
+        const transformedOrder: OrderData = {
+          customer_name: customerName,
+          status_cucian: orderData.status_cucian,
+          details: details,
+          tanggal_order: orderData.tanggal_order,
+          tanggal_selesai: orderData.tanggal_selesai || null, // Ambil langsung dari database
+          total_biaya: Number(orderData.total_biaya || 0),
+          status_bayar: orderData.status_bayar,
+        };
+
+        setOrder(transformedOrder);
       } catch (_e) {
         setOrder(null);
         setError(true);
