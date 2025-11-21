@@ -48,18 +48,11 @@ export default function LacakPage() {
       setError(false);
       try {
         const supabase = createBrowserSupabase();
-        const code = String(kode).toUpperCase();
-        const numericId = parseInt(code.replace(/[^0-9]/g, ''), 10);
+        const codeInput = String(kode).trim();
 
-        if (isNaN(numericId)) {
-          throw new Error("Kode tidak valid");
-        }
-
-        // Query langsung ke tabel orders dengan semua field yang diperlukan
         const { data: orderData, error: orderError } = await supabase
           .from('orders')
           .select(`
-            order_id,
             tanggal_order,
             tanggal_selesai,
             total_biaya,
@@ -72,7 +65,7 @@ export default function LacakPage() {
               service:services ( nama_layanan )
             )
           `)
-          .eq('order_id', numericId)
+          .eq('order_code', codeInput)
           .single();
 
         if (orderError || !orderData) {
@@ -81,19 +74,11 @@ export default function LacakPage() {
           return;
         }
 
-        // Handle customer data (bisa array atau object)
-        const customerData = (orderData as any).customer;
-        const customerName = Array.isArray(customerData) 
-          ? (customerData[0]?.nama || 'N/A') 
-          : (customerData?.nama || 'N/A');
+        const customer = Array.isArray((orderData as any).customer) ? (orderData as any).customer[0] : (orderData as any).customer;
+        const customerName = customer?.nama || 'N/A';
 
-        // Handle order details
         const details = ((orderData as any).order_details || []).map((detail: any) => {
-          const serviceData = detail.service;
-          const service = Array.isArray(serviceData) 
-            ? (serviceData[0] || null) 
-            : (serviceData || null);
-          
+          const service = Array.isArray(detail.service) ? detail.service[0] : detail.service;
           return {
             nama_layanan: service?.nama_layanan || 'N/A',
             jumlah: Number(detail.jumlah || 0),
@@ -101,13 +86,12 @@ export default function LacakPage() {
           };
         });
 
-        // Transform data sesuai dengan OrderData type
         const transformedOrder: OrderData = {
           customer_name: customerName,
           status_cucian: orderData.status_cucian,
           details: details,
           tanggal_order: orderData.tanggal_order,
-          tanggal_selesai: orderData.tanggal_selesai || null, // Ambil langsung dari database
+          tanggal_selesai: orderData.tanggal_selesai || null,
           total_biaya: Number(orderData.total_biaya || 0),
           status_bayar: orderData.status_bayar,
         };

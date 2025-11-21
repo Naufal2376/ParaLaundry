@@ -26,6 +26,7 @@ export default async function TransaksiPage() {
     .from('orders')
     .select(`
       order_id,
+      order_code,
       customer_id,
       status_cucian,
       total_biaya,

@@ -15,6 +15,7 @@ type Customer = {
 
 export interface Order {
   order_id: number;
+  order_code?: string;
   customer_id: number;
   status_cucian: string;
   total_biaya: number;
@@ -71,8 +72,9 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders, userRole }) => {
     });
   };
 
-  const handleShowQr = (orderId: number) => {
-    const trackingUrl = `https://para-laundry.vercel.app/lacak/PL-${orderId}`;
+  const handleShowQr = (order: Order) => {
+    const code = order.order_code || order.order_id;
+    const trackingUrl = `https://para-laundry.vercel.app/lacak/${code}`;
     setModalQrValue(trackingUrl);
   };
 
@@ -81,6 +83,7 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders, userRole }) => {
     const q = query.trim().toLowerCase();
     const base = q
       ? orders.filter(o =>
+          (o.order_code?.toLowerCase() || '').includes(q) ||
           String(o.order_id).includes(q) ||
           (o.customer?.nama?.toLowerCase() || '').includes(q) ||
           o.status_cucian.toLowerCase().includes(q) ||
@@ -164,7 +167,7 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders, userRole }) => {
               {filteredSorted.length > 0 ? (
                 filteredSorted.map(order => (
                   <tr key={order.order_id} className="border-b hover:bg-(--color-light-primary)">
-                    <td className="p-4 font-semibold text-(--color-brand-primary)">PL-{order.order_id}</td>
+                    <td className="p-4 font-semibold text-(--color-brand-primary)">{order.order_code || `PL-${order.order_id}`}</td>
                     <td className="p-4 text-(--color-text-primary)">
                       {order.customer?.nama || 'N/A'}
                     </td>
@@ -209,7 +212,7 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders, userRole }) => {
                     </td>
                     <td className="p-4">
                       <button
-                        onClick={() => handleShowQr(order.order_id)}
+                        onClick={() => handleShowQr(order)}
                         className="flex items-center gap-1 text-(--color-brand-primary) hover:text-(--color-brand-primary-hover) disabled:opacity-50"
                         disabled={isPending}
                       >
@@ -218,7 +221,7 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders, userRole }) => {
                       </button>
                     </td>
                     <td className="p-4">
-                        <Link href={`/os/transaksi/sukses/${order.order_id}`} className="text-blue-500 hover:underline">
+                        <Link href={`/os/transaksi/sukses/${order.order_code || order.order_id}`} className="text-blue-500 hover:underline">
                             Lihat Detail
                         </Link>
                     </td>

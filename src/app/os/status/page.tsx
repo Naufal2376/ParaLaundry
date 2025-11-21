@@ -39,6 +39,10 @@ export default function UpdateStatusPage() {
     setMessage('');
     try {
       const supabase = createClient();
+      let cleanCode = inputCode.trim();
+      if (cleanCode.includes('/lacak/')) {
+         cleanCode = cleanCode.split('/lacak/').pop() || '';
+      }
       const code = inputCode.trim().toUpperCase();
       const numMatch = code.match(/\d+/);
       const numericId = numMatch ? Number(numMatch[0]) : Number(code);

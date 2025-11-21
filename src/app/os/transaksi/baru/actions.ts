@@ -1,19 +1,15 @@
-// src/app/os/transaksi/baru/actions.ts
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-// 1. Definisikan tipe data untuk item yang dikirim dari form
-// Ini harus cocok dengan apa yang dikirim oleh 'page.tsx'
 interface OrderItem {
   service_id: number;
   jumlah: number;
   sub_total: number;
 }
 
-// 2. Definisikan tipe data untuk seluruh payload form
 export interface OrderData {
   customerName: string;
   customerPhone: string;
@@ -23,76 +19,65 @@ export interface OrderData {
   items: OrderItem[];
 }
 
-/**
- * Server Action untuk membuat transaksi baru.
- * Ini akan menangani 3 operasi database:
- * 1. Upsert (Find or Create) Pelanggan
- * 2. Insert Order (Transaksi Utama)
- * 3. Insert Order Details (Rincian Item)
- */
+// --- FUNGSI GENERATOR KODE ACAK ---
+function generateOrderCode() {
+  // Menghasilkan string acak 5 karakter
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; 
+  let result = '';
+  for (let i = 0; i < 5; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `PL-${result}`; // Contoh: PL-X7A29
+}
+
 export async function createOrder(data: OrderData) {
   const supabase = await createClient();
 
-  // --- Langkah 1: Dapatkan ID Pegawai (User) yang Sedang Login ---
+  // 1. Cek User
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { error: "Otentikasi gagal. Silakan login ulang." };
-  }
-  const pegawaiUserId = user.id;
-
-  // --- Langkah 2: Cari atau Buat Pelanggan (Upsert) ---
-  // 'upsert' akan mencari berdasarkan 'no_hp' (karena itu UNIQUE)
-  // Jika tidak ada, ia akan membuat. Jika ada, ia akan update namanya.
+  if (!user) return { error: "Otentikasi gagal." };
+  
+  // 2. Upsert Customer
   const { data: customer, error: customerError } = await supabase
     .from('customers')
     .upsert(
-      { 
-        nama: data.customerName, 
-        no_hp: data.customerPhone 
-      },
+      { nama: data.customerName, no_hp: data.customerPhone },
       { onConflict: 'no_hp', ignoreDuplicates: false }
     )
-    .select('customer_id') // Kita butuh ID-nya untuk langkah berikutnya
+    .select('customer_id')
     .single();
 
-  if (customerError || !customer) {
-    console.error('Error Upsert Customer:', customerError);
-    return { error: `Gagal memproses data pelanggan: ${customerError?.message}` };
-  }
-  const customerId = customer.customer_id;
+  if (customerError || !customer) return { error: `Gagal pelanggan: ${customerError?.message}` };
 
-  // --- Langkah 3: Buat Transaksi (Order) Utama ---
-  // Sesuai ERD Anda: order_id, customer_id, user_id, total_biaya, status_bayar, status_cucian
-  // Jika bayar saat pengambilan, status_bayar = 'Belum Lunas' dan jumlah_bayar = 0
+  // --- 3. INSERT ORDER (DIPERBARUI UNTUK ID ACAK) ---
+  
+  // (BARU) Panggil fungsi generator
+  const newOrderCode = generateOrderCode(); 
+
   const status_bayar = data.bayarSaatPengambilan 
     ? 'Belum Lunas' 
     : (data.jumlahBayar >= data.totalBiaya ? 'Lunas' : 'Belum Lunas');
-  
+
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
-      customer_id: customerId,
-      user_id: pegawaiUserId,
+      customer_id: customer.customer_id,
+      user_id: user.id,
       total_biaya: data.totalBiaya,
-      jumlah_bayar: data.bayarSaatPengambilan ? 0 : data.jumlahBayar, // <-- Jika bayar saat pengambilan, set ke 0
+      jumlah_bayar: data.bayarSaatPengambilan ? 0 : data.jumlahBayar,
       status_bayar: status_bayar,
-      status_cucian: 'Masuk Antrean', // Sesuai flowchart, ini adalah status default
+      status_cucian: 'Masuk Antrean',
+      order_code: newOrderCode, // (BARU) Simpan kode acak ke database
     })
-    .select('order_id') // Kita butuh ID order baru untuk nota
+    // (BARU) Ambil 'order_code' juga
+    .select('order_id, order_code') 
     .single();
 
-  if (orderError || !order) {
-    console.error('Error Insert Order:', orderError);
-    return { error: `Gagal membuat pesanan utama: ${orderError?.message}` };
-  }
-  const orderId = order.order_id;
+  if (orderError || !order) return { error: `Gagal order: ${orderError?.message}` };
 
-  // --- Langkah 4: Siapkan dan Masukkan Rincian Pesanan (Order Details) ---
-  // Sesuai ERD: order_id, service_id, jumlah, sub_total
-  
-  // 'map' array item dari form agar cocok dengan struktur tabel
+  // 4. Insert Rincian (Tetap pakai ID Angka untuk relasi internal database)
   const orderDetailsData = data.items.map(item => ({
-    order_id: orderId,
+    order_id: order.order_id, // Relasi database wajib pakai ID angka (Internal)
     service_id: item.service_id,
     jumlah: item.jumlah,
     sub_total: item.sub_total,
@@ -102,18 +87,12 @@ export async function createOrder(data: OrderData) {
     .from('order_details')
     .insert(orderDetailsData);
 
-  if (detailsError) {
-    console.error('Error Insert Details:', detailsError);
-    // Di aplikasi produksi, kita seharusnya menghapus 'order' yang sudah dibuat (rollback)
-    return { error: `Gagal menyimpan rincian pesanan: ${detailsError.message}` };
-  }
+  if (detailsError) return { error: `Gagal rincian: ${detailsError.message}` };
 
-  // --- Langkah 5: Berhasil -> Bersihkan Cache & Arahkan ke Halaman Nota ---
-  
-  // Bersihkan cache (revalidate) agar halaman 'Daftar Transaksi' menampilkan data baru
+  // 5. Redirect (DIPERBARUI)
   revalidatePath('/os/transaksi');
   revalidatePath('/os');
-
-  // Arahkan (redirect) pegawai ke halaman cetak nota
-  redirect(`/os/transaksi/sukses/${orderId}`);
+  
+  // (BARU) Arahkan ke URL dengan kode acak (Eksternal/Publik)
+  redirect(`/os/transaksi/sukses/${order.order_code}`);
 }
