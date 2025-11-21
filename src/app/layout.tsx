@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import AppShell from "@/components/AppShell"; // <-- Impor Shell Klien kita
+import { Analytics } from "@vercel/analytics/next"
 
 const poppins = Poppins({ 
   subsets: ["latin"],
@@ -35,6 +36,7 @@ export default function RootLayout({
         */}
         <AppShell>
           {children}
+          <Analytics/>
         </AppShell>
       </body>
     </html>
