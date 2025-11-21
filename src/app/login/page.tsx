@@ -2,110 +2,338 @@
 "use client";
 
 import { login } from "./actions";
-// 1. Impor useState dari React
-import { Suspense, useState } from "react";
-// 2. Impor ikon Eye dan EyeOff
-import { Sparkles, User, Lock, Eye, EyeOff } from "lucide-react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { 
+  User, 
+  Lock, 
+  Eye, 
+  EyeOff, 
+  ArrowRight, 
+  Shirt, 
+  Droplets, 
+  Sparkles, 
+  WashingMachine
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import Image from 'next/image';
+import { useFormStatus } from "react-dom";
 
-// ❗️ Penting: jangan prerender halaman login
 export const dynamic = "force-dynamic";
 
-function Login() {
-  const searchParams = useSearchParams();
-  const message = searchParams.get("message");
+// --- 1. KOMPONEN BACKGROUND PARTIKEL ---
+const FloatingParticles = () => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  // 3. Tambahkan state untuk melacak visibilitas password
-  const [showPassword, setShowPassword] = useState(false);
+  if (!mounted) return null;
+
+  const icons = [Shirt, Droplets, Sparkles, WashingMachine];
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-(--color-light-primary) to-white p-4">
-      <motion.div
-        className="w-full max-w-md p-8 bg-white rounded-2xl shadow-2xl"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ type: "spring" as const, stiffness: 100 }} // Perbaikan 'as const' untuk build Vercel
+    <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10 bg-gradient-to-br from-blue-50 via-white to-blue-100">
+      {/* Orb Warna */}
+      <motion.div 
+        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 8, repeat: Infinity }}
+        className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-400/20 rounded-full blur-[100px]"
+      />
+      <motion.div 
+        animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.4, 0.2] }}
+        transition={{ duration: 10, repeat: Infinity, delay: 1 }}
+        className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-purple-400/20 rounded-full blur-[120px]"
+      />
+
+      {/* Ikon Mengapung */}
+      {Array.from({ length: 15 }).map((_, i) => {
+        const Icon = icons[i % icons.length];
+        const randomSize = Math.random() * 20 + 15;
+        const randomDelay = Math.random() * 5;
+        const randomDuration = Math.random() * 10 + 10;
+        
+        return (
+          <motion.div
+            key={i}
+            initial={{ y: "110vh", x: Math.random() * 100 + "vw", opacity: 0 }}
+            animate={{ 
+              y: "-10vh", 
+              opacity: [0, 1, 0],
+              rotate: 360 
+            }}
+            transition={{
+              duration: randomDuration,
+              repeat: Infinity,
+              delay: randomDelay,
+              ease: "linear"
+            }}
+            className="absolute text-(--color-brand-primary)/20"
+          >
+            <Icon size={randomSize} />
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+};
+
+// --- 2. INPUT INTERAKTIF (DIPERBAIKI LABELNYA) ---
+const InteractiveInput = ({ 
+  icon: Icon, 
+  type, 
+  name, 
+  placeholder, 
+  showPasswordToggle, 
+  onTogglePassword, 
+  isPasswordVisible 
+}: any) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const [hasValue, setHasValue] = useState(false);
+
+  return (
+    <motion.div 
+      className="relative mb-5"
+      initial={false}
+      animate={isFocused ? { scale: 1.02 } : { scale: 1 }}
+    >
+      {/* Label Animasi (Sekarang punya background agar border tertutup) */}
+      <motion.label
+        initial={false}
+        animate={{
+          y: isFocused || hasValue ? -28 : 0, // Naik ke atas border
+          x: isFocused || hasValue ? 10 : 48, // Geser posisi
+          scale: isFocused || hasValue ? 0.85 : 1,
+          color: isFocused ? "var(--color-brand-primary)" : "#64748b",
+        }}
+        className={`absolute top-3.5 left-0 pointer-events-none font-medium transition-all z-20 px-2 rounded-md ${
+          // Tambahkan background putih saat aktif agar menutupi garis border di belakangnya
+          isFocused || hasValue ? "bg-white shadow-sm" : "bg-transparent"
+        }`}
       >
-        <div className="flex items-center justify-center space-x-2 mb-6">
-          <div className="from-(--color-brand-primary) to-(--color-brand-primary-active) flex items-center justify-center">
-            <Image 
-              src="/ParaLaundry.png" 
-              alt="Para Laundry Logo" 
-              width={32} 
-              height={32}
-              className="rounded-md"
-            />
-          </div>
-          <span className="text-2xl font-bold text-(--color-text-primary)">
-            Para Laundry OS
-          </span>
+        {placeholder}
+      </motion.label>
+
+      <div className={`relative flex items-center overflow-visible rounded-xl border-2 transition-all duration-300 z-10 ${
+        isFocused 
+          ? "border-(--color-brand-primary) bg-white shadow-[0_0_20px_rgba(0,132,255,0.15)]" 
+          : "border-gray-200 bg-white/60 hover:bg-white/80"
+      }`}>
+        {/* Ikon Sisi Kiri */}
+        <div className="pl-4">
+          <motion.div
+            animate={isFocused ? { y: [0, -3, 0], color: "#0084ff" } : { color: "#94a3b8" }}
+            transition={{ duration: 0.4 }}
+          >
+            <Icon size={20} />
+          </motion.div>
         </div>
 
-        <h2 className="text-xl font-semibold text-center text-(--color-text-primary) mb-2">
-          Selamat Datang
-        </h2>
-        <p className="text-center text-(--color-dark-primary) mb-8">
-          Masuk untuk mengelola operasional laundry.
-        </p>
+        <input
+          type={type}
+          name={name}
+          onFocus={() => setIsFocused(true)}
+          onBlur={(e) => {
+            setIsFocused(false);
+            setHasValue(e.target.value.length > 0);
+          }}
+          onChange={(e) => setHasValue(e.target.value.length > 0)}
+          className="w-full py-4 px-3 bg-transparent outline-none text-gray-700 font-medium z-0"
+          required
+        />
 
-        <form action={login} className="space-y-6">
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-(--color-dark-primary)/50" />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              required
-              className="w-full py-3 pl-10 pr-4 border border-(--color-light-primary-active) rounded-lg focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)"
-            />
-          </div>
-          
-          {/* --- 4. PERBAIKAN PADA BLOK PASSWORD --- */}
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-(--color-dark-primary)/50" />
-            <input
-              // Ubah 'type' menjadi dinamis
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Password"
-              required
-              // Tambahkan padding di kanan (pr-10) untuk ikon mata
-              className="w-full py-3 pl-10 pr-10 border border-(--color-light-primary-active) rounded-lg focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)"
-            />
-            {/* Tambahkan tombol/ikon mata di sini */}
-            <button
-              type="button" // PENTING: agar tidak men-submit form
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-(--color-dark-primary)/50 cursor-pointer"
-              aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
-            >
-              {showPassword ? <EyeOff /> : <Eye />}
-            </button>
-          </div>
-          {/* --- AKHIR PERBAIKAN --- */}
-
-          {message && (
-            <p className="text-sm text-center text-red-500">{message}</p>
-          )}
-
+        {/* Toggle Password */}
+        {showPasswordToggle && (
           <button
-            type="submit"
-            className="w-full py-3 font-semibold text-white bg-(--color-brand-primary) rounded-lg shadow-lg hover:bg-(--color-brand-primary-hover) active:bg-(--color-brand-primary-active) transition-all duration-300 transform hover:scale-105"
+            type="button"
+            onClick={onTogglePassword}
+            className="pr-4 text-gray-400 hover:text-(--color-brand-primary) transition-colors"
           >
-            Masuk
+            {isPasswordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
-        </form>
-      </motion.div>
-    </div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+// --- 3. TOMBOL SUBMIT MAGNETIK ---
+function MagneticButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <motion.button
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.95 }}
+      disabled={pending}
+      className="relative w-full py-4 bg-gradient-to-r from-(--color-brand-primary) to-(--color-brand-primary-active) text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 overflow-hidden group"
+    >
+      {/* Efek Kilau Bergerak */}
+      <div className="absolute inset-0 -translate-x-full group-hover:animate-[shine_1s_ease-in-out] bg-gradient-to-r from-transparent via-white/30 to-transparent z-10" />
+      
+      <div className="relative z-20 flex items-center justify-center gap-2">
+        {pending ? (
+          <>
+            <motion.div 
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            >
+              <WashingMachine size={20} /> 
+            </motion.div>
+            <span>Memproses...</span>
+          </>
+        ) : (
+          <>
+            <span>Masuk ke Sistem</span>
+            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+          </>
+        )}
+      </div>
+    </motion.button>
   );
 }
 
+// --- 4. KARTU UTAMA (TANPA 3D TILT & LOGO CLEAN) ---
+function LoginCard() {
+  const searchParams = useSearchParams();
+  const message = searchParams.get("message");
+  const [showPassword, setShowPassword] = useState(false);
+  const [greeting, setGreeting] = useState("Selamat Datang");
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Selamat Pagi");
+    else if (hour < 18) setGreeting("Selamat Siang");
+    else setGreeting("Selamat Malam");
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="relative z-10 w-full max-w-[450px]"
+    >
+      <div className="relative bg-white/70 backdrop-blur-2xl border border-white/50 rounded-3xl p-8 md:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden">
+        
+        {/* Dekorasi Lingkaran di dalam kartu */}
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-200/50 rounded-full blur-2xl" />
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-200/50 rounded-full blur-2xl" />
+
+        {/* Header: Logo Bersih Tanpa Kotak */}
+        <div className="text-center mb-8 relative z-10">
+          <motion.div 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            className="flex justify-center mb-6"
+          >
+            <Image 
+              src="/ParaLaundry.png" 
+              alt="Logo Para Laundry" 
+              width={100} 
+              height={100} 
+              className="object-contain drop-shadow-lg hover:scale-105 transition-transform duration-300"
+              priority
+            />
+          </motion.div>
+
+          <motion.h1 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-3xl font-bold text-(--color-text-primary)"
+          >
+            {greeting}!
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-(--color-dark-primary)/80 mt-2 font-medium"
+          >
+            Silakan masuk ke <b>Para Laundry OS</b>
+          </motion.p>
+        </div>
+
+        {/* Form */}
+        <form action={login} className="relative z-10 space-y-2">
+          <motion.div
+            initial={{ x: -30, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <InteractiveInput 
+              icon={User} 
+              type="email" 
+              name="email" 
+              placeholder="Email Pegawai / Owner" 
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ x: 30, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <InteractiveInput 
+              icon={Lock} 
+              type={showPassword ? "text" : "password"} 
+              name="password" 
+              placeholder="Kata Sandi" 
+              showPasswordToggle={true}
+              isPasswordVisible={showPassword}
+              onTogglePassword={() => setShowPassword(!showPassword)}
+            />
+          </motion.div>
+
+          {/* Error Message dengan Shake Animation */}
+          <AnimatePresence>
+            {message && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: [0, -10, 10, -10, 10, 0] }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.4 }}
+                className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg mb-4 shadow-sm"
+              >
+                <p className="text-sm text-red-600 font-medium flex items-center gap-2">
+                  <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
+                  {message}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="pt-2"
+          >
+            <MagneticButton />
+          </motion.div>
+        </form>
+
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="text-center text-xs text-gray-400 mt-8"
+        >
+          &copy; {new Date().getFullYear()} Para Laundry. Security Encrypted.
+        </motion.p>
+      </div>
+    </motion.div>
+  );
+}
+
+// --- 5. WRAPPER UTAMA (100vh & Overflow Hidden) ---
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <Login />
-    </Suspense>
+    <div className="h-screen w-full overflow-hidden flex items-center justify-center relative font-poppins">
+      <FloatingParticles />
+      <div className="p-4 w-full flex justify-center">
+        <LoginCard />
+      </div>
+    </div>
   );
 }
