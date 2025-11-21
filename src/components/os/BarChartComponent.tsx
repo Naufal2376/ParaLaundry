@@ -35,7 +35,7 @@ const BarChartComponent = ({ data }: { data: BarChartData[] }) => {
         <BarChart 
           data={data}
           // Tambahkan margin agar label tidak terpotong
-          margin={{ top: 5, right: 20, left: 10, bottom: 60 }} 
+          margin={{ top: 10, right: 20, left: 20, bottom: 60 }} 
         >
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           
