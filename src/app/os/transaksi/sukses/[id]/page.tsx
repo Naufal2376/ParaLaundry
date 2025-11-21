@@ -112,18 +112,18 @@ export default async function SuccessPage(props: any) {
   };
 
   return (
-    <div className="py-12 px-4 bg-(--color-light-primary)">
+    <div className="bg-gray-100 min-h-screen py-8 sm:py-12 px-4">
       <div className="max-w-md mx-auto">
         {/* Render Nota */}
         <NotaCetak data={notaData} />
 
-        <div className="mt-4 text-center flex flex-col gap-4 no-print">
+        <div className="mt-6 text-center no-print">
           <a
             href="/os/transaksi/baru"
-            className="shine-button flex items-center justify-center w-full bg-white text-(--color-brand-primary) font-semibold px-6 py-3 rounded-lg shadow-lg border border-(--color-light-primary-active) hover:bg-(--color-light-primary-hover)"
+            className="shine-button inline-flex items-center justify-center w-full bg-white text-(--color-brand-primary) font-semibold px-6 py-3 rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50"
           >
             <FilePlus className="mr-2" size={20} />
-            Buat Transaksi Baru Lagi
+            Buat Transaksi Baru
           </a>
         </div>
       </div>

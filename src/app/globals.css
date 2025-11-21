@@ -182,21 +182,39 @@
 }
 
 @media print {
-  /* Sembunyikan semua elemen di luar nota saat mencetak */
-  body * {
-    visibility: hidden;
+  /* Sembunyikan semua elemen di body secara default */
+  body > *:not(.printable-area) {
+    display: none !important;
   }
+
+  /* Sembunyikan elemen yang secara eksplisit ditandai .no-print */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Pastikan area cetak dan isinya terlihat */
   .printable-area, .printable-area * {
     visibility: visible;
   }
+  
+  /* Atur area cetak agar mengisi halaman */
   .printable-area {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+    background: white; /* Pastikan background putih saat cetak */
   }
-  /* Sembunyikan elemen UI seperti header, sidebar, dan tombol */
-  .no-print {
-    display: none !important;
+
+  /* Paksa browser untuk mencetak warna background dan teks */
+  /* Wajib untuk browser berbasis WebKit (Chrome, Safari) */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
