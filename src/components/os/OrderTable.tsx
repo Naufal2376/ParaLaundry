@@ -72,7 +72,10 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders, userRole }) => {
     });
   };
 
-  const handleShowQr = (order: Order) => {
+  const handleShowQr = (orderId: number) => {
+    const order = orders.find(o => o.order_id === orderId);
+    if (!order) return;
+
     const code = order.order_code || order.order_id;
     const trackingUrl = `https://para-laundry.vercel.app/lacak/${code}`;
     setModalQrValue(trackingUrl);
@@ -212,7 +215,7 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders, userRole }) => {
                     </td>
                     <td className="p-4">
                       <button
-                        onClick={() => handleShowQr(order)}
+                        onClick={() => handleShowQr(order.order_id)}
                         className="flex items-center gap-1 text-(--color-brand-primary) hover:text-(--color-brand-primary-hover) disabled:opacity-50"
                         disabled={isPending}
                       >
