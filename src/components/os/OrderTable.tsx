@@ -2,11 +2,13 @@
 "use client";
 import React, { useState, useTransition, useMemo } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { updateOrderStatus, updatePaymentStatus } from '@/app/os/transaksi/actions';
 import { AnimatePresence } from 'framer-motion';
-import { QrCodeModal } from './QrCodeModal';
 import OrderCard from './OrderCard';
 import { QrCode, Search, ChevronDown, ChevronUp } from 'lucide-react';
+
+const QrCodeModal = dynamic(() => import('./QrCodeModal').then(mod => mod.QrCodeModal), { ssr: false });
 
 // Tipe data (interface) Anda
 type Customer = {
