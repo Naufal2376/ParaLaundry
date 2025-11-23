@@ -1,4 +1,7 @@
 // src/components/os/ExpenseManager.tsx
+"use client";
+import React, { useState, useMemo, useTransition } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import ExpenseCard from './ExpenseCard'; // Impor komponen card
 import { Save, Search, Edit, Trash2 } from 'lucide-react';
 
