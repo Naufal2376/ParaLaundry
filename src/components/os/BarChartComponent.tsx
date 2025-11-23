@@ -26,8 +26,7 @@ const formatRupiah = (value: number) => {
 
 const BarChartComponent = ({ data }: { data: BarChartData[] }) => {
   return (
-    // Beri tinggi tetap agar tidak terlalu kecil
-    <div className="bg-white p-4 rounded-lg shadow h-[400px]"> 
+    <>
       <h3 className="text-lg font-semibold mb-4 text-(--color-text-primary)">
         Grafik Pendapatan {data[0]?.pengeluaran !== undefined ? 'vs Pengeluaran' : ''}
       </h3>
@@ -66,7 +65,7 @@ const BarChartComponent = ({ data }: { data: BarChartData[] }) => {
           )}
         </BarChart>
       </ResponsiveContainer>
-    </div>
+    </>
   );
 };
 

@@ -230,7 +230,7 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
         </div>
 
         <div className="grid gap-8">
-          <div className="bg-gray-50 p-6 sm:p-7 rounded-lg">
+          <div className="bg-white p-6 sm:p-7 rounded-2xl shadow-lg h-[300px] sm:h-[350px] md:h-[450px]">
             <BarChartComponent data={barChartData} />
           </div>
         </div>

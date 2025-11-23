@@ -1,7 +1,5 @@
 // src/components/os/ExpenseManager.tsx
-"use client";
-import React, { useState, useMemo, useTransition } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import ExpenseCard from './ExpenseCard'; // Impor komponen card
 import { Save, Search, Edit, Trash2 } from 'lucide-react';
 
 // Tipe data untuk baris pengeluaran
@@ -102,6 +100,13 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ initialExpenses 
         await supabase.from('expenses').delete().eq('expense_id', id);
         setRows(rows.filter(x => x.expense_id !== id));
       });
+    }
+  };
+
+   // Handler untuk memperbarui state editing dari card
+   const handleUpdateEditing = (field: 'keterangan' | 'jumlah', value: string | number) => {
+    if (editing) {
+      setEditing({ ...editing, [field]: value });
     }
   };
 
@@ -270,11 +275,26 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ initialExpenses 
           </table>
         </div>
         
-        {/* Tampilan Card untuk Mobile (Akan menggunakan komponen terpisah) */}
+        {/* Tampilan Card untuk Mobile */}
         <div className="md:hidden mt-4 space-y-4">
-          <p className="p-4 text-center text-(--color-dark-primary)">
-            Tampilan mobile akan ditambahkan di sini.
-          </p>
+          {filteredRows.length > 0 ? (
+            filteredRows.map((r) => (
+              <ExpenseCard
+                key={r.expense_id}
+                expense={r}
+                editing={editing}
+                isPending={isPending}
+                onEdit={setEditing}
+                onDelete={handleDelete}
+                onSave={handleSaveEdit}
+                onUpdateEditing={handleUpdateEditing}
+              />
+            ))
+          ) : (
+            <p className="p-4 text-center text-(--color-dark-primary)">
+              {rows.length === 0 ? "Belum ada data pengeluaran." : "Tidak ada hasil yang cocok."}
+            </p>
+          )}
         </div>
       </div>
     </>

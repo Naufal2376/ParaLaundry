@@ -1,77 +1,102 @@
 // src/components/os/ExpenseCard.tsx
+"use client";
 import React from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Save } from 'lucide-react';
 
-interface Expense {
+// Tipe data yang sama dengan di ExpenseManager
+export type ExpenseRow = {
   expense_id: number;
   tanggal_pengeluaran: string;
   keterangan: string;
   jumlah: number;
-}
+};
 
 interface ExpenseCardProps {
-  expense: Expense;
-  onEdit: (expense: Expense) => void;
+  expense: ExpenseRow;
+  editing: ExpenseRow | null;
+  isPending: boolean;
+  onEdit: (expense: ExpenseRow) => void;
   onDelete: (id: number) => void;
-  isEditing: boolean;
-  editingExpense: { expense_id: number; keterangan: string; jumlah: number } | null;
-  setEditingExpense: (expense: { expense_id: number; keterangan: string; jumlah: number }) => void;
-  onSaveEdit: (expense: Expense) => void;
+  onSave: (expense: ExpenseRow) => void;
+  onUpdateEditing: (field: 'keterangan' | 'jumlah', value: string | number) => void;
 }
 
-const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, onEdit, onDelete, isEditing, editingExpense, setEditingExpense, onSaveEdit }) => {
+const ExpenseCard: React.FC<ExpenseCardProps> = ({
+  expense,
+  editing,
+  isPending,
+  onEdit,
+  onDelete,
+  onSave,
+  onUpdateEditing,
+}) => {
+  const isEditing = editing?.expense_id === expense.expense_id;
+
   return (
-    <div className="bg-white p-4 rounded-lg shadow mb-4">
+    <div className={`bg-white p-4 rounded-lg shadow-md border ${isEditing ? 'border-blue-500' : 'border-gray-200'}`}>
       <div className="flex justify-between items-start mb-2">
         <div>
-          <p className="text-sm text-gray-500">{new Date(expense.tanggal_pengeluaran).toLocaleDateString('id-ID')}</p>
-          {isEditing && editingExpense?.expense_id === expense.expense_id ? (
+          <p className="font-semibold text-gray-800">
+            {new Date(expense.tanggal_pengeluaran).toLocaleDateString('id-ID', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+          </p>
+          {isEditing ? (
             <input
-              className="p-2 border rounded w-full text-lg font-bold"
-              value={editingExpense.keterangan}
-              onChange={(e) => setEditingExpense({ ...editingExpense, keterangan: e.target.value })}
+              type="text"
+              value={editing!.keterangan}
+              onChange={(e) => onUpdateEditing('keterangan', e.target.value)}
+              className="mt-1 w-full p-2 border rounded-md"
             />
           ) : (
-            <p className="font-bold text-lg text-(--color-text-primary)">{expense.keterangan}</p>
+            <p className="text-sm text-gray-600">{expense.keterangan}</p>
           )}
         </div>
-        {isEditing && editingExpense?.expense_id === expense.expense_id ? (
+        <div className="flex flex-col items-end gap-2">
+          {isEditing ? (
+            <input
+              type="number"
+              value={editing!.jumlah}
+              onChange={(e) => onUpdateEditing('jumlah', Number(e.target.value))}
+              className="w-32 p-2 border rounded-md text-right font-mono"
+            />
+          ) : (
+            <p className="font-bold text-lg text-red-500">
+              Rp {expense.jumlah.toLocaleString('id-ID')}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="flex justify-end items-center gap-2 mt-4 pt-2 border-t">
+        {isEditing ? (
           <button
-            type="button"
-            className="px-3 py-1 bg-(--color-brand-primary) text-white rounded text-sm"
-            onClick={() => onSaveEdit(expense)}
+            onClick={() => onSave(expense)}
+            disabled={isPending}
+            className="flex items-center gap-1 text-sm text-white bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded-md"
           >
+            <Save size={14} />
             Simpan
           </button>
         ) : (
-          <div className="flex space-x-2">
-            <button
-              onClick={() => onEdit(expense)}
-              className="text-(--color-brand-primary) hover:text-(--color-brand-primary-hover)"
-            >
-              <Edit size={18} />
-            </button>
-            <button
-              onClick={() => onDelete(expense.expense_id)}
-              className="text-red-500 hover:text-red-700"
-            >
-              <Trash2 size={18} />
-            </button>
-          </div>
+          <button
+            onClick={() => onEdit(expense)}
+            disabled={isPending}
+            className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 px-3 py-1 rounded-md"
+          >
+            <Edit size={14} />
+            Edit
+          </button>
         )}
-      </div>
-      <div>
-        <label className="text-sm text-gray-500">Jumlah</label>
-        {isEditing && editingExpense?.expense_id === expense.expense_id ? (
-          <input
-            type="number"
-            className="p-2 border rounded w-full text-lg font-bold"
-            value={editingExpense.jumlah}
-            onChange={(e) => setEditingExpense({ ...editingExpense, jumlah: Number(e.target.value || 0) })}
-          />
-        ) : (
-          <p className="font-bold text-lg">Rp {Number(expense.jumlah).toLocaleString('id-ID')}</p>
-        )}
+        <button
+          onClick={() => onDelete(expense.expense_id)}
+          disabled={isPending}
+          className="flex items-center gap-1 text-sm text-red-500 hover:text-red-700 px-3 py-1 rounded-md"
+        >
+          <Trash2 size={14} />
+          Hapus
+        </button>
       </div>
     </div>
   );
