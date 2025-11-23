@@ -8,7 +8,6 @@ import { AOSInit } from "@/components/AOSInit";
 import { PreloaderVisuals } from "@/components/Preloader";
 import BubbleCursor from "@/components/BubbleCursor";
 import FloatingBackgroundIcons from "@/components/FloatingBackgroundIcons";
-import AnimatedBubbles from "@/components/AnimatedBubbles";
 
 export default function AppShell({
   children,
@@ -44,7 +43,6 @@ export default function AppShell({
           <BubbleCursor />
           <div className="fixed inset-0 -z-10 pointer-events-none">
             <FloatingBackgroundIcons />
-            <AnimatedBubbles />
           </div>
         </>
       )}

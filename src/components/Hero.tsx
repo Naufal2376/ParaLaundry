@@ -3,7 +3,6 @@
 import React from 'react';
 import { TypeAnimation } from 'react-type-animation';
 import FloatingBackgroundIcons from '@/components/FloatingBackgroundIcons';
-import AnimatedBubbles from '@/components/AnimatedBubbles';
 import WaveText from '@/components/WaveText';
 import AnimatedIcon from './AnimatedIcon';
 
@@ -16,7 +15,6 @@ const Hero = () => {
     <section id="beranda" className="pt-32 pb-20 px-4 min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Latar Belakang Ramai (Tetap ada) */}
       <FloatingBackgroundIcons />
-      <AnimatedBubbles />
       
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">

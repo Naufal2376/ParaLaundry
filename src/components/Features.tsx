@@ -4,7 +4,6 @@ import React from 'react';
 // Impor ikon-ikon baru yang relevan
 import { Award, Truck, Percent, Smile, ShieldCheck, Clock, CreditCard } from 'lucide-react';
 import FloatingBackgroundIcons from '@/components/FloatingBackgroundIcons';
-import AnimatedBubbles from '@/components/AnimatedBubbles';
 
 // Daftar keunggulan baru dengan ikon dan penjelasan
 const features = [
@@ -44,7 +43,6 @@ const Features = () => {
   return (
     <section id="keunggulan" className="py-20 px-4 bg-white relative z-10 overflow-hidden">
       <FloatingBackgroundIcons />
-      <AnimatedBubbles />
       <div className="container mx-auto">
         <h2 className="text-4xl font-bold text-center text-(--color-text-primary) mb-4" data-aos="fade-down">
           Mengapa Pilih Kami?

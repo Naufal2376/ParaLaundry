@@ -31,21 +31,10 @@ const FloatingParticles = () => {
   const icons = [Shirt, Droplets, Sparkles, WashingMachine];
 
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10 bg-gradient-to-br from-blue-50 via-white to-blue-100">
-      {/* Orb Warna */}
-      <motion.div 
-        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-        transition={{ duration: 8, repeat: Infinity }}
-        className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-400/20 rounded-full blur-[100px]"
-      />
-      <motion.div 
-        animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.4, 0.2] }}
-        transition={{ duration: 10, repeat: Infinity, delay: 1 }}
-        className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-purple-400/20 rounded-full blur-[120px]"
-      />
+    <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10 bg-gradient-to-br from-blue-50 via-white to-blue-100">      
 
       {/* Ikon Mengapung */}
-      {Array.from({ length: 15 }).map((_, i) => {
+      {Array.from({ length: 12 }).map((_, i) => {
         const Icon = icons[i % icons.length];
         const randomSize = Math.random() * 20 + 15;
         const randomDelay = Math.random() * 5;
@@ -76,7 +65,7 @@ const FloatingParticles = () => {
   );
 };
 
-// --- 2. INPUT INTERAKTIF (DIPERBAIKI LABELNYA) ---
+// --- 2. INPUT INTERAKTIF (OPTIMIZED WITH CSS TRANSITIONS) ---
 const InteractiveInput = ({ 
   icon: Icon, 
   type, 
@@ -86,60 +75,41 @@ const InteractiveInput = ({
   onTogglePassword, 
   isPasswordVisible 
 }: any) => {
-  const [isFocused, setIsFocused] = useState(false);
-  const [hasValue, setHasValue] = useState(false);
+  // ID unik untuk menghubungkan label dan input
+  const inputId = `input-${name}`;
 
   return (
-    <motion.div 
-      className="relative mb-5"
-      initial={false}
-      animate={isFocused ? { scale: 1.02 } : { scale: 1 }}
-    >
-      {/* Label Animasi (Sekarang punya background agar border tertutup) */}
-      <motion.label
-        initial={false}
-        animate={{
-          y: isFocused || hasValue ? -28 : 0, // Naik ke atas border
-          x: isFocused || hasValue ? 10 : 48, // Geser posisi
-          scale: isFocused || hasValue ? 0.85 : 1,
-          color: isFocused ? "var(--color-brand-primary)" : "#64748b",
-        }}
-        className={`absolute top-3.5 left-0 pointer-events-none font-medium transition-all z-20 px-2 rounded-md ${
-          // Tambahkan background putih saat aktif agar menutupi garis border di belakangnya
-          isFocused || hasValue ? "bg-white shadow-sm" : "bg-transparent"
-        }`}
-      >
-        {placeholder}
-      </motion.label>
-
-      <div className={`relative flex items-center overflow-visible rounded-xl border-2 transition-all duration-300 z-10 ${
-        isFocused 
-          ? "border-(--color-brand-primary) bg-white shadow-[0_0_20px_rgba(0,132,255,0.15)]" 
-          : "border-gray-200 bg-white/60 hover:bg-white/80"
-      }`}>
+    <div className="relative group mb-5">
+      <div className={`relative flex items-center overflow-visible rounded-xl border-2 transition-all duration-300 z-10 
+        bg-white/60 hover:bg-white/80
+        focus-within:border-(--color-brand-primary) focus-within:bg-white focus-within:shadow-[0_0_20px_rgba(0,132,255,0.15)]
+      `}>
         {/* Ikon Sisi Kiri */}
-        <div className="pl-4">
-          <motion.div
-            animate={isFocused ? { y: [0, -3, 0], color: "#0084ff" } : { color: "#94a3b8" }}
-            transition={{ duration: 0.4 }}
-          >
-            <Icon size={20} />
-          </motion.div>
+        <div className="pl-4 text-gray-400 group-focus-within:text-(--color-brand-primary) transition-colors duration-300">
+          <Icon size={20} />
         </div>
 
         <input
+          id={inputId}
           type={type}
           name={name}
-          onFocus={() => setIsFocused(true)}
-          onBlur={(e) => {
-            setIsFocused(false);
-            setHasValue(e.target.value.length > 0);
-          }}
-          onChange={(e) => setHasValue(e.target.value.length > 0)}
-          className="w-full py-4 px-3 bg-transparent outline-none text-gray-700 font-medium z-0"
+          placeholder=" " // Placeholder harus ada tapi kosong agar CSS selector berfungsi
+          className="peer w-full py-4 px-3 bg-transparent outline-none text-gray-700 font-medium z-0"
           required
         />
 
+        {/* Label Animasi (CSS-based) */}
+        <label
+          htmlFor={inputId}
+          className="absolute top-4 left-12 text-gray-400 pointer-events-none font-medium transition-all duration-300 ease-in-out
+            peer-placeholder-shown:top-4 peer-placeholder-shown:left-12 peer-placeholder-shown:scale-100
+            peer-focus:-top-4 peer-focus:-left-0 peer-focus:scale-85 peer-focus:text-(--color-brand-primary) peer-focus:bg-white peer-focus:px-2 peer-focus:py-0 peer-focus:rounded-md peer-focus:shadow-sm
+            peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:-left-0 peer-[:not(:placeholder-shown)]:scale-85 peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-2 peer-[:not(:placeholder-shown)]:py-0 peer-[:not(:placeholder-shown)]:rounded-md peer-[:not(:placeholder-shown)]:shadow-sm
+          "
+        >
+          {placeholder}
+        </label>
+        
         {/* Toggle Password */}
         {showPasswordToggle && (
           <button
@@ -151,7 +121,7 @@ const InteractiveInput = ({
           </button>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 

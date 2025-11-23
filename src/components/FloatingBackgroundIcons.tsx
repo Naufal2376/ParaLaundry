@@ -16,7 +16,7 @@ const FloatingBackgroundIcons = () => {
 
   useEffect(() => {
     // Hasilkan ikon HANYA di dalam useEffect (sisi klien)
-    const newItems = Array.from({ length: 28 }, (_, i) => {
+    const newItems = Array.from({ length: 12 }, (_, i) => {
       const Icon = icons[i % 3];
       const size = Math.random() * (36 - 12) + 12;
       return {
