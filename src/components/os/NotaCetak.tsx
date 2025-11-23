@@ -153,7 +153,7 @@ Terima kasih atas kepercayaan Anda!
       <div ref={notaRef} className="printable-area bg-white p-6 rounded-lg border border-gray-200">
         
         {/* Header Nota */}
-        <div className="flex items-center justify-between pb-4 border-b border-dashed">
+        <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-dashed">
           <div className="flex items-center gap-3">
             <Image src="/ParaLaundry.png" alt="Logo" width={50} height={50} className="rounded-full" />
             <div>
@@ -162,7 +162,7 @@ Terima kasih atas kepercayaan Anda!
             </div>
           </div>
           {isLunas && (
-            <div className="bg-green-100 text-green-700 font-bold text-sm py-1 px-4 rounded-full">
+            <div className="bg-green-100 text-green-700 font-bold text-sm py-1 px-4 rounded-full self-end sm:self-auto">
               LUNAS
             </div>
           )}

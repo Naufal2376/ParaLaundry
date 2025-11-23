@@ -19,21 +19,17 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, userRole, onStatusCucianCh
     <div className="bg-white p-4 rounded-lg shadow mb-4">
       <div className="flex justify-between items-start">
         <div>
-          <p className="font-bold text-lg text-(--color-brand-primary)">PL-{order.order_id}</p>
+          <p className="font-bold text-lg text-(--color-brand-primary)">{order.order_code || `PL-${order.order_id}`}</p>
           <p className="text-gray-600">{order.customer?.nama || 'N/A'}</p>
         </div>
-        <Link href={`/os/transaksi/sukses/${order.order_id}`} className="flex items-center text-blue-500">
+        <Link href={`/os/transaksi/sukses/${order.order_code || order.order_id}`} className="flex items-center text-blue-500">
           Detail <ChevronRight size={16} />
         </Link>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm text-gray-500">Status Cucian</label>
-          {userRole === 'Owner' ? (
-            <div className={`w-full p-2 rounded-lg text-sm font-medium ${getStatusClass(order.status_cucian)}`}>
-              {order.status_cucian}
-            </div>
-          ) : (
+          {userRole === 'Owner' || userRole === 'Pegawai' ? (
             <select
               value={order.status_cucian}
               onChange={(e) => onStatusCucianChange(order.order_id, e.target.value)}
@@ -44,15 +40,15 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, userRole, onStatusCucianCh
                 <option key={status} value={status}>{status}</option>
               ))}
             </select>
+          ) : (
+            <div className={`w-full p-2 rounded-lg text-sm font-medium ${getStatusClass(order.status_cucian)}`}>
+              {order.status_cucian}
+            </div>
           )}
         </div>
         <div>
           <label className="text-sm text-gray-500">Status Bayar</label>
-          {userRole === 'Owner' ? (
-            <div className={`w-full p-2 rounded-lg text-sm font-semibold ${getPaymentClass(order.status_bayar)}`}>
-              {order.status_bayar}
-            </div>
-          ) : (
+          {userRole === 'Owner' || userRole === 'Pegawai' ? (
             <select
               value={order.status_bayar}
               onChange={(e) => onStatusBayarChange(order.order_id, e.target.value)}
@@ -63,6 +59,10 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, userRole, onStatusCucianCh
                 <option key={status} value={status}>{status}</option>
               ))}
             </select>
+          ) : (
+            <div className={`w-full p-2 rounded-lg text-sm font-semibold ${getPaymentClass(order.status_bayar)}`}>
+              {order.status_bayar}
+            </div>
           )}
         </div>
       </div>
