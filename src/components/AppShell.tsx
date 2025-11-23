@@ -37,14 +37,17 @@ export default function AppShell({
     <>
       {/* Inisialisasi AOS (Client Component) */}
       <AOSInit />
-      {/* Kursor Gelembung (Client Component) */}
-      <BubbleCursor />
-      
-      {/* Background global yang ramai (Client Component) */}
-      <div className="fixed inset-0 -z-10 pointer-events-none">
-        <FloatingBackgroundIcons />
-        <AnimatedBubbles />
-      </div>
+
+      {/* Conditionally render heavy animations on non-functional pages */}
+      {!pathname.startsWith('/login') && !pathname.startsWith('/os') && (
+        <>
+          <BubbleCursor />
+          <div className="fixed inset-0 -z-10 pointer-events-none">
+            <FloatingBackgroundIcons />
+            <AnimatedBubbles />
+          </div>
+        </>
+      )}
 
       {/* Logika Preloader */}
       <AnimatePresence mode="wait">

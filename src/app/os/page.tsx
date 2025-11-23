@@ -216,7 +216,9 @@ const DashboardPage = async () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <PieChartComponent data={pieChartData} />
-        <BarChartComponent data={last7DaysData} />
+        <div className="bg-white p-4 rounded-2xl shadow-lg h-[400px] sm:h-[450px] md:h-[500px]">
+          <BarChartComponent data={last7DaysData} />
+        </div>
       </div>
 
       <OrderTable orders={recentOrders} userRole={role} />
