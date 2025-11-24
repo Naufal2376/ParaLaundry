@@ -16,8 +16,8 @@ async function authorizeOwner() {
     .eq('id', user.id)
     .single();
 
-  if (profile?.role !== 'Owner') {
-    throw new Error("Akses ditolak. Hanya Owner yang dapat melakukan aksi ini.");
+  if (profile?.role !== 'Owner' && profile?.role !== 'Pegawai') {
+    throw new Error("Akses ditolak.");
   }
 }
 

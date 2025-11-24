@@ -18,7 +18,8 @@ export const ServiceTable: React.FC<ServiceTableProps> = ({ role, services }) =>
   const [isPending, startTransition] = useTransition();
   const [query, setQuery] = useState('');
 
-  const isOwner = role === "Owner";
+  // const isOwner = role === "Owner";
+  const canEdit = role === "Owner" || role === "Pegawai";
 
   const openModalForNew = () => {
     setEditingService(null); // Pastikan mode-nya 'Tambah Baru'
@@ -51,7 +52,7 @@ export const ServiceTable: React.FC<ServiceTableProps> = ({ role, services }) =>
   return (
     <>
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
-        {isOwner && (
+        {canEdit && (
           <button
             onClick={openModalForNew}
             className="shine-button flex items-center bg-(--color-brand-primary) text-white font-semibold px-4 py-2 md:px-6 md:py-3 rounded-lg shadow-lg transition-transform hover:scale-105 w-full md:w-auto justify-center"
@@ -79,7 +80,7 @@ export const ServiceTable: React.FC<ServiceTableProps> = ({ role, services }) =>
               <th className="p-4">Nama Layanan</th>
               <th className="p-4">Harga</th>
               <th className="p-4">Satuan</th>
-              {isOwner && <th className="p-4 text-right">Aksi</th>}
+              {canEdit && <th className="p-4 text-right">Aksi</th>}
             </tr>
           </thead>
           <tbody>
@@ -89,7 +90,7 @@ export const ServiceTable: React.FC<ServiceTableProps> = ({ role, services }) =>
                 <td className="p-4 text-(--color-dark-primary)">Rp {service.harga.toLocaleString('id-ID')}</td>
                 <td className="p-4 text-(--color-dark-primary)">/{service.satuan}</td>
                 {/* Tombol Edit/Hapus (Hanya Owner) */}
-                {isOwner && (
+                {canEdit && (
                   <td className="p-4 text-right">
                     <button
                       onClick={() => openModalForEdit(service)}
@@ -120,7 +121,7 @@ export const ServiceTable: React.FC<ServiceTableProps> = ({ role, services }) =>
             <ServiceCard
               key={service.service_id}
               service={service}
-              isOwner={isOwner}
+              canEdit={canEdit}
               onEdit={openModalForEdit}
               onDelete={handleDelete}
               isPending={isPending}

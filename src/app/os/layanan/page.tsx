@@ -43,13 +43,6 @@ export default async function LayananPage() {
       
       {/* 3. Render Komponen Klien, oper data server ke klien */}
       <ServiceTable role={role} services={services} />
-      
-      {/* Pesan untuk Pegawai */}
-      {role === "Pegawai" && (
-        <p className="text-center text-(--color-dark-primary) mt-4 italic">
-          Anda hanya dapat melihat daftar layanan. Hanya Owner yang dapat menambah atau mengedit.
-        </p>
-      )}
     </div>
   );
 }

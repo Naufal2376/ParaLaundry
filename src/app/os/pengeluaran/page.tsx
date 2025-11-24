@@ -20,8 +20,8 @@ export default async function ExpensePage() {
     .eq('id', user.id)
     .single();
 
-  // Hanya Owner yang boleh melihat halaman ini
-  if (profile?.role !== 'Owner') redirect('/os');
+  // Hanya Owner & Pegawai yang boleh melihat halaman ini
+  if (profile?.role !== 'Owner' && profile?.role !== 'Pegawai') redirect('/os');
 
   // --- 2. Ambil Data Awal ---
   // Ambil data di server agar halaman cepat dimuat

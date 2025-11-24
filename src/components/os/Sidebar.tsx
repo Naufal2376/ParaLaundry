@@ -13,12 +13,12 @@ import Link from 'next/link';
 // Definisikan semua link yang mungkin ada
 const allNavLinks = [
   { name: 'Dashboard', href: '/os', icon: <LayoutDashboard />, roles: ['Pegawai', 'Owner'] },
-  { name: 'Transaksi Baru', href: '/os/transaksi/baru', icon: <Sparkles />, roles: ['Pegawai'] },
-  { name: 'Pengeluaran', href: '/os/pengeluaran', icon: <FileText />, roles: ['Owner'] },
+  { name: 'Transaksi Baru', href: '/os/transaksi/baru', icon: <Sparkles />, roles: ['Pegawai', 'Owner'] },
+  { name: 'Pengeluaran', href: '/os/pengeluaran', icon: <FileText />, roles: ['Owner', 'Pegawai'] },
   { name: 'Daftar Transaksi', href: '/os/transaksi', icon: <List />, roles: ['Pegawai', 'Owner'] },
-  { name: 'Update Status', href: '/os/status', icon: <UserCheck />, roles: ['Pegawai'] },
-  { name: 'Manajemen Layanan', href: '/os/layanan', icon: <PieChart />, roles: ['Owner'] }, // <-- Owner Only
-  { name: 'Laporan Keuangan', href: '/os/laporan', icon: <TrendingUp />, roles: ['Owner'] }, // <-- Owner Only
+  { name: 'Update Status', href: '/os/status', icon: <UserCheck />, roles: ['Pegawai', 'Owner'] },
+  { name: 'Manajemen Layanan', href: '/os/layanan', icon: <PieChart />, roles: ['Owner', 'Pegawai'] },
+  { name: 'Laporan Keuangan', href: '/os/laporan', icon: <TrendingUp />, roles: ['Owner'] },
 ];
 
 // 1. Tentukan tipe props yang diterima

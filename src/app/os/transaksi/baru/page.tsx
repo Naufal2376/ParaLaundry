@@ -225,16 +225,23 @@ export default function NewTransactionPage() {
                     ))}
                   </select>
                   
-                  <input 
-                    type="number" 
-                    placeholder="Kg/Pcs" 
-                    value={item.jumlah}
-                    onChange={(e) => updateItem(item.id, 'jumlah', e.target.value)}
-                    min="0.1"
-                    step="0.1"
-                    required
-                    className="w-full md:w-32 p-3 border border-(--color-light-primary-active) rounded-lg" 
-                  />
+                  <div className="relative w-full md:w-36">
+                    <input 
+                      type="number" 
+                      placeholder="0" 
+                      value={item.jumlah}
+                      onChange={(e) => updateItem(item.id, 'jumlah', e.target.value)}
+                      min="0.1"
+                      step="0.1"
+                      required
+                      // Tambahkan pr-12 (padding-right) agar teks tidak menabrak satuan
+                      className="w-full p-3 pr-12 border border-(--color-light-primary-active) rounded-lg" 
+                    />
+                    {/* Teks Satuan (kg/pcs) Otomatis dari State */}
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium text-sm pointer-events-none">
+                      {item.satuan}
+                    </span>
+                  </div>
                   
                   <span className="w-full md:w-auto text-lg font-medium text-(--color-text-primary)">
                     = Rp {item.sub_total.toLocaleString('id-ID')}
