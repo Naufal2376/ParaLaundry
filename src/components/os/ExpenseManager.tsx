@@ -265,14 +265,12 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ role, initialExp
                       // Tombol Edit (opsional: bisa disembunyikan juga jika pegawai tidak boleh edit)
                       // Untuk saat ini kita biarkan tombol edit, tapi database akan menolak jika Anda set policy UPDATE ke owner only
                       // Jika policy UPDATE hanya owner, sebaiknya tombol ini juga: canDelete && <button...>
-                      canDelete && (
-                        <button
-                            type="button"
-                            className="px-3 py-1 bg-white border rounded"
-                            disabled={isPending}
-                            onClick={() => setEditing(r)}
-                        >Edit</button>
-                      )
+                      <button
+                          type="button"
+                          className="px-3 py-1 bg-white border rounded"
+                          disabled={isPending}
+                          onClick={() => setEditing(r)}
+                      >Edit</button>
                     )}
                     
                     {/* HANYA TAMPILKAN JIKA OWNER */}
