@@ -1,11 +1,9 @@
-// src/components/os/ExpenseManager.tsx
 "use client";
 import React, { useState, useMemo, useTransition } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import ExpenseCard from './ExpenseCard'; // Impor komponen card
-import { Save, Search, Edit, Trash2 } from 'lucide-react';
+import ExpenseCard from './ExpenseCard'; 
+import { Save, Search } from 'lucide-react';
 
-// Tipe data untuk baris pengeluaran
 type ExpenseRow = {
   expense_id: number;
   tanggal_pengeluaran: string;
@@ -14,15 +12,15 @@ type ExpenseRow = {
 };
 
 interface ExpenseManagerProps {
-  // Menerima data awal dari Server Component
+  role: string; // Role sekarang wajib
   initialExpenses: ExpenseRow[];
 }
 
-export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ initialExpenses }) => {
+export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ role, initialExpenses }) => {
   const [jumlah, setJumlah] = useState<number | ''>('');
   const [kategori, setKategori] = useState('Operasional');
   const [keterangan, setKeterangan] = useState('');
-  const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10)); // Default hari ini
+  const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10));
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -32,7 +30,10 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ initialExpenses 
   const [query, setQuery] = useState('');
   const [isPending, startTransition] = useTransition();
 
-  // Fungsi untuk refresh data tabel
+  // --- LOGIKA HAK AKSES ---
+  // Hanya Owner yang boleh menghapus
+  const canDelete = role === "Owner"; 
+
   const refreshTable = async () => {
     const supabase = createClient();
     const { data } = await supabase
@@ -42,7 +43,6 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ initialExpenses 
     if (data) setRows(data as any);
   };
 
-  // Handler untuk submit form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -71,15 +71,18 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ initialExpenses 
         setJumlah('');
         setKategori('Operasional');
         setKeterangan('');
-        await refreshTable(); // Refresh tabel
+        await refreshTable();
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handler untuk menyimpan editan
   const handleSaveEdit = async (exp: ExpenseRow) => {
+    // Hanya Owner yang boleh edit (sesuai permintaan tidak boleh hapus/ubah data sensitif oleh pegawai)
+    // Tapi jika pegawai salah input, biasanya mereka perlu edit. 
+    // Jika ingin ketat (hanya owner), tambahkan: if(!canDelete) return;
+    
     startTransition(async () => {
       if (!editing) return;
       const supabase = createClient();
@@ -91,29 +94,38 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ initialExpenses 
       if (!error) {
         setEditing(null);
         await refreshTable();
+      } else {
+        alert("Gagal edit: " + error.message);
       }
     });
   };
 
-  // Handler untuk menghapus
   const handleDelete = async (id: number) => {
+    if (!canDelete) {
+      alert("Hanya Owner yang dapat menghapus data keuangan.");
+      return;
+    }
+
     if (window.confirm("Anda yakin ingin menghapus pengeluaran ini?")) {
       startTransition(async () => {
         const supabase = createClient();
-        await supabase.from('expenses').delete().eq('expense_id', id);
-        setRows(rows.filter(x => x.expense_id !== id));
+        const { error } = await supabase.from('expenses').delete().eq('expense_id', id);
+        
+        if (error) {
+            alert("Gagal menghapus: " + error.message);
+        } else {
+            setRows(rows.filter(x => x.expense_id !== id));
+        }
       });
     }
   };
 
-   // Handler untuk memperbarui state editing dari card
    const handleUpdateEditing = (field: 'keterangan' | 'jumlah', value: string | number) => {
     if (editing) {
       setEditing({ ...editing, [field]: value });
     }
   };
 
-  // Logika filter (pencarian)
   const filteredRows = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return rows;
@@ -126,7 +138,6 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ initialExpenses 
 
   return (
     <>
-      {/* Form Input Pengeluaran */}
       <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-2xl shadow-lg max-w-3xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -190,7 +201,6 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ initialExpenses 
         </div>
       </form>
 
-      {/* Daftar Pengeluaran */}
       <div className="bg-white p-4 md:p-6 rounded-2xl shadow-lg mt-8">
         <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
             <h2 className="text-xl font-semibold text-(--color-text-primary)">Daftar Pengeluaran</h2>
@@ -206,7 +216,6 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ initialExpenses 
             </div>
         </div>
         
-        {/* Tampilan Tabel untuk Desktop */}
         <div className="hidden md:block overflow-x-auto">
           <table className={`w-full text-left ${isPending ? 'opacity-50' : ''}`}>
             <thead>
@@ -253,32 +262,40 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ initialExpenses 
                         onClick={() => handleSaveEdit(r)}
                       >Simpan</button>
                     ) : (
-                      <button
-                        type="button"
-                        className="px-3 py-1 bg-white border rounded"
-                        disabled={isPending}
-                        onClick={() => setEditing(r)}
-                      >Edit</button>
+                      // Tombol Edit (opsional: bisa disembunyikan juga jika pegawai tidak boleh edit)
+                      // Untuk saat ini kita biarkan tombol edit, tapi database akan menolak jika Anda set policy UPDATE ke owner only
+                      // Jika policy UPDATE hanya owner, sebaiknya tombol ini juga: canDelete && <button...>
+                      canDelete && (
+                        <button
+                            type="button"
+                            className="px-3 py-1 bg-white border rounded"
+                            disabled={isPending}
+                            onClick={() => setEditing(r)}
+                        >Edit</button>
+                      )
                     )}
+                    
+                    {/* HANYA TAMPILKAN JIKA OWNER */}
+                    {canDelete && (
                     <button
                       type="button"
                       className="px-3 py-1 bg-red-500 text-white rounded"
                       disabled={isPending}
                       onClick={() => handleDelete(r.expense_id)}
                     >Hapus</button>
+                    )}
                   </td>
                 </tr>
               ))}
               {filteredRows.length === 0 && (
                 <tr>
-                  <td className="p-3 text-center" colSpan={4}>{rows.length === 0 ? "Belum ada data pengeluaran." : "Tidak ada hasil yang cocok."}</td>
+                  <td className="p-3 text-center" colSpan={4}>Belum ada data.</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
         
-        {/* Tampilan Card untuk Mobile */}
         <div className="md:hidden mt-4 space-y-4">
           {filteredRows.length > 0 ? (
             filteredRows.map((r) => (
@@ -295,7 +312,7 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ initialExpenses 
             ))
           ) : (
             <p className="p-4 text-center text-(--color-dark-primary)">
-              {rows.length === 0 ? "Belum ada data pengeluaran." : "Tidak ada hasil yang cocok."}
+              Belum ada data.
             </p>
           )}
         </div>
