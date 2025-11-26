@@ -54,7 +54,7 @@ export default async function TransaksiPage() {
             Daftar Semua Transaksi
           </h1>
         </div>
-        {userRole === 'Pegawai' && (
+        {(userRole === 'Pegawai' || userRole === 'Owner') && (
           <Link href="/os/transaksi/baru" className="flex items-center gap-2 bg-(--color-brand-primary) text-white font-semibold px-4 py-2 rounded-lg hover:bg-(--color-brand-primary-active) transition-colors">
             <Plus size={20} />
             <span>Tambah Transaksi</span>

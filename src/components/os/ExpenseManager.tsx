@@ -181,6 +181,7 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ role, initialExp
               value={keterangan}
               onChange={(e) => setKeterangan(e.target.value)}
               rows={3}
+              required
               className="w-full p-3 border border-(--color-light-primary-active) rounded-lg"
               placeholder="Contoh: Beli deterjen, perbaikan mesin, dll."
             />

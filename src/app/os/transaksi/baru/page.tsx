@@ -55,10 +55,6 @@ export default function NewTransactionPage() {
         .select('role')
         .eq('id', user.id)
         .single();
-      if (profile?.role === 'Owner') {
-        router.push('/os'); // <-- 3. Gunakan router.push
-        return;
-      }
       // Load services
       const { data } = await supabase.from('services').select('*');
       if (data) setServices(data);
@@ -195,7 +191,7 @@ export default function NewTransactionPage() {
                 className="p-3 border border-(--color-light-primary-active) rounded-lg" 
               />
               <input 
-                type="tel" 
+                type="number" 
                 placeholder="Nomor HP" 
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
