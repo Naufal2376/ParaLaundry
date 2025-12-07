@@ -1,95 +1,102 @@
 // src/components/os/NotaCetak.tsx
-"use client";
+"use client"
 
-import React, { useRef } from 'react';
-import QRCode from 'react-qr-code';
-import { Printer, User, Calendar, Hash, Phone, Shirt } from 'lucide-react';
-import { FaWhatsapp } from 'react-icons/fa';
-import Image from 'next/image';
+import React, { useRef } from "react"
+import QRCode from "react-qr-code"
+import { Printer, User, Calendar, Hash, Phone, Shirt } from "lucide-react"
+import { FaWhatsapp } from "react-icons/fa"
+import Image from "next/image"
 
 // Sesuaikan Interface dengan data yang dikirim dari page.tsx
 interface NotaProps {
   data: {
-    order_code: string; // Menggunakan Code (PL-XXXX), bukan ID angka
-    date: string | Date;
+    order_code: string // Menggunakan Code (PL-XXXX), bukan ID angka
+    date: string | Date
     customer: {
-      name: string;
-      phone: string;
-    };
+      name: string
+      phone: string
+    }
     payment: {
-      total: number;
-      paid: number;
-      method: string;
-    };
+      total: number
+      paid: number
+      method: string
+    }
     items: Array<{
-      service_name: string;
-      qty: number;
-      price: number;
-      subtotal: number;
-    }>;
-  };
+      service_name: string
+      qty: number
+      price: number
+      subtotal: number
+    }>
+  }
 }
 
 export default function NotaCetak({ data }: NotaProps) {
-  const notaRef = useRef<HTMLDivElement>(null);
-  
+  const notaRef = useRef<HTMLDivElement>(null)
+
   // --- LOGIC HITUNGAN ---
-  const total = Number(data.payment.total);
-  const bayar = Number(data.payment.paid);
-  const kembalian = bayar - total;
-  const isLunas = bayar >= total;
-  const statusBayarString = isLunas ? 'Lunas' : 'Belum Lunas';
+  const total = Number(data.payment.total)
+  const bayar = Number(data.payment.paid)
+  const kembalian = bayar - total
+  const isLunas = bayar >= total
+  const statusBayarString = isLunas ? "Lunas" : "Belum Lunas"
 
   // URL Tracking menggunakan Order Code
-  const trackingUrl = `https://para-laundry.vercel.app/lacak/${data.order_code}`;
+  const trackingUrl = `https://para-laundry.vercel.app/lacak/${data.order_code}`
 
   const handlePrint = () => {
     // We need to move the printable area out of the main content flow
     // for the print styles in globals.css to work correctly.
-    const printableElement = notaRef.current;
+    const printableElement = notaRef.current
     if (printableElement) {
-      const parent = printableElement.parentNode;
-      document.body.appendChild(printableElement);
-      window.print();
+      const parent = printableElement.parentNode
+      document.body.appendChild(printableElement)
+      window.print()
       // Move it back after printing
-      parent?.appendChild(printableElement);
+      parent?.appendChild(printableElement)
     }
-  };
+  }
 
   // --- LOGIC WHATSAPP ---
   const sendWhatsAppReceipt = () => {
     if (!data.customer.phone) {
-      alert('Nomor HP pelanggan tidak ditemukan.');
-      return;
+      alert("Nomor HP pelanggan tidak ditemukan.")
+      return
     }
 
     // Format rincian item (looping dari data.items)
-    const itemsList = data.items.map((item) => 
-      `- ${item.service_name} (x${item.qty}): Rp ${item.subtotal.toLocaleString('id-ID')}`
-    ).join('\n');
+    const itemsList = data.items
+      .map(
+        (item) =>
+          `- ${item.service_name} (x${
+            item.qty
+          }): Rp ${item.subtotal.toLocaleString("id-ID")}`
+      )
+      .join("\n")
 
     // Logic teks pembayaran untuk WA
-    const isBayarNanti = !isLunas && bayar === 0;
-    const paymentInfo = isBayarNanti 
+    const isBayarNanti = !isLunas && bayar === 0
+    const paymentInfo = isBayarNanti
       ? `*💳 Status Pembayaran:* Bayar saat pengambilan barang`
-      : `*💵 Jumlah Bayar:* Rp ${bayar.toLocaleString('id-ID')}\n*🔄 Kembalian:* Rp ${kembalian.toLocaleString('id-ID')}`;
+      : `*💵 Jumlah Bayar:* Rp ${bayar.toLocaleString(
+          "id-ID"
+        )}\n*🔄 Kembalian:* Rp ${kembalian.toLocaleString("id-ID")}`
 
     const message = `
 *NOTA DIGITAL PARA LAUNDRY*
 
-Terima kasih, ${data.customer.name || 'Pelanggan'}!
+Terima kasih, ${data.customer.name || "Pelanggan"}!
 
 Pesanan Anda *${data.order_code}* telah kami terima.
 
 *📋 Detail Pesanan:*
 • *ID Pesanan:* ${data.order_code}
-• *Tanggal:* ${new Date(data.date).toLocaleString('id-ID')}
+• *Tanggal:* ${new Date(data.date).toLocaleString("id-ID")}
 • *Status Pembayaran:* ${statusBayarString}
 
 *🛍️ Rincian Pesanan:*
 ${itemsList}
 
-*💰 Total Biaya:* *Rp ${total.toLocaleString('id-ID')}*
+*💰 Total Biaya:* *Rp ${total.toLocaleString("id-ID")}*
 ${paymentInfo}
 
 *📱 Lacak Pesanan:*
@@ -104,32 +111,42 @@ Jl. Indralaya-Prabumulih Indralaya (Pertokoan Amanah Depan UNSRI)
 📞 0813-7777-1420
 
 Terima kasih atas kepercayaan Anda!
-    `.trim().replace(/\n\s+\n/g, '\n\n');
+    `
+      .trim()
+      .replace(/\n\s+\n/g, "\n\n")
 
     // Format nomor HP (08 -> 628)
-    const formattedPhoneNumber = data.customer.phone.replace(/[^0-9]/g, '').replace(/^0/, '62');
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/${formattedPhoneNumber}?text=${encodedMessage}`, '_blank');
-  };
-  
+    const formattedPhoneNumber = data.customer.phone
+      .replace(/[^0-9]/g, "")
+      .replace(/^0/, "62")
+    const encodedMessage = encodeURIComponent(message)
+    window.open(
+      `https://wa.me/${formattedPhoneNumber}?text=${encodedMessage}`,
+      "_blank"
+    )
+  }
+
   const formatDate = (dateString: string | Date) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    });
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
   }
 
   return (
     <div className="bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-lg max-w-md mx-auto print:shadow-none print:p-0">
-      
       {/* --- TOMBOL AKSI (TIDAK DICETAK) --- */}
       <div className="no-print mb-6 text-center">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">
           Transaksi Berhasil!
         </h2>
         <p className="text-gray-600 mb-6">
-          Pesanan <span className="font-mono font-bold text-blue-600">{data.order_code}</span> telah dibuat.
+          Pesanan{" "}
+          <span className="font-mono font-bold text-blue-600">
+            {data.order_code}
+          </span>{" "}
+          telah dibuat.
         </p>
         <div className="flex flex-col gap-3">
           <button
@@ -150,12 +167,20 @@ Terima kasih atas kepercayaan Anda!
       </div>
 
       {/* --- AREA NOTA FISIK --- */}
-      <div ref={notaRef} className="printable-area bg-white p-6 rounded-lg border border-gray-200">
-        
+      <div
+        ref={notaRef}
+        className="printable-area bg-white p-6 rounded-lg border border-gray-200"
+      >
         {/* Header Nota */}
         <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-dashed">
           <div className="flex items-center gap-3">
-            <Image src="/ParaLaundry.png" alt="Logo" width={50} height={50} className="rounded-full" />
+            <Image
+              src="/ParaLaundry.png"
+              alt="Logo"
+              width={50}
+              height={50}
+              className="rounded-full"
+            />
             <div>
               <h1 className="text-xl font-bold text-gray-900">Para Laundry</h1>
               <p className="text-xs text-gray-500">Nota Pemesanan</p>
@@ -176,7 +201,7 @@ Terima kasih atas kepercayaan Anda!
           </div>
           <div className="flex items-center gap-2">
             <Phone size={14} className="text-gray-400" />
-            <span>{data.customer.phone || 'No HP'}</span>
+            <span>{data.customer.phone || "No HP"}</span>
           </div>
           <div className="flex items-center gap-2">
             <Hash size={14} className="text-gray-400" />
@@ -187,21 +212,28 @@ Terima kasih atas kepercayaan Anda!
             <span>{formatDate(data.date)}</span>
           </div>
         </div>
-        
+
         {/* Rincian Item */}
         <div className="border-t border-b border-dashed py-4 space-y-3">
           {data.items.map((item, index) => (
-            <div key={index} className="flex justify-between items-center text-sm">
+            <div
+              key={index}
+              className="flex justify-between items-center text-sm"
+            >
               <div className="flex items-center gap-3">
                 <div className="bg-blue-50 p-2 rounded-lg">
                   <Shirt size={16} className="text-blue-500" />
                 </div>
                 <div>
                   <p className="font-bold text-gray-800">{item.service_name}</p>
-                  <p className="text-xs text-gray-500">{item.qty} x @{item.price.toLocaleString('id-ID')}</p>
+                  <p className="text-xs text-gray-500">
+                    {item.qty} x @{item.price.toLocaleString("id-ID")}
+                  </p>
                 </div>
               </div>
-              <p className="font-semibold text-gray-800">Rp {item.subtotal.toLocaleString('id-ID')}</p>
+              <p className="font-semibold text-gray-800">
+                Rp {item.subtotal.toLocaleString("id-ID")}
+              </p>
             </div>
           ))}
         </div>
@@ -210,29 +242,37 @@ Terima kasih atas kepercayaan Anda!
         <div className="mt-4 space-y-2 text-sm">
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Subtotal</span>
-            <span className="font-semibold text-gray-800">Rp {total.toLocaleString('id-ID')}</span>
+            <span className="font-semibold text-gray-800">
+              Rp {total.toLocaleString("id-ID")}
+            </span>
           </div>
           <div className="flex justify-between items-center font-bold text-lg text-blue-600 border-t pt-2 mt-2">
             <span>TOTAL</span>
-            <span>Rp {total.toLocaleString('id-ID')}</span>
+            <span>Rp {total.toLocaleString("id-ID")}</span>
           </div>
-          
+
           {/* Logic Tampilan Pembayaran */}
           {isLunas && bayar > 0 && (
             <>
               <div className="flex justify-between items-center text-xs pt-2">
                 <span className="text-gray-500">Tunai</span>
-                <span className="text-gray-500">Rp {bayar.toLocaleString('id-ID')}</span>
+                <span className="text-gray-500">
+                  Rp {bayar.toLocaleString("id-ID")}
+                </span>
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="text-gray-500">Kembali</span>
-                <span className="text-gray-500">Rp {kembalian < 0 ? 0 : kembalian.toLocaleString('id-ID')}</span>
+                <span className="text-gray-500">
+                  Rp {kembalian < 0 ? 0 : kembalian.toLocaleString("id-ID")}
+                </span>
               </div>
             </>
           )}
-           {!isLunas && bayar > 0 && (
+          {!isLunas && bayar > 0 && (
             <div className="mt-2 p-2 bg-yellow-100 border border-yellow-300 rounded text-center text-xs text-yellow-800">
-              <span className="font-bold">DP: Rp {bayar.toLocaleString('id-ID')}</span>
+              <span className="font-bold">
+                DP: Rp {bayar.toLocaleString("id-ID")}
+              </span>
             </div>
           )}
           {!isLunas && bayar === 0 && (
@@ -244,16 +284,51 @@ Terima kasih atas kepercayaan Anda!
 
         {/* QR Code & Footer */}
         <div className="flex flex-col items-center mt-6 text-center border-t border-dashed pt-4">
-          <p className="text-xs text-gray-500 mb-2">Lacak status pesanan Anda dengan memindai kode ini:</p>
+          <p className="text-xs text-gray-500 mb-2">
+            Lacak status pesanan Anda dengan memindai kode ini:
+          </p>
           <div className="p-1.5 bg-white border border-gray-300 rounded-md inline-block">
             <QRCode value={trackingUrl} size={90} />
           </div>
-          <p className="text-xs font-mono mt-2 text-gray-500">{data.order_code}</p>
-          <p className="text-[10px] text-gray-400 mt-4 italic">
+          <p className="text-xs font-mono mt-2 text-gray-500">
+            {data.order_code}
+          </p>
+        </div>
+
+        {/* Ketentuan */}
+        <div className="mt-6 pt-4 border-t border-dashed">
+          <h3 className="text-xs font-bold text-gray-800 mb-2 text-center">
+            KETENTUAN
+          </h3>
+          <ol className="text-[10px] text-gray-600 space-y-1 leading-relaxed">
+            <li>1. Pengambilan barang harus disertai dengan nota</li>
+            <li>
+              2. Kami tidak bertanggung jawab apabila luntur/susut karena sifat
+              bahannya
+            </li>
+            <li>
+              3. Jika terjadi kehilangan/kerusakan kami hanya mengganti max. Rp.
+              50.000 perpotong
+            </li>
+            <li>
+              4. Penggantian barang jika terjadi kehilangan/kerusakan paling
+              lama 1 bulan
+            </li>
+            <li>
+              5. Kami tidak bertanggung jawab atas barang yang tidak diambil
+              dalam waktu 30 hari
+            </li>
+            <li>6. Hak klaim berlaku 24 jam setelah barang diambil</li>
+            <li>
+              7. Setiap konsumen dianggap setuju dengan aturan tersebut setelah
+              menandatangani nota ini
+            </li>
+          </ol>
+          <p className="text-[10px] text-gray-400 mt-4 italic text-center">
             Terima kasih telah mempercayai Para Laundry!
           </p>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
