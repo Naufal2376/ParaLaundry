@@ -18,22 +18,12 @@ interface TransactionData {
 
 interface InteractiveFinancialChartProps {
   barChartData: BarChartData[]
-  allIncomeData: Array<{
-    tanggal_order: string
-    total_biaya: number
-    order_code?: string
-  }>
-  allExpenseData: Array<{
-    tanggal_pengeluaran: string
-    jumlah: number
-    keterangan: string
-  }>
-  bucketKeyFunction: (date: string) => string
+  periodDetailsMap: Record<string, TransactionData[]>
 }
 
 export const InteractiveFinancialChart: React.FC<
   InteractiveFinancialChartProps
-> = ({ barChartData, allIncomeData, allExpenseData, bucketKeyFunction }) => {
+> = ({ barChartData, periodDetailsMap }) => {
   const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null)
 
   const handleBarClick = (periodName: string) => {
@@ -41,37 +31,7 @@ export const InteractiveFinancialChart: React.FC<
   }
 
   const getDetailData = (periodName: string): TransactionData[] => {
-    const details: TransactionData[] = []
-
-    // Filter pendapatan untuk periode yang dipilih
-    allIncomeData.forEach((item) => {
-      const key = bucketKeyFunction(item.tanggal_order)
-      if (key === periodName) {
-        details.push({
-          tanggal: item.tanggal_order,
-          keterangan: `Order ${item.order_code || "N/A"}`,
-          jumlah: Number(item.total_biaya),
-          tipe: "pendapatan",
-        })
-      }
-    })
-
-    // Filter pengeluaran untuk periode yang dipilih
-    allExpenseData.forEach((item) => {
-      const key = bucketKeyFunction(item.tanggal_pengeluaran)
-      if (key === periodName) {
-        details.push({
-          tanggal: item.tanggal_pengeluaran,
-          keterangan: item.keterangan,
-          jumlah: Number(item.jumlah),
-          tipe: "pengeluaran",
-        })
-      }
-    })
-
-    return details.sort(
-      (a, b) => new Date(a.tanggal).getTime() - new Date(b.tanggal).getTime()
-    )
+    return periodDetailsMap[periodName] || []
   }
 
   return (

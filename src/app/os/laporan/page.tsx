@@ -219,6 +219,44 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
     pengeluaran: expenseBuckets[k] || 0,
   }))
 
+  // Buat map untuk detail transaksi per periode
+  const periodDetailsMap: Record<string, any[]> = {}
+
+  sortedKeys.forEach((key) => {
+    const details: any[] = []
+
+    // Tambahkan pendapatan untuk periode ini
+    ;(incomeRows || []).forEach((item) => {
+      const k = bucketKey(item.tanggal_order, chartBucketStrategy)
+      if (k === key) {
+        details.push({
+          tanggal: item.tanggal_order,
+          keterangan: `Order ${item.order_code || "N/A"}`,
+          jumlah: Number(item.total_biaya),
+          tipe: "pendapatan",
+        })
+      }
+    })
+
+    // Tambahkan pengeluaran untuk periode ini
+    ;(expenseRows || []).forEach((item) => {
+      const k = bucketKey(item.tanggal_pengeluaran, chartBucketStrategy)
+      if (k === key) {
+        details.push({
+          tanggal: item.tanggal_pengeluaran,
+          keterangan: item.keterangan,
+          jumlah: Number(item.jumlah),
+          tipe: "pengeluaran",
+        })
+      }
+    })
+
+    // Sort by date
+    periodDetailsMap[key] = details.sort(
+      (a, b) => new Date(a.tanggal).getTime() - new Date(b.tanggal).getTime()
+    )
+  })
+
   return (
     <div>
       <header className="flex items-center gap-4 mb-8">
@@ -268,11 +306,7 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
         <div className="grid gap-8">
           <InteractiveFinancialChart
             barChartData={barChartData}
-            allIncomeData={incomeRows || []}
-            allExpenseData={expenseRows || []}
-            bucketKeyFunction={(dateStr: string) =>
-              bucketKey(dateStr, chartBucketStrategy)
-            }
+            periodDetailsMap={periodDetailsMap}
           />
         </div>
       </div>
