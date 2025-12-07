@@ -28,8 +28,7 @@ export default function ResetPasswordPage() {
           "Tautan reset sudah kedaluwarsa atau tidak valid. Silakan minta tautan baru."
       )
       setStatus("error")
-      const timer = setTimeout(() => router.push("/login/lupa-password"), 1800)
-      return () => clearTimeout(timer)
+      return
     }
 
     const codeFromQuery = searchParams.get("code")
@@ -43,34 +42,26 @@ export default function ResetPasswordPage() {
         "Kode reset tidak ditemukan. Silakan buka ulang tautan dari email."
       )
       setStatus("error")
-      const timer = setTimeout(() => router.push("/login/lupa-password"), 1800)
-      return () => clearTimeout(timer)
+      return
     }
 
     supabase.auth
       .exchangeCodeForSession(code)
       .then(({ error }: { error: any }) => {
         if (error) {
-          setMsg("Sesi reset tidak valid atau sudah kedaluwarsa.")
-          setStatus("error")
-          const timer = setTimeout(
-            () => router.push("/login/lupa-password"),
-            1800
+          setMsg(
+            "Sesi reset tidak valid atau sudah kedaluwarsa. Silakan minta tautan baru."
           )
-          return () => clearTimeout(timer)
+          setStatus("error")
+          return
         }
         setStatus("ready")
       })
       .catch(() => {
         setMsg("Gagal menukar kode reset. Coba lagi dari tautan email.")
         setStatus("error")
-        const timer = setTimeout(
-          () => router.push("/login/lupa-password"),
-          1800
-        )
-        return () => clearTimeout(timer)
       })
-  }, [router, searchParams, supabase])
+  }, [searchParams, supabase])
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -90,7 +81,6 @@ export default function ResetPasswordPage() {
     } else {
       setMsg("Password berhasil diubah. Silakan login.")
       setStatus("ready")
-      setTimeout(() => router.push("/login"), 1200)
     }
   }
 
