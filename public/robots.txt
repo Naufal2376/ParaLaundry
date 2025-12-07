@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /os/
+Disallow: /api/
+
+Sitemap: https://para-laundry.vercel.app/sitemap.xml

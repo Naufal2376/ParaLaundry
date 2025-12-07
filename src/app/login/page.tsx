@@ -20,8 +20,6 @@ import Image from 'next/image';
 import Link from "next/link"
 import { useFormStatus } from "react-dom";
 
-export const dynamic = "force-dynamic";
-
 // --- 1. KOMPONEN BACKGROUND PARTIKEL ---
 const FloatingParticles = () => {
   const [mounted, setMounted] = useState(false);

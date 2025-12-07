@@ -6,28 +6,38 @@ import { Mail, ArrowLeft, CheckCircle, Loader } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { sendResetEmail } from "./actions";
+import { useRouter } from "next/navigation"
+import { sendOTP } from "./actions"
 
 export default function LupaPasswordPage() {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [message, setMessage] = useState("");
+  const router = useRouter()
+  const [email, setEmail] = useState("")
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle")
+  const [message, setMessage] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus("loading");
-    setMessage("");
+    e.preventDefault()
+    setStatus("loading")
+    setMessage("")
 
-    const result = await sendResetEmail(email);
+    const result = await sendOTP(email)
 
     if (result.error) {
-      setStatus("error");
-      setMessage(result.error);
+      setStatus("error")
+      setMessage(result.error)
     } else {
-      setStatus("success");
-      setMessage("Link reset password telah dikirim ke email Anda. Silakan cek inbox atau folder spam.");
+      setStatus("success")
+      setMessage(
+        "Kode OTP 6 digit telah dikirim ke email Anda. Silakan cek inbox atau folder spam."
+      )
+      // Redirect ke halaman verifikasi OTP setelah 2 detik
+      setTimeout(() => {
+        router.push(`/login/reset-password?email=${encodeURIComponent(email)}`)
+      }, 2000)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-blue-100">
@@ -48,9 +58,11 @@ export default function LupaPasswordPage() {
                 className="rounded-full"
               />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">Lupa Password?</h1>
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">
+              Lupa Password?
+            </h1>
             <p className="text-gray-600 text-sm">
-              Masukkan email Anda dan kami akan mengirimkan link untuk reset password
+              Masukkan email Anda dan kami akan mengirimkan kode OTP 6 digit
             </p>
           </div>
 
@@ -115,7 +127,7 @@ export default function LupaPasswordPage() {
                     Mengirim...
                   </>
                 ) : (
-                  "Kirim Link Reset Password"
+                  "Kirim Kode OTP"
                 )}
               </motion.button>
 
@@ -134,5 +146,5 @@ export default function LupaPasswordPage() {
         </div>
       </motion.div>
     </div>
-  );
+  )
 }

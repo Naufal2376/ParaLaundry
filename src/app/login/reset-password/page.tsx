@@ -1,92 +1,67 @@
 // src/app/login/reset-password/page.tsx
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react"
+import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
-import { updatePassword } from "./actions"
+import { verifyOTPAndResetPassword } from "./actions"
 import Image from "next/image"
+import { Lock, Mail, ArrowLeft } from "lucide-react"
+import Link from "next/link"
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const supabase = useMemo(() => createClient(), [])
-  const [status, setStatus] = useState<
-    "exchanging" | "ready" | "submitting" | "error"
-  >("exchanging")
-  const [msg, setMsg] = useState<string>("")
+  const emailFromQuery = searchParams.get("email") || ""
+
+  const [email, setEmail] = useState(emailFromQuery)
+  const [otp, setOtp] = useState("")
   const [password, setPassword] = useState("")
   const [confirm, setConfirm] = useState("")
-  const hasExchanged = useRef(false) // Flag untuk prevent double-call di React Strict Mode
-
-  useEffect(() => {
-    // Prevent double execution in development (React Strict Mode)
-    if (hasExchanged.current) return
-    hasExchanged.current = true
-
-    const error = searchParams.get("error")
-    const errorDesc = searchParams.get("error_description")
-
-    // Jika Supabase sudah memberi error (expired / invalid)
-    if (error) {
-      setMsg(
-        errorDesc ||
-          "Tautan reset sudah kedaluwarsa atau tidak valid. Silakan minta tautan baru."
-      )
-      setStatus("error")
-      return
-    }
-
-    const codeFromQuery = searchParams.get("code")
-    const codeFromHash = new URLSearchParams(
-      window.location.hash.replace("#", "?")
-    ).get("code")
-    const code = codeFromQuery || codeFromHash
-
-    if (!code) {
-      setMsg(
-        "Kode reset tidak ditemukan. Silakan buka ulang tautan dari email."
-      )
-      setStatus("error")
-      return
-    }
-
-    supabase.auth
-      .exchangeCodeForSession(code)
-      .then(({ error }: { error: any }) => {
-        if (error) {
-          setMsg(
-            "Sesi reset tidak valid atau sudah kedaluwarsa. Silakan minta tautan baru."
-          )
-          setStatus("error")
-          return
-        }
-        setStatus("ready")
-      })
-      .catch(() => {
-        setMsg("Gagal menukar kode reset. Coba lagi dari tautan email.")
-        setStatus("error")
-      })
-  }, [searchParams, supabase])
+  const [status, setStatus] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle")
+  const [msg, setMsg] = useState<string>("")
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setMsg("")
+
+    if (!email || !otp) {
+      setMsg("Email dan kode OTP harus diisi.")
+      setStatus("error")
+      return
+    }
+
+    if (otp.length !== 6) {
+      setMsg("Kode OTP harus 6 digit.")
+      setStatus("error")
+      return
+    }
+
     if (password.length < 6) {
       setMsg("Password minimal 6 karakter.")
+      setStatus("error")
       return
     }
+
     if (password !== confirm) {
       setMsg("Konfirmasi password tidak sama.")
+      setStatus("error")
       return
     }
+
     setStatus("submitting")
-    const res = await updatePassword(password)
+    const res = await verifyOTPAndResetPassword(email, otp, password)
+
     if (res?.error) {
       setMsg(res.error)
-      setStatus("ready")
+      setStatus("error")
     } else {
-      setMsg("Password berhasil diubah. Silakan login.")
-      setStatus("ready")
+      setMsg("Password berhasil diubah! Silakan login dengan password baru.")
+      setStatus("success")
+      setTimeout(() => {
+        router.push("/login")
+      }, 2000)
     }
   }
 
@@ -108,7 +83,9 @@ export default function ResetPasswordPage() {
           <h1 className="text-2xl font-bold text-gray-800 mb-2">
             Reset Password
           </h1>
-          <p className="text-gray-600 text-sm">Masukkan password baru Anda</p>
+          <p className="text-gray-600 text-sm">
+            Masukkan kode OTP dan password baru Anda
+          </p>
         </div>
 
         {msg && (
@@ -126,49 +103,104 @@ export default function ResetPasswordPage() {
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password baru
+              Email
+            </label>
+            <div className="relative">
+              <Mail
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+              />
+              <input
+                type="email"
+                placeholder="Email Anda"
+                className="w-full rounded-lg border pl-10 pr-3 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={status === "submitting" || status === "success"}
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Kode OTP (6 digit)
             </label>
             <input
-              type="password"
-              placeholder="Password baru"
-              className="w-full rounded-lg border px-3 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={status !== "ready" && status !== "submitting"}
+              type="text"
+              placeholder="123456"
+              maxLength={6}
+              className="w-full rounded-lg border px-3 py-3 text-center text-2xl tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+              disabled={status === "submitting" || status === "success"}
+              required
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Konfirmasi password baru
+              Password Baru
             </label>
-            <input
-              type="password"
-              placeholder="Konfirmasi password baru"
-              className="w-full rounded-lg border px-3 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              disabled={status !== "ready" && status !== "submitting"}
-            />
+            <div className="relative">
+              <Lock
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+              />
+              <input
+                type="password"
+                placeholder="Minimal 6 karakter"
+                className="w-full rounded-lg border pl-10 pr-3 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={status === "submitting" || status === "success"}
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Konfirmasi Password
+            </label>
+            <div className="relative">
+              <Lock
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+              />
+              <input
+                type="password"
+                placeholder="Ketik ulang password"
+                className="w-full rounded-lg border pl-10 pr-3 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                disabled={status === "submitting" || status === "success"}
+                required
+              />
+            </div>
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-blue-600 text-white py-3 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
-            disabled={status !== "ready" && status !== "submitting"}
+            className="w-full rounded-lg bg-blue-600 text-white py-3 font-semibold hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            disabled={status === "submitting" || status === "success"}
           >
-            {status === "submitting" ? "Menyimpan..." : "Simpan Password"}
+            {status === "submitting"
+              ? "Memproses..."
+              : status === "success"
+              ? "Berhasil!"
+              : "Reset Password"}
           </button>
 
-          <p className="text-center text-sm text-gray-600">
-            Tidak ada kode?{" "}
-            <a
+          <div className="text-center">
+            <Link
               href="/login/lupa-password"
-              className="text-blue-600 hover:underline"
+              className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
             >
-              Kirim ulang
-            </a>
-          </p>
+              <ArrowLeft size={16} />
+              Kirim ulang OTP
+            </Link>
+          </div>
         </form>
       </div>
     </div>

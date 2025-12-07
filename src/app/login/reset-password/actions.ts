@@ -2,16 +2,32 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-export async function updatePassword(newPassword: string) {
-  const supabase = await createClient();
+export async function verifyOTPAndResetPassword(
+  email: string,
+  token: string,
+  newPassword: string
+) {
+  const supabase = await createClient()
 
-  const { error } = await supabase.auth.updateUser({
-    password: newPassword,
-  });
+  // Verifikasi OTP
+  const { error: verifyError } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: "email",
+  })
 
-  if (error) {
-    return { error: "Gagal mengubah password. Silakan coba lagi." };
+  if (verifyError) {
+    return { error: "Kode OTP tidak valid atau sudah kedaluwarsa." }
   }
 
-  return { success: true };
+  // Update password setelah OTP valid
+  const { error: updateError } = await supabase.auth.updateUser({
+    password: newPassword,
+  })
+
+  if (updateError) {
+    return { error: "Gagal mengubah password. Silakan coba lagi." }
+  }
+
+  return { success: true }
 }

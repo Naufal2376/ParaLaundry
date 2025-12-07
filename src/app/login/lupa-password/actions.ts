@@ -2,18 +2,20 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-export async function sendResetEmail(email: string) {
-  const supabase = await createClient();
+export async function sendOTP(email: string) {
+  const supabase = await createClient()
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${
-      process.env.NEXT_PUBLIC_SITE_URL || "https://para-laundry.vercel.app"
-    }/login/reset-password`,
+  // Kirim OTP 6 digit ke email
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: false, // Hanya untuk user yang sudah ada
+    },
   })
 
   if (error) {
-    return { error: "Gagal mengirim email reset password. Pastikan email terdaftar." };
+    return { error: "Gagal mengirim OTP. Pastikan email terdaftar." }
   }
 
-  return { success: true };
+  return { success: true }
 }
