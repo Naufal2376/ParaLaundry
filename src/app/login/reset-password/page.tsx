@@ -1,11 +1,10 @@
-// src/app/login/reset-password/page.tsx
-"use client";
+"use client"
 
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { verifyOTPAndResetPassword } from "./actions"
+import { verifyOTPAndResetPassword } from "./actions" // Import action yang baru
 import Image from "next/image"
-import { Lock, Mail, ArrowLeft } from "lucide-react"
+import { Lock, Mail, ArrowLeft, KeyRound } from "lucide-react"
 import Link from "next/link"
 
 export default function ResetPasswordPage() {
@@ -26,20 +25,17 @@ export default function ResetPasswordPage() {
     e.preventDefault()
     setMsg("")
 
+    // Validasi dasar
     if (!email || !otp) {
       setMsg("Email dan kode OTP harus diisi.")
       setStatus("error")
       return
     }
 
-    if (otp.length < 6) {
-      setMsg("Kode OTP harus minimal 6 digit.")
-      setStatus("error")
-      return
-    }
-
-    // Hanya ambil 6 digit pertama jika lebih
-    const otpCode = otp.substring(0, 6)
+    // --- PERBAIKAN: Hapus limitasi panjang karakter OTP ---
+    // Token Supabase bisa 6 atau 8 digit (atau hash panjang jika dari link)
+    // Jadi kita hanya bersihkan spasi (trim)
+    const cleanToken = otp.trim()
 
     if (password.length < 6) {
       setMsg("Password minimal 6 karakter.")
@@ -54,13 +50,15 @@ export default function ResetPasswordPage() {
     }
 
     setStatus("submitting")
-    const res = await verifyOTPAndResetPassword(email, otpCode, password)
+
+    // Panggil Server Action dengan token UTUH
+    const res = await verifyOTPAndResetPassword(email, cleanToken, password)
 
     if (res?.error) {
       setMsg(res.error)
       setStatus("error")
     } else {
-      setMsg("Password berhasil diubah! Silakan login dengan password baru.")
+      setMsg("Password berhasil diubah! Mengalihkan ke login...")
       setStatus("success")
       setTimeout(() => {
         router.push("/login")
@@ -87,7 +85,7 @@ export default function ResetPasswordPage() {
             Reset Password
           </h1>
           <p className="text-gray-600 text-sm">
-            Masukkan kode OTP dan password baru Anda
+            Masukkan kode OTP dari email dan password baru.
           </p>
         </div>
 
@@ -116,10 +114,9 @@ export default function ResetPasswordPage() {
               <input
                 type="email"
                 placeholder="Email Anda"
-                className="w-full rounded-lg border pl-10 pr-3 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border pl-10 pr-3 py-3 focus:ring-2 focus:ring-blue-500"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={status === "submitting" || status === "success"}
                 required
               />
             </div>
@@ -127,20 +124,27 @@ export default function ResetPasswordPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Kode OTP (6 digit pertama dari email)
+              Kode OTP
             </label>
-            <input
-              type="text"
-              placeholder="123456"
-              maxLength={8}
-              className="w-full rounded-lg border px-3 py-3 text-center text-2xl tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-              disabled={status === "submitting" || status === "success"}
-              required
-            />
+            <div className="relative">
+              <KeyRound
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+              />
+              <input
+                type="text"
+                placeholder="Contoh: 123456"
+                // HAPUS maxLength={6} atau perbesar angkanya
+                maxLength={20}
+                className="w-full rounded-lg border pl-10 pr-3 py-3 font-mono tracking-widest focus:ring-2 focus:ring-blue-500"
+                value={otp}
+                // Izinkan input angka saja, tanpa memotong panjang string
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                required
+              />
+            </div>
             <p className="text-xs text-gray-500 mt-1">
-              Masukkan 6 digit pertama dari kode OTP yang dikirim ke email
+              Masukkan kode angka yang Anda terima di email.
             </p>
           </div>
 
@@ -156,10 +160,9 @@ export default function ResetPasswordPage() {
               <input
                 type="password"
                 placeholder="Minimal 6 karakter"
-                className="w-full rounded-lg border pl-10 pr-3 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border pl-10 pr-3 py-3 focus:ring-2 focus:ring-blue-500"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={status === "submitting" || status === "success"}
                 required
               />
             </div>
@@ -177,10 +180,9 @@ export default function ResetPasswordPage() {
               <input
                 type="password"
                 placeholder="Ketik ulang password"
-                className="w-full rounded-lg border pl-10 pr-3 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border pl-10 pr-3 py-3 focus:ring-2 focus:ring-blue-500"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-                disabled={status === "submitting" || status === "success"}
                 required
               />
             </div>
@@ -188,23 +190,18 @@ export default function ResetPasswordPage() {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-blue-600 text-white py-3 font-semibold hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            className="w-full rounded-lg bg-blue-600 text-white py-3 font-semibold hover:bg-blue-700 disabled:opacity-60 transition-colors"
             disabled={status === "submitting" || status === "success"}
           >
-            {status === "submitting"
-              ? "Memproses..."
-              : status === "success"
-              ? "Berhasil!"
-              : "Reset Password"}
+            {status === "submitting" ? "Memproses..." : "Ubah Password"}
           </button>
 
           <div className="text-center">
             <Link
-              href="/login/lupa-password"
+              href="/login"
               className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
             >
-              <ArrowLeft size={16} />
-              Kirim ulang OTP
+              <ArrowLeft size={16} /> Kembali ke Login
             </Link>
           </div>
         </form>
