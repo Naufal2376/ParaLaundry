@@ -86,20 +86,21 @@ export async function createUser(
     const adminClient = createAdminClient()
 
     // Create user dengan admin client
-    const { data: newUser, error: signUpError } = await adminClient.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true, // Auto confirm email
-      user_metadata: {
-        full_name: nama
-      }
-    })
+    const { data: newUser, error: signUpError } =
+      await adminClient.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true, // Auto confirm email
+        user_metadata: {
+          full_name: nama,
+        },
+      })
 
     if (signUpError) return { error: signUpError.message }
 
     if (newUser.user) {
-      // Upsert supaya tidak bentrok dengan trigger handle_new_user
-      const { error: profileError } = await supabase.from("profiles").upsert(
+      // Upsert dengan admin client (service role) agar melewati RLS
+      const { error: profileError } = await adminClient.from("profiles").upsert(
         [
           {
             id: newUser.user.id,
