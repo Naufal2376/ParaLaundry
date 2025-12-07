@@ -22,28 +22,31 @@ export default async function UsersPage() {
   // Hanya Owner yang boleh masuk
   if (profile?.role !== "Owner") redirect("/os")
 
-  // Ambil profiles
-  const { data: profiles } = await supabase
+  // Gunakan Admin client untuk bypass RLS dan ambil semua data
+  const { createAdminClient } = await import("@/lib/supabase/admin")
+  const adminClient = createAdminClient()
+
+  // Ambil profiles dengan admin client agar bisa lihat semua user
+  const { data: profiles } = await adminClient
     .from("profiles")
     .select("id, role, full_name")
     .order("full_name", { ascending: true })
 
-  // Gunakan Admin client untuk mendapatkan list users dengan email
-  const { createAdminClient } = await import("@/lib/supabase/admin")
-  const adminClient = createAdminClient()
-  
-  const { data: { users: authUsers } } = await adminClient.auth.admin.listUsers()
+  const {
+    data: { users: authUsers },
+  } = await adminClient.auth.admin.listUsers()
 
   // Gabungkan data profiles dengan auth users
-  const initialUsers = profiles?.map(profile => {
-    const authUser = authUsers?.find(u => u.id === profile.id)
-    return {
-      id: profile.id,
-      email: authUser?.email || 'N/A',
-      role: profile.role,
-      nama: profile.full_name || 'N/A'
-    }
-  }) || []
+  const initialUsers =
+    profiles?.map((profile) => {
+      const authUser = authUsers?.find((u) => u.id === profile.id)
+      return {
+        id: profile.id,
+        email: authUser?.email || "N/A",
+        role: profile.role,
+        nama: profile.full_name || "N/A",
+      }
+    }) || []
 
   return (
     <div>
