@@ -6,20 +6,20 @@ import { createClient } from "@/lib/supabase/server"
 export async function sendOTP(email: string) {
   const supabase = await createClient()
 
-  // Deteksi environment (Localhost atau Production)
-  // Sebaiknya set NEXT_PUBLIC_BASE_URL di Environment Variables Vercel
-  const origin = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-
-  // Arahkan ke /auth/callback, lalu minta callback meneruskan ke /login/reset-password
-  const redirectUrl = `${origin}/auth/callback?next=/login/reset-password`
-
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: redirectUrl,
-  })
+  // Kita hapus properti 'redirectTo' karena user akan input manual
+  const { error } = await supabase.auth.resetPasswordForEmail(email)
 
   if (error) {
+    // Pesan error lebih spesifik untuk debugging (bisa disederhanakan untuk user public)
     console.error("Error sending recovery:", error.message)
-    return { error: "Gagal memproses permintaan. Pastikan email benar." }
+
+    if (error.message.includes("Rate limit")) {
+      return {
+        error: "Terlalu banyak permintaan. Silakan tunggu beberapa saat lagi.",
+      }
+    }
+
+    return { error: "Gagal mengirim kode. Pastikan email terdaftar dan benar." }
   }
 
   return { success: true }

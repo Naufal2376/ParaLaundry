@@ -30,7 +30,7 @@ export default function LupaPasswordPage() {
     } else {
       setStatus("success")
       setMessage(
-        "Kode OTP 6 digit telah dikirim ke email Anda. Silakan cek inbox atau folder spam."
+        "Kode OTP telah dikirim ke email Anda. Silakan cek inbox atau folder spam."
       )
       // Redirect ke halaman verifikasi OTP setelah 2 detik
       setTimeout(() => {
@@ -62,7 +62,8 @@ export default function LupaPasswordPage() {
               Lupa Password?
             </h1>
             <p className="text-gray-600 text-sm">
-              Masukkan email Anda dan kami akan mengirimkan kode OTP 6 digit
+              Masukkan email Anda dan kami akan mengirimkan kode OTP ke email
+              Anda
             </p>
           </div>
 
