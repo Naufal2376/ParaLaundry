@@ -31,16 +31,16 @@ export default function Calendar({
         nav_button_next: "absolute right-1",
 
         // --- BAGIAN INI SANGAT PENTING UNTUK GRID ---
-        table: "w-full border-collapse space-y-1",
-        head_row: "flex", // Memaksa header hari (Sen, Sel, ...) jadi baris horizontal
-        head_cell: "text-gray-400 rounded-md w-9 font-normal text-[0.8rem]",
+        table: "w-full border-collapse",
+        head_row: "grid grid-cols-7 gap-1", // Paksa 7 kolom agar header tidak turun ke bawah
+        head_cell: "text-gray-400 font-normal text-[0.8rem] text-center",
 
-        row: "flex w-full mt-2", // Memaksa tanggal jadi baris horizontal
+        row: "grid grid-cols-7 gap-1 mt-2", // Paksa 7 kolom agar tanggal tidak jadi 1 kolom panjang
 
-        // Memastikan setiap sel punya lebar tetap (w-9) agar tidak gepeng
-        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-blue-50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+        // Grid kolom 7, sel full-width per kolom
+        cell: "p-0 text-center text-sm relative flex items-center justify-center [&:has([aria-selected])]:bg-blue-50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
 
-        day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-gray-100 rounded-md transition-colors flex items-center justify-center",
+        day: "h-10 w-full p-0 font-normal aria-selected:opacity-100 hover:bg-gray-100 rounded-md transition-colors flex items-center justify-center",
         day_selected:
           "bg-blue-600 text-white hover:bg-blue-700 hover:text-white focus:bg-blue-700 focus:text-white shadow-md",
 
