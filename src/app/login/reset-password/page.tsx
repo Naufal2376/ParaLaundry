@@ -32,11 +32,14 @@ export default function ResetPasswordPage() {
       return
     }
 
-    if (otp.length !== 6) {
-      setMsg("Kode OTP harus 6 digit.")
+    if (otp.length < 6) {
+      setMsg("Kode OTP harus minimal 6 digit.")
       setStatus("error")
       return
     }
+
+    // Hanya ambil 6 digit pertama jika lebih
+    const otpCode = otp.substring(0, 6)
 
     if (password.length < 6) {
       setMsg("Password minimal 6 karakter.")
@@ -51,7 +54,7 @@ export default function ResetPasswordPage() {
     }
 
     setStatus("submitting")
-    const res = await verifyOTPAndResetPassword(email, otp, password)
+    const res = await verifyOTPAndResetPassword(email, otpCode, password)
 
     if (res?.error) {
       setMsg(res.error)
@@ -124,18 +127,21 @@ export default function ResetPasswordPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Kode OTP (6 digit)
+              Kode OTP (6 digit pertama dari email)
             </label>
             <input
               type="text"
               placeholder="123456"
-              maxLength={6}
+              maxLength={8}
               className="w-full rounded-lg border px-3 py-3 text-center text-2xl tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
               disabled={status === "submitting" || status === "success"}
               required
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Masukkan 6 digit pertama dari kode OTP yang dikirim ke email
+            </p>
           </div>
 
           <div>
