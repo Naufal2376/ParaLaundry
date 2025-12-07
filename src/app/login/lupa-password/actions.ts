@@ -1,3 +1,4 @@
+// src/app/login/lupa-password/actions.ts
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
@@ -5,19 +6,19 @@ import { createClient } from "@/lib/supabase/server"
 export async function sendOTP(email: string) {
   const supabase = await createClient()
 
-  // Dapatkan URL dasar aplikasi (localhost atau domain produksi)
-  // Pastikan Anda sudah set NEXT_PUBLIC_BASE_URL di .env.local atau Vercel
+  // Deteksi environment (Localhost atau Production)
+  // Sebaiknya set NEXT_PUBLIC_BASE_URL di Environment Variables Vercel
   const origin = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
 
-  // GANTI: Menggunakan resetPasswordForEmail (Flow Recovery)
+  // Arahkan ke /auth/callback, lalu minta callback meneruskan ke /login/reset-password
+  const redirectUrl = `${origin}/auth/callback?next=/login/reset-password`
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    // RedirectTO ini penting jika user mengklik LINK di email
-    redirectTo: `${origin}/login/reset-password`,
+    redirectTo: redirectUrl,
   })
 
   if (error) {
     console.error("Error sending recovery:", error.message)
-    // Pesan error umum untuk keamanan (user enumeration protection)
     return { error: "Gagal memproses permintaan. Pastikan email benar." }
   }
 
