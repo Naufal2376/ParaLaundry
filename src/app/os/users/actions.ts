@@ -98,17 +98,20 @@ export async function createUser(
     if (signUpError) return { error: signUpError.message }
 
     if (newUser.user) {
-      // Insert profile dengan role dan nama
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .insert({
-          id: newUser.user.id,
-          full_name: nama,
-          role: role
-        })
+      // Upsert supaya tidak bentrok dengan trigger handle_new_user
+      const { error: profileError } = await supabase.from("profiles").upsert(
+        [
+          {
+            id: newUser.user.id,
+            full_name: nama,
+            role: role,
+          },
+        ],
+        { onConflict: "id" }
+      )
 
       if (profileError) {
-        // Jika insert profile gagal, hapus user yang baru dibuat
+        // Jika upsert profile gagal, hapus user auth agar tidak ada orphan
         await adminClient.auth.admin.deleteUser(newUser.user.id)
         return { error: profileError.message }
       }
