@@ -1,10 +1,11 @@
 // src/app/login/reset-password/page.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { updatePassword } from "./actions"
+import Image from "next/image"
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams()
@@ -16,8 +17,13 @@ export default function ResetPasswordPage() {
   const [msg, setMsg] = useState<string>("")
   const [password, setPassword] = useState("")
   const [confirm, setConfirm] = useState("")
+  const hasExchanged = useRef(false) // Flag untuk prevent double-call di React Strict Mode
 
   useEffect(() => {
+    // Prevent double execution in development (React Strict Mode)
+    if (hasExchanged.current) return
+    hasExchanged.current = true
+
     const error = searchParams.get("error")
     const errorDesc = searchParams.get("error_description")
 
@@ -87,6 +93,17 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-blue-100">
       <div className="w-full max-w-md bg-white/80 backdrop-blur-2xl border border-white/50 rounded-3xl p-8 shadow-xl">
+        {/* Logo */}
+        <div className="flex justify-center mb-4">
+          <Image
+            src="/ParaLaundry.png"
+            alt="Para Laundry"
+            width={80}
+            height={80}
+            className="rounded-full"
+          />
+        </div>
+
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">
             Reset Password
