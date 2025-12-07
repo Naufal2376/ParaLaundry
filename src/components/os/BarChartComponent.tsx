@@ -19,46 +19,62 @@ interface BarChartData {
   pengeluaran?: number; // Pengeluaran bersifat opsional
 }
 
+interface BarChartComponentProps {
+  data: BarChartData[]
+  onBarClick?: (periodName: string) => void // Callback untuk handle click
+}
+
 // Helper untuk format Rupiah
 const formatRupiah = (value: number) => {
   return `Rp ${value.toLocaleString('id-ID')}`;
 };
 
-const BarChartComponent = ({ data }: { data: BarChartData[] }) => {
+const BarChartComponent = ({ data, onBarClick }: BarChartComponentProps) => {
+  const handleClick = (data: any) => {
+    if (data && data.activeLabel && onBarClick) {
+      onBarClick(data.activeLabel)
+    }
+  }
   return (
     <>
       <h3 className="text-lg font-semibold mb-4 text-(--color-text-primary)">
-        Grafik Pendapatan {data[0]?.pengeluaran !== undefined ? 'vs Pengeluaran' : ''}
+        Grafik Pendapatan{" "}
+        {data[0]?.pengeluaran !== undefined ? "vs Pengeluaran" : ""}
       </h3>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart 
+        <BarChart
           data={data}
+          onClick={handleClick}
           // Tambahkan margin agar label tidak terpotong
-          margin={{ top: 10, right: 20, left: 20, bottom: 60 }} 
+          margin={{ top: 10, right: 20, left: 20, bottom: 60 }}
         >
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          
+
           {/* 2. Penjelasan sumbu X (Tanggal) */}
-          <XAxis 
-            dataKey="name" 
+          <XAxis
+            dataKey="name"
             angle={-45} // Putar label agar muat
             textAnchor="end" // Ratakan ke kanan
             height={70} // Beri ruang lebih untuk label miring
             interval={0} // Tampilkan semua label
-            tick={{ fontSize: 12, fill: 'var(--color-dark-primary)' }} 
+            tick={{ fontSize: 12, fill: "var(--color-dark-primary)" }}
           />
-          
+
           {/* 3. Penjelasan sumbu Y (Nominal Rupiah) */}
-          <YAxis 
+          <YAxis
             tickFormatter={formatRupiah} // Format angka sebagai Rupiah
-            tick={{ fontSize: 12, fill: 'var(--color-dark-primary)' }}
+            tick={{ fontSize: 12, fill: "var(--color-dark-primary)" }}
           />
-          
+
           <Tooltip formatter={(value: number) => formatRupiah(value)} />
-          <Legend wrapperStyle={{ paddingTop: '40px' }} />
-          
+          <Legend wrapperStyle={{ paddingTop: "40px" }} />
+
           {/* 4. Batang untuk Pendapatan & Pengeluaran */}
-          <Bar dataKey="pendapatan" fill="var(--color-brand-primary)" name="Pendapatan" />
+          <Bar
+            dataKey="pendapatan"
+            fill="var(--color-brand-primary)"
+            name="Pendapatan"
+          />
           {/* Hanya tampilkan batang pengeluaran jika datanya ada */}
           {data[0]?.pengeluaran !== undefined && (
             <Bar dataKey="pengeluaran" fill="#ef4444" name="Pengeluaran" /> // Warna merah
@@ -66,7 +82,7 @@ const BarChartComponent = ({ data }: { data: BarChartData[] }) => {
         </BarChart>
       </ResponsiveContainer>
     </>
-  );
-};
+  )
+}
 
 export default BarChartComponent;
