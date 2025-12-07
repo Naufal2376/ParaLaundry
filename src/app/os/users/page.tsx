@@ -22,10 +22,28 @@ export default async function UsersPage() {
   // Hanya Owner yang boleh masuk
   if (profile?.role !== "Owner") redirect("/os")
 
-  const { data: initialUsers } = await supabase
+  // Ambil profiles
+  const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, email, role, nama")
-    .order("email", { ascending: true })
+    .select("id, role, full_name")
+    .order("full_name", { ascending: true })
+
+  // Gunakan Admin client untuk mendapatkan list users dengan email
+  const { createAdminClient } = await import("@/lib/supabase/admin")
+  const adminClient = createAdminClient()
+  
+  const { data: { users: authUsers } } = await adminClient.auth.admin.listUsers()
+
+  // Gabungkan data profiles dengan auth users
+  const initialUsers = profiles?.map(profile => {
+    const authUser = authUsers?.find(u => u.id === profile.id)
+    return {
+      id: profile.id,
+      email: authUser?.email || 'N/A',
+      role: profile.role,
+      nama: profile.full_name || 'N/A'
+    }
+  }) || []
 
   return (
     <div>
@@ -36,7 +54,7 @@ export default async function UsersPage() {
         </h1>
       </header>
 
-      <UserManager initialUsers={initialUsers || []} />
+      <UserManager initialUsers={initialUsers} />
     </div>
   )
 }

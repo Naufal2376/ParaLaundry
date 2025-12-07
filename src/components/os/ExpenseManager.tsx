@@ -260,7 +260,7 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ role, initialExp
                 <th className="p-3">Tanggal</th>
                 <th className="p-3">Keterangan</th>
                 <th className="p-3 text-right">Jumlah</th>
-                <th className="p-3 text-center">Aksi</th>
+                {(canEdit || canDelete) && <th className="p-3 text-center">Aksi</th>}
               </tr>
             </thead>
             <tbody>
@@ -301,44 +301,46 @@ export const ExpenseManager: React.FC<ExpenseManagerProps> = ({ role, initialExp
                       `Rp ${Number(r.jumlah).toLocaleString("id-ID")}`
                     )}
                   </td>
-                  <td className="p-3 space-x-2 text-center">
-                    {editing?.expense_id === r.expense_id ? (
-                      <button
-                        type="button"
-                        className="px-3 py-1 bg-(--color-brand-primary) text-white rounded"
-                        disabled={isPending}
-                        onClick={() => handleSaveEdit(r)}
-                      >
-                        Simpan
-                      </button>
-                    ) : (
-                      <>
-                        {/* HANYA TAMPILKAN TOMBOL EDIT JIKA OWNER */}
-                        {canEdit && (
-                          <button
-                            type="button"
-                            className="px-3 py-1 bg-white border rounded"
-                            disabled={isPending}
-                            onClick={() => setEditing(r)}
-                          >
-                            Edit
-                          </button>
-                        )}
-                      </>
-                    )}
+                  {(canEdit || canDelete) && (
+                    <td className="p-3 space-x-2 text-center">
+                      {editing?.expense_id === r.expense_id ? (
+                        <button
+                          type="button"
+                          className="px-3 py-1 bg-(--color-brand-primary) text-white rounded"
+                          disabled={isPending}
+                          onClick={() => handleSaveEdit(r)}
+                        >
+                          Simpan
+                        </button>
+                      ) : (
+                        <>
+                          {/* HANYA TAMPILKAN TOMBOL EDIT JIKA OWNER */}
+                          {canEdit && (
+                            <button
+                              type="button"
+                              className="px-3 py-1 bg-white border rounded"
+                              disabled={isPending}
+                              onClick={() => setEditing(r)}
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </>
+                      )}
 
-                    {/* HANYA TAMPILKAN JIKA OWNER */}
-                    {canDelete && (
-                      <button
-                        type="button"
-                        className="px-3 py-1 bg-red-500 text-white rounded"
-                        disabled={isPending}
-                        onClick={() => handleDelete(r.expense_id)}
-                      >
-                        Hapus
-                      </button>
-                    )}
-                  </td>
+                      {/* HANYA TAMPILKAN JIKA OWNER */}
+                      {canDelete && (
+                        <button
+                          type="button"
+                          className="px-3 py-1 bg-red-500 text-white rounded"
+                          disabled={isPending}
+                          onClick={() => handleDelete(r.expense_id)}
+                        >
+                          Hapus
+                        </button>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
               {filteredRows.length === 0 && (

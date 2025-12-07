@@ -67,17 +67,23 @@ export const UserManager: React.FC<UserManagerProps> = ({ initialUsers }) => {
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // For now, we'll just add to the profiles table
-    // In production, you'd want proper user creation through Supabase Admin API
     startTransition(async () => {
-      const supabase = createClient()
-
-      // This is a simplified approach - typically you'd need admin privileges
-      alert(
-        "Fitur tambah user memerlukan Supabase Admin API. Silakan tambahkan user melalui Supabase Dashboard."
+      const { createUser } = await import('@/app/os/users/actions')
+      const result = await createUser(
+        newUser.email,
+        newUser.password,
+        newUser.role,
+        newUser.nama
       )
-      setShowAddModal(false)
-      setNewUser({ email: "", password: "", role: "Pegawai", nama: "" })
+
+      if (result.error) {
+        alert('Gagal menambahkan user: ' + result.error)
+      } else {
+        alert('User berhasil ditambahkan!')
+        setShowAddModal(false)
+        setNewUser({ email: "", password: "", role: "Pegawai", nama: "" })
+        await refreshTable()
+      }
     })
   }
 

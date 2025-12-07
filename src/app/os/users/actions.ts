@@ -80,25 +80,43 @@ export async function createUser(
 
   if (profile?.role !== "Owner") return { error: "Forbidden" }
 
-  // Note: Creating users through Supabase auth requires admin privileges
-  // This is a simplified version - in production, you'd use Supabase Admin API
-  const { data: newUser, error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
-  })
+  // Gunakan Supabase Admin untuk create user
+  try {
+    const { createAdminClient } = await import("@/lib/supabase/admin")
+    const adminClient = createAdminClient()
 
-  if (signUpError) return { error: signUpError.message }
+    // Create user dengan admin client
+    const { data: newUser, error: signUpError } = await adminClient.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // Auto confirm email
+      user_metadata: {
+        full_name: nama
+      }
+    })
 
-  if (newUser.user) {
-    // Update profile with role and name
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .update({ role, nama })
-      .eq("id", newUser.user.id)
+    if (signUpError) return { error: signUpError.message }
 
-    if (profileError) return { error: profileError.message }
+    if (newUser.user) {
+      // Insert profile dengan role dan nama
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .insert({
+          id: newUser.user.id,
+          full_name: nama,
+          role: role
+        })
+
+      if (profileError) {
+        // Jika insert profile gagal, hapus user yang baru dibuat
+        await adminClient.auth.admin.deleteUser(newUser.user.id)
+        return { error: profileError.message }
+      }
+    }
+
+    revalidatePath("/os/users")
+    return { success: true }
+  } catch (error: any) {
+    return { error: error.message || "Gagal membuat user" }
   }
-
-  revalidatePath("/os/users")
-  return { success: true }
 }
