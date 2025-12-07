@@ -125,21 +125,6 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
   const profit = income - expense
 
   // Status Operasional Count
-  const { count: masukAntreanCount } = await supabase
-    .from("orders")
-    .select("*", { count: "exact", head: true })
-    .eq("status_cucian", "Masuk Antrean")
-
-  const { count: prosesDicuciCount } = await supabase
-    .from("orders")
-    .select("*", { count: "exact", head: true })
-    .eq("status_cucian", "Proses Dicuci")
-
-  const { count: siapDiambilCount } = await supabase
-    .from("orders")
-    .select("*", { count: "exact", head: true })
-    .eq("status_cucian", "Siap Diambil")
-
   function getWeekStartDate(d: Date) {
     const date = new Date(d)
     const day = date.getDay()

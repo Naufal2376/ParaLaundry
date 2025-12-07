@@ -1,10 +1,8 @@
 // src/components/os/PeriodSelector.tsx
-"use client";
+"use client"
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { useState, useTransition } from 'react';
-
-type Period = 'hari' | 'minggu' | 'bulan' | 'tahun';
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import React, { useState, useTransition } from "react"
 
 export default function PeriodSelector() {
   const router = useRouter()
@@ -13,51 +11,22 @@ export default function PeriodSelector() {
   const [isPending, startTransition] = useTransition()
 
   // Get initial state from URL params to ensure server and client are in sync
-  const initialPeriod = (searchParams.get("period") as Period) || "bulan"
   const initialFrom = searchParams.get("from") || ""
   const initialTo = searchParams.get("to") || ""
-
-  // If 'from' exists, a custom period is active, so don't highlight any period button.
-  const [activePeriod, setActivePeriod] = useState<Period | null>(
-    initialFrom ? null : initialPeriod
-  )
   const [startDate, setStartDate] = useState(initialFrom)
   const [endDate, setEndDate] = useState(initialTo)
-
-  const handlePeriodChange = (newPeriod: Period) => {
-    setActivePeriod(newPeriod)
-    // Clear date inputs when a period button is clicked
-    setStartDate("")
-    setEndDate("")
-    const params = new URLSearchParams()
-    params.set("period", newPeriod)
-    startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`)
-    })
-  }
 
   const handleDateChange = () => {
     if (!startDate || !endDate) {
       alert("Silakan pilih tanggal mulai dan tanggal selesai.")
       return
     }
-    // A custom date range is being applied, so no period button is active.
-    setActivePeriod(null)
     const params = new URLSearchParams()
     params.set("from", startDate)
     params.set("to", endDate)
     startTransition(() => {
       router.push(`${pathname}?${params.toString()}`)
     })
-  }
-
-  const getButtonClass = (p: Period) => {
-    const base =
-      "px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-sm sm:text-base"
-    if (activePeriod === p) {
-      return `${base} bg-blue-600 text-white shadow-md`
-    }
-    return `${base} bg-white hover:bg-blue-50 text-gray-700 border border-gray-300`
   }
 
   return (

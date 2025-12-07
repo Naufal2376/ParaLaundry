@@ -2,7 +2,14 @@
 "use client";
 import React from 'react';
 // Impor ikon-ikon baru yang relevan
-import { Award, Truck, Percent, Smile, ShieldCheck, Clock, CreditCard } from 'lucide-react';
+import {
+  Award,
+  Percent,
+  Smile,
+  ShieldCheck,
+  Clock,
+  CreditCard,
+} from "lucide-react"
 import FloatingBackgroundIcons from '@/components/FloatingBackgroundIcons';
 
 // Daftar keunggulan baru dengan ikon dan penjelasan

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import OrderStatusTracker from '@/components/OrderStatusTracker';
-import { Loader, Calendar, CheckCircle, DollarSign, AlertCircle } from 'lucide-react';
+import { Loader, Calendar, CheckCircle, AlertCircle } from "lucide-react"
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { createClient as createBrowserSupabase } from '@/lib/supabase/client';
@@ -97,7 +97,7 @@ export default function LacakPage() {
         };
 
         setOrder(transformedOrder);
-      } catch (_e) {
+      } catch {
         setOrder(null);
         setError(true);
       } finally {

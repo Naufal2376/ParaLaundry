@@ -26,13 +26,13 @@ const TrackOrder = () => {
     let finalCode = decodedText.trim().toUpperCase();
     
     try {
-      const url = new URL(decodedText);
-      const pathParts = url.pathname.split('/');
-      const lastPart = pathParts[pathParts.length - 1];
+      const url = new URL(decodedText)
+      const pathParts = url.pathname.split("/")
+      const lastPart = pathParts[pathParts.length - 1]
       if (lastPart) {
-        finalCode = lastPart.toUpperCase();
+        finalCode = lastPart.toUpperCase()
       }
-    } catch (_e) {
+    } catch {
       // Bukan URL, anggap itu adalah kodenya
     }
 

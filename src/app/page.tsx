@@ -4,8 +4,7 @@ import Hero from '@/components/Hero';
 import Features from '@/components/Features';
 import Services from '@/components/Services';
 import TrackOrder from '@/components/TrackOrder';
-import Pricing from '@/components/Pricing';
-import Contact from '@/components/Contact';
+import Pricing from "@/components/Pricing"
 import Footer from '@/components/Footer';
 
 export default function HomePage() {
@@ -14,12 +13,12 @@ export default function HomePage() {
       <Header />
       <main>
         <Hero />
-        <Features /> 
+        <Features />
         <Services />
         <TrackOrder />
         <Pricing />
       </main>
       <Footer />
     </>
-  );
+  )
 }

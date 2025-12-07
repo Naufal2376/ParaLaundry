@@ -44,45 +44,42 @@ export default function NewTransactionPage() {
   // 1. Ambil data layanan dan cek role user saat halaman dimuat
   useEffect(() => {
     const bootstrap = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
       if (!user) {
-        router.push('/login'); // <-- 3. Gunakan router.push
-        return;
+        router.push("/login") // <-- 3. Gunakan router.push
+        return
       }
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+      await supabase.from("profiles").select("role").eq("id", user.id).single()
       // Load services
-      const { data } = await supabase.from('services').select('*');
-      if (data) setServices(data);
-    };
-    bootstrap();
-  }, [router]); // <-- 4. Tambahkan router ke dependency array
+      const { data } = await supabase.from("services").select("*")
+      if (data) setServices(data)
+    }
+    bootstrap()
+  }, [router]) // <-- 4. Tambahkan router ke dependency array
 
   // 2. Hitung ulang total biaya DAN kembalian
   useEffect(() => {
-    const total = cart.reduce((acc, item) => acc + item.sub_total, 0);
-    setTotalBiaya(total);
-    
+    const total = cart.reduce((acc, item) => acc + item.sub_total, 0)
+    setTotalBiaya(total)
+
     // Jika bayar saat pengambilan, set jumlah bayar dan kembalian ke 0
     if (bayarSaatPengambilan) {
-      setJumlahBayar(0);
-      setKembalian(0);
+      setJumlahBayar(0)
+      setKembalian(0)
     } else {
-      const bayar = Number(jumlahBayar) || 0;
-      const sisa = bayar - total;
-      setKembalian(sisa > 0 ? sisa : 0);
+      const bayar = Number(jumlahBayar) || 0
+      const sisa = bayar - total
+      setKembalian(sisa > 0 ? sisa : 0)
     }
-    
-  }, [cart, jumlahBayar, bayarSaatPengambilan]);
+  }, [cart, jumlahBayar, bayarSaatPengambilan])
 
   // 3. Fungsi untuk menambah item baru ke keranjang
   const addItem = () => {
-    const defaultService = services[0];
-    if (!defaultService) return; 
+    const defaultService = services[0]
+    if (!defaultService) return
 
     setCart([
       ...cart,
@@ -95,77 +92,84 @@ export default function NewTransactionPage() {
         jumlah: 1.0,
         sub_total: defaultService.harga * 1,
       },
-    ]);
-  };
+    ])
+  }
 
   // 4. Fungsi untuk menghapus item dari keranjang
   const removeItem = (id: number) => {
-    setCart(cart.filter(item => item.id !== id));
-  };
+    setCart(cart.filter((item) => item.id !== id))
+  }
 
   // 5. Fungsi untuk mengubah item di keranjang
-  const updateItem = (id: number, field: 'service' | 'jumlah', value: string | number) => {
-    setCart(cart.map(item => {
-      if (item.id === id) {
-        if (field === 'service') {
-          const selectedService = services.find(s => s.service_id === Number(value));
-          if (selectedService) {
-            const newJumlah = item.jumlah;
-            const newSubTotal = selectedService.harga * newJumlah;
-            return {
-              ...item,
-              service_id: selectedService.service_id,
-              nama_layanan: selectedService.nama_layanan,
-              harga: selectedService.harga,
-              satuan: selectedService.satuan,
-              sub_total: newSubTotal,
-            };
+  const updateItem = (
+    id: number,
+    field: "service" | "jumlah",
+    value: string | number
+  ) => {
+    setCart(
+      cart.map((item) => {
+        if (item.id === id) {
+          if (field === "service") {
+            const selectedService = services.find(
+              (s) => s.service_id === Number(value)
+            )
+            if (selectedService) {
+              const newJumlah = item.jumlah
+              const newSubTotal = selectedService.harga * newJumlah
+              return {
+                ...item,
+                service_id: selectedService.service_id,
+                nama_layanan: selectedService.nama_layanan,
+                harga: selectedService.harga,
+                satuan: selectedService.satuan,
+                sub_total: newSubTotal,
+              }
+            }
+          } else if (field === "jumlah") {
+            const newJumlah = parseFloat(value as string) || 0
+            const newSubTotal = item.harga * newJumlah
+            return { ...item, jumlah: newJumlah, sub_total: newSubTotal }
           }
-        } else if (field === 'jumlah') {
-          const newJumlah = parseFloat(value as string) || 0; 
-          const newSubTotal = item.harga * newJumlah;
-          return { ...item, jumlah: newJumlah, sub_total: newSubTotal };
         }
-      }
-      return item;
-    }));
-  };
-  
+        return item
+      })
+    )
+  }
+
   // 6. Fungsi untuk menangani submit form
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrorMessage('');
+    e.preventDefault()
+    setIsLoading(true)
+    setErrorMessage("")
 
     if (cart.length === 0) {
-      setErrorMessage("Keranjang tidak boleh kosong.");
-      setIsLoading(false);
-      return;
+      setErrorMessage("Keranjang tidak boleh kosong.")
+      setIsLoading(false)
+      return
     }
-    
+
     // 5. Hapus paymentStatus, kirim jumlahBayar
     const orderData: OrderData = {
       customerName,
       customerPhone,
       totalBiaya,
-      jumlahBayar: bayarSaatPengambilan ? 0 : (Number(jumlahBayar) || 0),
+      jumlahBayar: bayarSaatPengambilan ? 0 : Number(jumlahBayar) || 0,
       bayarSaatPengambilan,
-      items: cart.map(item => ({
+      items: cart.map((item) => ({
         service_id: item.service_id,
         jumlah: item.jumlah,
         sub_total: item.sub_total,
       })),
-    };
+    }
 
-    const result = await createOrder(orderData);
+    const result = await createOrder(orderData)
 
     if (result?.error) {
-      setErrorMessage(result.error);
-      setIsLoading(false);
+      setErrorMessage(result.error)
+      setIsLoading(false)
     }
     // Jika berhasil, Server Action akan mengarahkan (redirect) otomatis
-  };
-
+  }
 
   return (
     <div>
@@ -180,75 +184,92 @@ export default function NewTransactionPage() {
         <div className="bg-white p-8 rounded-2xl shadow-lg max-w-4xl mx-auto">
           {/* Data Pelanggan */}
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-(--color-text-primary) mb-4">1. Data Pelanggan</h2>
+            <h2 className="text-xl font-semibold text-(--color-text-primary) mb-4">
+              1. Data Pelanggan
+            </h2>
             <div className="grid md:grid-cols-2 gap-4">
-              <input 
-                type="text" 
-                placeholder="Nama Pelanggan" 
+              <input
+                type="text"
+                placeholder="Nama Pelanggan"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 required
-                className="p-3 border border-(--color-light-primary-active) rounded-lg" 
+                className="p-3 border border-(--color-light-primary-active) rounded-lg"
               />
-              <input 
-                type="number" 
-                placeholder="Nomor HP" 
+              <input
+                type="number"
+                placeholder="Nomor HP"
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
                 required
-                className="p-3 border border-(--color-light-primary-active) rounded-lg" 
+                className="p-3 border border-(--color-light-primary-active) rounded-lg"
               />
             </div>
           </div>
 
           {/* Item cucian */}
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-(--color-text-primary) mb-4">2. Item Cucian</h2>
+            <h2 className="text-xl font-semibold text-(--color-text-primary) mb-4">
+              2. Item Cucian
+            </h2>
             <div className="flex flex-col gap-4">
-              {cart.map((item, index) => (
-                <div key={item.id} className="flex flex-col md:flex-row gap-2 items-center">
-                  <select 
+              {cart.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex flex-col md:flex-row gap-2 items-center"
+                >
+                  <select
                     value={item.service_id}
-                    onChange={(e) => updateItem(item.id, 'service', e.target.value)}
+                    onChange={(e) =>
+                      updateItem(item.id, "service", e.target.value)
+                    }
                     className="flex-grow p-3 border border-(--color-light-primary-active) rounded-lg"
                   >
                     {/* Tambahkan opsi placeholder */}
-                    {services.length === 0 && <option>Memuat layanan...</option>}
-                    {services.map(s => (
+                    {services.length === 0 && (
+                      <option>Memuat layanan...</option>
+                    )}
+                    {services.map((s) => (
                       <option key={s.service_id} value={s.service_id}>
                         {s.nama_layanan} (Rp {s.harga}/{s.satuan})
                       </option>
                     ))}
                   </select>
-                  
+
                   <div className="relative w-full md:w-36">
-                    <input 
-                      type="number" 
-                      placeholder="0" 
+                    <input
+                      type="number"
+                      placeholder="0"
                       value={item.jumlah}
-                      onChange={(e) => updateItem(item.id, 'jumlah', e.target.value)}
+                      onChange={(e) =>
+                        updateItem(item.id, "jumlah", e.target.value)
+                      }
                       min="0.1"
                       step="0.1"
                       required
                       // Tambahkan pr-12 (padding-right) agar teks tidak menabrak satuan
-                      className="w-full p-3 pr-12 border border-(--color-light-primary-active) rounded-lg" 
+                      className="w-full p-3 pr-12 border border-(--color-light-primary-active) rounded-lg"
                     />
                     {/* Teks Satuan (kg/pcs) Otomatis dari State */}
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium text-sm pointer-events-none">
                       {item.satuan}
                     </span>
                   </div>
-                  
+
                   <span className="w-full md:w-auto text-lg font-medium text-(--color-text-primary)">
-                    = Rp {item.sub_total.toLocaleString('id-ID')}
+                    = Rp {item.sub_total.toLocaleString("id-ID")}
                   </span>
-                  
-                  <button type="button" onClick={() => removeItem(item.id)} className="text-red-500 p-3">
+
+                  <button
+                    type="button"
+                    onClick={() => removeItem(item.id)}
+                    className="text-red-500 p-3"
+                  >
                     <Trash2 size={20} />
                   </button>
                 </div>
               ))}
-              <button 
+              <button
                 type="button"
                 onClick={addItem}
                 className="flex items-center justify-center gap-2 p-3 text-(--color-brand-primary) border-2 border-dashed border-(--color-brand-primary) rounded-lg hover:bg-(--color-light-primary-hover)"
@@ -260,8 +281,10 @@ export default function NewTransactionPage() {
 
           {/* 6. Perbarui bagian Pembayaran */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-(--color-text-primary) mb-4">3. Pembayaran</h2>
-            
+            <h2 className="text-xl font-semibold text-(--color-text-primary) mb-4">
+              3. Pembayaran
+            </h2>
+
             {/* Opsi Bayar Saat Pengambilan */}
             <div className="mb-4">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -269,9 +292,9 @@ export default function NewTransactionPage() {
                   type="checkbox"
                   checked={bayarSaatPengambilan}
                   onChange={(e) => {
-                    setBayarSaatPengambilan(e.target.checked);
+                    setBayarSaatPengambilan(e.target.checked)
                     if (e.target.checked) {
-                      setJumlahBayar(0);
+                      setJumlahBayar(0)
                     }
                   }}
                   className="w-5 h-5 text-(--color-brand-primary) border-gray-300 rounded focus:ring-(--color-brand-primary)"
@@ -284,34 +307,41 @@ export default function NewTransactionPage() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-(--color-dark-primary) mb-1">Jumlah Bayar (Rp)</label>
-                <input 
+                <label className="block text-sm font-medium text-(--color-dark-primary) mb-1">
+                  Jumlah Bayar (Rp)
+                </label>
+                <input
                   type="number"
                   placeholder="0"
                   value={jumlahBayar}
                   onChange={(e) => {
                     if (!bayarSaatPengambilan) {
-                      setJumlahBayar(e.target.value ? Number(e.target.value) : '');
+                      setJumlahBayar(
+                        e.target.value ? Number(e.target.value) : ""
+                      )
                     }
                   }}
                   disabled={bayarSaatPengambilan}
                   className={`w-full p-3 border border-(--color-light-primary-active) rounded-lg ${
-                    bayarSaatPengambilan ? 'bg-gray-100 cursor-not-allowed' : ''
+                    bayarSaatPengambilan ? "bg-gray-100 cursor-not-allowed" : ""
                   }`}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-(--color-dark-primary) mb-1">Kembalian (Rp)</label>
+                <label className="block text-sm font-medium text-(--color-dark-primary) mb-1">
+                  Kembalian (Rp)
+                </label>
                 <div className="w-full p-3 border border-gray-200 bg-gray-50 rounded-lg text-(--color-dark-primary) font-medium">
-                  Rp {kembalian.toLocaleString('id-ID')}
+                  Rp {kembalian.toLocaleString("id-ID")}
                 </div>
               </div>
             </div>
-            
+
             {bayarSaatPengambilan && (
               <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-sm text-yellow-800">
-                  <strong>Status:</strong> Pembayaran akan dilakukan saat pengambilan barang
+                  <strong>Status:</strong> Pembayaran akan dilakukan saat
+                  pengambilan barang
                 </p>
               </div>
             )}
@@ -320,12 +350,12 @@ export default function NewTransactionPage() {
           {/* Total & Simpan */}
           <div className="flex flex-col md:flex-row justify-between items-center mt-8 gap-4">
             <div className="text-2xl font-bold text-(--color-text-primary)">
-              Total Biaya: 
+              Total Biaya:
               <span className="text-(--color-brand-primary) ml-2">
-                Rp {totalBiaya.toLocaleString('id-ID')},-
+                Rp {totalBiaya.toLocaleString("id-ID")},-
               </span>
             </div>
-            <button 
+            <button
               type="submit"
               disabled={isLoading}
               className="shine-button w-full md:w-auto flex items-center justify-center bg-(--color-brand-primary) text-white font-semibold px-4 py-2 md:px-6 md:py-3 rounded-lg shadow-lg transition-all hover:scale-105 disabled:opacity-50"
@@ -341,5 +371,5 @@ export default function NewTransactionPage() {
         </div>
       </form>
     </div>
-  );
+  )
 };

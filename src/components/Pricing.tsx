@@ -20,17 +20,6 @@ const priceList = [
   { kategori: "Boneka", harga: "Sesuai Ukuran", estimasi: "2-3 hari" },
 ];
 
-// Varian animasi untuk kontainer <tbody>
-const tableVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1, // Setiap baris akan muncul dengan jeda 0.1 detik
-    },
-  },
-};
-
 // Varian animasi untuk setiap baris <tr> (DIPERBAIKI)
 const rowVariants = {
   hidden: { opacity: 0, x: -50 },

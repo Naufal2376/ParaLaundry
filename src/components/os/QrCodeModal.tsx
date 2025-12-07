@@ -1,7 +1,7 @@
 // src/components/os/QrCodeModal.tsx
 "use client";
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from "framer-motion"
 import { X } from 'lucide-react';
 import QRCode from 'react-qr-code'; // Pastikan Anda sudah 'npm install react-qr-code'
 
