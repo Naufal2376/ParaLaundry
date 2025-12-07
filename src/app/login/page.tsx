@@ -17,6 +17,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import Image from 'next/image';
+import Link from "next/link"
 import { useFormStatus } from "react-dom";
 
 export const dynamic = "force-dynamic";
@@ -183,30 +184,29 @@ function LoginCard() {
       className="relative z-10 w-full max-w-[450px]"
     >
       <div className="relative bg-white/70 backdrop-blur-2xl border border-white/50 rounded-3xl p-8 md:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden">
-        
         {/* Dekorasi Lingkaran di dalam kartu */}
         <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-200/50 rounded-full blur-2xl" />
         <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-200/50 rounded-full blur-2xl" />
 
         {/* Header: Logo Bersih Tanpa Kotak */}
         <div className="text-center mb-8 relative z-10">
-          <motion.div 
+          <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
             className="flex justify-center mb-6"
           >
-            <Image 
-              src="/ParaLaundry.png" 
-              alt="Logo Para Laundry" 
-              width={100} 
-              height={100} 
+            <Image
+              src="/ParaLaundry.png"
+              alt="Logo Para Laundry"
+              width={100}
+              height={100}
               className="object-contain drop-shadow-lg hover:scale-105 transition-transform duration-300"
               priority
             />
           </motion.div>
 
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -214,7 +214,7 @@ function LoginCard() {
           >
             {greeting}!
           </motion.h1>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
@@ -231,11 +231,11 @@ function LoginCard() {
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <InteractiveInput 
-              icon={User} 
-              type="email" 
-              name="email" 
-              placeholder="Email Pegawai / Owner" 
+            <InteractiveInput
+              icon={User}
+              type="email"
+              name="email"
+              placeholder="Email Pegawai / Owner"
             />
           </motion.div>
 
@@ -244,11 +244,11 @@ function LoginCard() {
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            <InteractiveInput 
-              icon={Lock} 
-              type={showPassword ? "text" : "password"} 
-              name="password" 
-              placeholder="Kata Sandi" 
+            <InteractiveInput
+              icon={Lock}
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Kata Sandi"
               showPasswordToggle={true}
               isPasswordVisible={showPassword}
               onTogglePassword={() => setShowPassword(!showPassword)}
@@ -281,9 +281,24 @@ function LoginCard() {
           >
             <MagneticButton />
           </motion.div>
+
+          {/* Lupa Password Link */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="text-center mt-4"
+          >
+            <Link
+              href="/login/lupa-password"
+              className="text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+            >
+              Lupa Password?
+            </Link>
+          </motion.div>
         </form>
 
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
@@ -293,7 +308,7 @@ function LoginCard() {
         </motion.p>
       </div>
     </motion.div>
-  );
+  )
 }
 
 // --- 5. WRAPPER UTAMA (100vh & Overflow Hidden) ---
