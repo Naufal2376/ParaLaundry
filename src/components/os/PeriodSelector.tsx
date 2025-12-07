@@ -7,70 +7,74 @@ import React, { useState, useTransition } from 'react';
 type Period = 'hari' | 'minggu' | 'bulan' | 'tahun';
 
 export default function PeriodSelector() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const [isPending, startTransition] = useTransition()
 
   // Get initial state from URL params to ensure server and client are in sync
-  const initialPeriod = (searchParams.get('period') as Period) || 'bulan';
-  const initialFrom = searchParams.get('from') || '';
-  const initialTo = searchParams.get('to') || '';
+  const initialPeriod = (searchParams.get("period") as Period) || "bulan"
+  const initialFrom = searchParams.get("from") || ""
+  const initialTo = searchParams.get("to") || ""
 
   // If 'from' exists, a custom period is active, so don't highlight any period button.
-  const [activePeriod, setActivePeriod] = useState<Period | null>(initialFrom ? null : initialPeriod);
-  const [startDate, setStartDate] = useState(initialFrom);
-  const [endDate, setEndDate] = useState(initialTo);
+  const [activePeriod, setActivePeriod] = useState<Period | null>(
+    initialFrom ? null : initialPeriod
+  )
+  const [startDate, setStartDate] = useState(initialFrom)
+  const [endDate, setEndDate] = useState(initialTo)
 
   const handlePeriodChange = (newPeriod: Period) => {
-    setActivePeriod(newPeriod);
+    setActivePeriod(newPeriod)
     // Clear date inputs when a period button is clicked
-    setStartDate('');
-    setEndDate('');
-    const params = new URLSearchParams();
-    params.set('period', newPeriod);
+    setStartDate("")
+    setEndDate("")
+    const params = new URLSearchParams()
+    params.set("period", newPeriod)
     startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`);
-    });
-  };
+      router.push(`${pathname}?${params.toString()}`)
+    })
+  }
 
   const handleDateChange = () => {
     if (!startDate || !endDate) {
-      alert('Silakan pilih tanggal mulai dan tanggal selesai.');
-      return;
+      alert("Silakan pilih tanggal mulai dan tanggal selesai.")
+      return
     }
     // A custom date range is being applied, so no period button is active.
-    setActivePeriod(null); 
-    const params = new URLSearchParams();
-    params.set('from', startDate);
-    params.set('to', endDate);
+    setActivePeriod(null)
+    const params = new URLSearchParams()
+    params.set("from", startDate)
+    params.set("to", endDate)
     startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`);
-    });
-  };
+      router.push(`${pathname}?${params.toString()}`)
+    })
+  }
 
   const getButtonClass = (p: Period) => {
-    const base = 'px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-sm sm:text-base';
+    const base =
+      "px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-sm sm:text-base"
     if (activePeriod === p) {
-      return `${base} bg-blue-600 text-white shadow-md`;
+      return `${base} bg-blue-600 text-white shadow-md`
     }
-    return `${base} bg-white hover:bg-blue-50 text-gray-700 border border-gray-300`;
-  };
+    return `${base} bg-white hover:bg-blue-50 text-gray-700 border border-gray-300`
+  }
 
   return (
-    <div className={`transition-opacity ${isPending ? 'opacity-50 pointer-events-none' : ''}`}>
-      {/* Predefined period buttons */}
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        <button onClick={() => handlePeriodChange('hari')} className={getButtonClass('hari')}>Harian</button>
-        <button onClick={() => handlePeriodChange('minggu')} className={getButtonClass('minggu')}>Mingguan</button>
-        <button onClick={() => handlePeriodChange('bulan')} className={getButtonClass('bulan')}>Bulanan</button>
-        <button onClick={() => handlePeriodChange('tahun')} className={getButtonClass('tahun')}>Tahunan</button>
-      </div>
-
-      {/* Custom date range selector */}
+    <div
+      className={`transition-opacity ${
+        isPending ? "opacity-50 pointer-events-none" : ""
+      }`}
+    >
+      {/* Date range selector */}
       <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
         <div className="flex-1 w-full">
-          <label htmlFor="start-date" className="block text-sm font-medium text-gray-600 mb-1">Dari Tanggal</label>
+          <label
+            htmlFor="start-date"
+            className="block text-sm font-medium text-gray-600 mb-1"
+          >
+            Dari Tanggal
+          </label>
           <input
             id="start-date"
             type="date"
@@ -80,7 +84,12 @@ export default function PeriodSelector() {
           />
         </div>
         <div className="flex-1 w-full">
-          <label htmlFor="end-date" className="block text-sm font-medium text-gray-600 mb-1">Sampai Tanggal</label>
+          <label
+            htmlFor="end-date"
+            className="block text-sm font-medium text-gray-600 mb-1"
+          >
+            Sampai Tanggal
+          </label>
           <input
             id="end-date"
             type="date"
@@ -101,11 +110,27 @@ export default function PeriodSelector() {
       </div>
 
       {/* Display active custom date range */}
-      {(initialFrom && initialTo) && (
+      {initialFrom && initialTo && (
         <p className="text-sm text-gray-600 mt-3">
-          Menampilkan laporan dari <strong>{new Date(initialFrom).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</strong> sampai <strong>{new Date(initialTo).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>.
+          Menampilkan laporan dari{" "}
+          <strong>
+            {new Date(initialFrom).toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </strong>{" "}
+          sampai{" "}
+          <strong>
+            {new Date(initialTo).toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </strong>
+          .
         </p>
       )}
     </div>
-  );
+  )
 }

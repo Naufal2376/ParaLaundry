@@ -15,7 +15,8 @@ interface ExpenseCardProps {
   expense: ExpenseRow
   editing: ExpenseRow | null
   isPending: boolean
-  canDelete: boolean // Tambahkan prop untuk kontrol hak akses
+  canDelete: boolean // Kontrol hak akses untuk delete
+  canEdit: boolean // Kontrol hak akses untuk edit
   onEdit: (expense: ExpenseRow) => void
   onDelete: (id: number) => void
   onSave: (expense: ExpenseRow) => void

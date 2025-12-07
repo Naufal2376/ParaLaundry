@@ -109,21 +109,18 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
   )
   if (incomeError) console.error("Error Pendapatan:", incomeError.message)
 
-  // Pengeluaran - hanya untuk Owner
-  let expenseRows: any[] = []
-  let expense = 0
+  // Pengeluaran - Pegawai dan Owner bisa lihat
+  const { data: expenseRows, error: expenseError } = await supabase
+    .from("expenses")
+    .select("jumlah, tanggal_pengeluaran, keterangan")
+    .gte("tanggal_pengeluaran", startISO)
+    .lte("tanggal_pengeluaran", endISO)
 
-  if (role === "Owner") {
-    const { data: expData, error: expenseError } = await supabase
-      .from("expenses")
-      .select("jumlah, tanggal_pengeluaran, keterangan")
-      .gte("tanggal_pengeluaran", startISO)
-      .lte("tanggal_pengeluaran", endISO)
-
-    expenseRows = expData || []
-    expense = expenseRows.reduce((acc, r) => acc + Number(r.jumlah || 0), 0)
-    if (expenseError) console.error("Error Pengeluaran:", expenseError.message)
-  }
+  const expense = (expenseRows || []).reduce(
+    (acc, r) => acc + Number(r.jumlah || 0),
+    0
+  )
+  if (expenseError) console.error("Error Pengeluaran:", expenseError.message)
 
   const profit = income - expense
 
@@ -215,30 +212,20 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
     return new Date(a).getTime() - new Date(b).getTime()
   })
 
-  // Hanya tampilkan pengeluaran di chart jika Owner
-  const barChartData = sortedKeys.map((k) => {
-    const data: any = {
-      name: k,
-      pendapatan: incomeBuckets[k] || 0,
-    }
-    if (role === "Owner") {
-      data.pengeluaran = expenseBuckets[k] || 0
-    }
-    return data
-  })
+  // Tampilkan pendapatan dan pengeluaran di chart untuk semua role
+  const barChartData = sortedKeys.map((k) => ({
+    name: k,
+    pendapatan: incomeBuckets[k] || 0,
+    pengeluaran: expenseBuckets[k] || 0,
+  }))
 
   return (
     <div>
       <header className="flex items-center gap-4 mb-8">
         <TrendingUp className="w-8 h-8 text-blue-600" />
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-          {role === "Owner" ? "Laporan Keuangan" : "Laporan Pendapatan"}
+          Laporan Keuangan
         </h1>
-        {role === "Pegawai" && (
-          <span className="ml-auto px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
-            View Only
-          </span>
-        )}
       </header>
 
       <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
@@ -249,49 +236,34 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
           <PeriodSelector />
         </div>
 
-        {role === "Owner" ? (
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <StatCard
-              title={`Pendapatan (${titlePeriod})`}
-              value={`Rp ${income.toLocaleString("id-ID")}`}
-              icon={
-                <span className="text-green-600 font-bold text-xl">Rp</span>
-              }
-              colorClass="bg-green-100"
-            />
-            <StatCard
-              title={`Pengeluaran (${titlePeriod})`}
-              value={`Rp ${expense.toLocaleString("id-ID")}`}
-              icon={<Wallet className="text-red-600" />}
-              colorClass="bg-red-100"
-            />
-            <StatCard
-              title={`Laba Bersih (${titlePeriod})`}
-              value={`Rp ${profit.toLocaleString("id-ID")}`}
-              icon={
-                <span
-                  className={`font-bold text-xl ${
-                    profit >= 0 ? "text-indigo-600" : "text-red-600"
-                  }`}
-                >
-                  Rp
-                </span>
-              }
-              colorClass={profit >= 0 ? "bg-indigo-100" : "bg-red-100"}
-            />
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-1 gap-6 mb-8">
-            <StatCard
-              title={`Pendapatan (${titlePeriod})`}
-              value={`Rp ${income.toLocaleString("id-ID")}`}
-              icon={
-                <span className="text-green-600 font-bold text-xl">Rp</span>
-              }
-              colorClass="bg-green-100"
-            />
-          </div>
-        )}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <StatCard
+            title={`Pendapatan (${titlePeriod})`}
+            value={`Rp ${income.toLocaleString("id-ID")}`}
+            icon={<span className="text-green-600 font-bold text-xl">Rp</span>}
+            colorClass="bg-green-100"
+          />
+          <StatCard
+            title={`Pengeluaran (${titlePeriod})`}
+            value={`Rp ${expense.toLocaleString("id-ID")}`}
+            icon={<Wallet className="text-red-600" />}
+            colorClass="bg-red-100"
+          />
+          <StatCard
+            title={`Laba Bersih (${titlePeriod})`}
+            value={`Rp ${profit.toLocaleString("id-ID")}`}
+            icon={
+              <span
+                className={`font-bold text-xl ${
+                  profit >= 0 ? "text-indigo-600" : "text-red-600"
+                }`}
+              >
+                Rp
+              </span>
+            }
+            colorClass={profit >= 0 ? "bg-indigo-100" : "bg-red-100"}
+          />
+        </div>
 
         <div className="grid gap-8">
           <InteractiveFinancialChart
@@ -303,16 +275,6 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
             }
           />
         </div>
-
-        {role === "Pegawai" && (
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-700">
-              <strong>Catatan:</strong> Halaman ini hanya menampilkan data
-              pendapatan. Untuk melihat data pengeluaran dan laba bersih,
-              hubungi Owner.
-            </p>
-          </div>
-        )}
       </div>
     </div>
   )
